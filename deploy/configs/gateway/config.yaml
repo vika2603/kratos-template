@@ -1,0 +1,44 @@
+server:
+  http:
+    addr: 0.0.0.0:8080
+    timeout: 30s
+
+client:
+  auth:
+    discovery_name: auth
+    timeout: 5s
+  user:
+    discovery_name: user
+    timeout: 5s
+  asset:
+    discovery_name: asset
+    timeout: 5s
+
+temporal:
+  host_port: temporal:7233
+  namespace: default
+
+service:
+  name: gateway
+  version: v1.0.0
+
+registry:
+  consul:
+    address: consul:8500
+    scheme: http
+
+tracing:
+  jaeger:
+    endpoint: http://jaeger:4317
+  sample_rate: 1.0
+
+log:
+  level: info
+  env: development
+
+auth:
+  jwt_secret: your-secret-key-change-in-production
+
+rate_limit:
+  capacity: 100
+  rate: 10

@@ -1,0 +1,34 @@
+server:
+  http:
+    addr: 0.0.0.0:8081
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9081
+    timeout: 30s
+
+data:
+  database:
+    driver: postgres
+    source: postgres://postgres:postgres@localhost:5432/kratos?sslmode=disable
+
+auth:
+  jwt_secret: your-secret-key-change-in-production
+  token_expiry: 86400
+
+service:
+  name: auth
+  version: v1.0.0
+
+registry:
+  consul:
+    address: localhost:8500
+    scheme: http
+
+tracing:
+  jaeger:
+    endpoint: http://localhost:14268/api/traces
+  sample_rate: 1.0
+
+log:
+  level: info
+  env: development

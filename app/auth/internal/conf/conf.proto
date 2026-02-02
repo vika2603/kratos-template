@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package kratos.api.auth.conf;
+
+option go_package = "kratos-template/app/auth/internal/conf;conf";
+
+message Bootstrap {
+  Server server = 1;
+  Data data = 2;
+  Auth auth = 3;
+  Service service = 4;
+  Registry registry = 5;
+  Tracing tracing = 6;
+  Log log = 7;
+}
+
+message Server {
+  message HTTP {
+    string addr = 1;
+    string timeout = 2;
+  }
+  message GRPC {
+    string addr = 1;
+    string timeout = 2;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+  }
+  Database database = 1;
+}
+
+message Auth {
+  string jwt_secret = 1;
+  int64 token_expiry = 2;
+}
+
+message Service {
+  string name = 1;
+  string version = 2;
+}
+
+message Registry {
+  message Consul {
+    string address = 1;
+    string scheme = 2;
+  }
+  Consul consul = 1;
+}
+
+message Tracing {
+  message Jaeger {
+    string endpoint = 1;
+  }
+  Jaeger jaeger = 1;
+  double sample_rate = 2;
+}
+
+message Log {
+  string level = 1;
+  string env = 2;
+}

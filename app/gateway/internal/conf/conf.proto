@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package kratos.api.gateway.conf;
+
+option go_package = "kratos-template/app/gateway/internal/conf;conf";
+
+message Bootstrap {
+  Server server = 1;
+  Client client = 2;
+  Temporal temporal = 3;
+  Service service = 4;
+  Registry registry = 5;
+  Tracing tracing = 6;
+  Log log = 7;
+  Auth auth = 8;
+  RateLimit rate_limit = 9;
+}
+
+message Server {
+  message HTTP {
+    string addr = 1;
+    string timeout = 2;
+  }
+  HTTP http = 1;
+}
+
+message Client {
+  message Endpoint {
+    string discovery_name = 1;
+    string timeout = 2;
+  }
+  Endpoint auth = 1;
+  Endpoint user = 2;
+  Endpoint asset = 3;
+}
+
+message Temporal {
+  string host_port = 1;
+  string namespace = 2;
+}
+
+message Service {
+  string name = 1;
+  string version = 2;
+}
+
+message Registry {
+  message Consul {
+    string address = 1;
+    string scheme = 2;
+  }
+  Consul consul = 1;
+}
+
+message Tracing {
+  message Jaeger {
+    string endpoint = 1;
+  }
+  Jaeger jaeger = 1;
+  double sample_rate = 2;
+}
+
+message Log {
+  string level = 1;
+  string env = 2;
+}
+
+message Auth {
+  string jwt_secret = 1;
+}
+
+message RateLimit {
+  int64 capacity = 1;
+  int64 rate = 2;
+}

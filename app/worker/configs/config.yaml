@@ -1,0 +1,29 @@
+server:
+  http:
+    addr: 0.0.0.0:8084
+    timeout: 30s
+
+temporal:
+  host_port: temporal:7233
+  namespace: default
+  task_queue: worker-task-queue
+  max_concurrent_activities: 10
+  max_concurrent_workflows: 5
+
+service:
+  name: worker
+  version: v1.0.0
+
+registry:
+  consul:
+    address: localhost:8500
+    scheme: http
+
+tracing:
+  jaeger:
+    endpoint: http://localhost:14268/api/traces
+  sample_rate: 1.0
+
+log:
+  level: info
+  env: development
