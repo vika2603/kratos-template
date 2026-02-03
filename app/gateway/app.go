@@ -5,7 +5,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/go-kratos/kratos/v2/config"
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/fx"
 
@@ -16,6 +16,10 @@ import (
 	"kratos-template/app/gateway/pkg/auth"
 	"kratos-template/app/gateway/pkg/handler"
 	"kratos-template/pkg/bootstrap"
+	"kratos-template/pkg/config"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/registry"
+	"kratos-template/pkg/tracing"
 )
 
 var flagConf string
@@ -28,19 +32,19 @@ func Run() {
 	flag.Parse()
 
 	app := fx.New(
-		bootstrap.FxLogger(),
-		bootstrap.ProvideConfigWithConsul(flagConf, "config/gateway/", ""),
+		log.FxLogger(),
+		config.ProvideWithConsul(flagConf, "config/gateway/", ""),
 		fx.Provide(loadBootstrapConfig),
-		fx.Provide(func(b *conf.Bootstrap) bootstrap.ConfigAccessor { return b }),
+		fx.Provide(func(b *conf.Bootstrap) config.Accessor { return b }),
 
 		fx.Provide(getLoggerSettings),
 		fx.Provide(getRegistrySettings),
 		fx.Provide(getTracingSettings),
 		fx.Provide(provideServiceInfo),
 
-		fx.Provide(bootstrap.NewLogger),
-		fx.Provide(bootstrap.NewRegistry),
-		fx.Provide(bootstrap.NewTracing),
+		fx.Provide(log.New),
+		fx.Provide(registry.New),
+		fx.Provide(tracing.New),
 
 		client.ProvideClients(),
 
@@ -66,7 +70,7 @@ type configResult struct {
 	Bootstrap *conf.Bootstrap
 }
 
-func loadBootstrapConfig(cfg config.Config) (configResult, error) {
+func loadBootstrapConfig(cfg kratosconfig.Config) (configResult, error) {
 	var bc conf.Bootstrap
 	if err := cfg.Scan(&bc); err != nil {
 		return configResult{}, err
@@ -132,12 +136,12 @@ func provideServiceInfo(cfg *conf.Bootstrap) serviceInfoResult {
 	if hostname == "" {
 		hostname = "unknown"
 	}
-	params := bootstrap.ProvideServiceInfoFromConfig(cfg, hostname)
+	info := bootstrap.ServiceInfoFromConfig(cfg, hostname)
 	return serviceInfoResult{
-		ServiceID:       params.ServiceID,
-		ServiceName:     params.ServiceName,
-		ServiceVersion:  params.ServiceVersion,
-		ServiceMetadata: params.ServiceMetadata,
+		ServiceID:       info.ID,
+		ServiceName:     info.Name,
+		ServiceVersion:  info.Version,
+		ServiceMetadata: info.Metadata,
 	}
 }
 

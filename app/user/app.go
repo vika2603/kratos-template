@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
 
 	"kratos-template/app/user/internal/biz"
@@ -14,6 +14,10 @@ import (
 	"kratos-template/app/user/internal/server"
 	"kratos-template/app/user/internal/service"
 	"kratos-template/pkg/bootstrap"
+	"kratos-template/pkg/config"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/registry"
+	"kratos-template/pkg/tracing"
 )
 
 var flagConf string
@@ -26,13 +30,13 @@ func Run() {
 	flag.Parse()
 
 	app := fx.New(
-		bootstrap.FxLogger(),
-		bootstrap.ProvideConfigWithConsul(flagConf, "config/user/", ""),
+		log.FxLogger(),
+		config.ProvideWithConsul(flagConf, "config/user/", ""),
 		fx.Provide(loadBootstrapConfig),
 
-		fx.Provide(func(b *conf.Bootstrap) bootstrap.ConfigAccessor { return b }),
+		fx.Provide(func(b *conf.Bootstrap) config.Accessor { return b }),
 
-		fx.Provide(getKratosModule),
+		fx.Provide(getModule),
 
 		fx.Provide(provideServiceInfo),
 
@@ -52,7 +56,7 @@ type configResult struct {
 	Bootstrap *conf.Bootstrap
 }
 
-func loadBootstrapConfig(cfg config.Config) (configResult, error) {
+func loadBootstrapConfig(cfg kratosconfig.Config) (configResult, error) {
 	var bc conf.Bootstrap
 	if err := cfg.Scan(&bc); err != nil {
 		return configResult{}, err
@@ -69,12 +73,12 @@ type serviceInfoResult struct {
 }
 
 func provideServiceInfo(cfg *conf.Bootstrap) serviceInfoResult {
-	params := bootstrap.ProvideServiceInfoFromConfig(cfg, getHostname())
+	info := bootstrap.ServiceInfoFromConfig(cfg, getHostname())
 	return serviceInfoResult{
-		ServiceID:       params.ServiceID,
-		ServiceName:     params.ServiceName,
-		ServiceVersion:  params.ServiceVersion,
-		ServiceMetadata: params.ServiceMetadata,
+		ServiceID:       info.ID,
+		ServiceName:     info.Name,
+		ServiceVersion:  info.Version,
+		ServiceMetadata: info.Metadata,
 	}
 }
 
@@ -86,14 +90,14 @@ func getHostname() string {
 	return hostname
 }
 
-func getKratosModule(cfg *conf.Bootstrap) fx.Option {
-	loggerCfg := bootstrap.ProvideLoggerFromConfig(cfg)
-	registryCfg := bootstrap.ProvideRegistryFromConfig(cfg)
-	tracingCfg := bootstrap.ProvideTracingFromConfig(cfg)
-	return bootstrap.KratosModule(
-		bootstrap.LoggerSettings{Level: loggerCfg.Level, Env: loggerCfg.Env},
-		bootstrap.RegistrySettings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
-		bootstrap.TracingSettings{
+func getModule(cfg *conf.Bootstrap) fx.Option {
+	loggerCfg := bootstrap.LoggerFromConfig(cfg)
+	registryCfg := bootstrap.RegistryFromConfig(cfg)
+	tracingCfg := bootstrap.TracingFromConfig(cfg)
+	return bootstrap.Module(
+		log.Settings{Level: loggerCfg.Level, Env: loggerCfg.Env},
+		registry.Settings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
+		tracing.Settings{
 			ServiceName:    tracingCfg.ServiceName,
 			ServiceVersion: tracingCfg.ServiceVersion,
 			JaegerEndpoint: tracingCfg.JaegerEndpoint,

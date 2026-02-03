@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
 
 	"kratos-template/app/asset/internal/biz"
@@ -14,6 +14,10 @@ import (
 	"kratos-template/app/asset/internal/server"
 	"kratos-template/app/asset/internal/service"
 	"kratos-template/pkg/bootstrap"
+	"kratos-template/pkg/config"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/registry"
+	"kratos-template/pkg/tracing"
 )
 
 var flagConf string
@@ -26,17 +30,17 @@ func Run() {
 	flag.Parse()
 
 	app := fx.New(
-		bootstrap.FxLogger(),
-		bootstrap.ProvideConfigWithConsul(flagConf, "config/asset/", ""),
-		fx.Provide(func(cfg config.Config) (*conf.Bootstrap, error) {
+		log.FxLogger(),
+		config.ProvideWithConsul(flagConf, "config/asset/", ""),
+		fx.Provide(func(cfg kratosconfig.Config) (*conf.Bootstrap, error) {
 			var bc conf.Bootstrap
 			if err := cfg.Scan(&bc); err != nil {
 				return nil, err
 			}
 			return &bc, nil
 		}),
-		bootstrap.ProvideConfigAccessor[*conf.Bootstrap](),
-		fx.Provide(getKratosModule),
+		config.ProvideAccessor[*conf.Bootstrap](),
+		fx.Provide(getModule),
 		fx.Provide(provideServiceInfo),
 		data.Module,
 		biz.Module,
@@ -48,14 +52,14 @@ func Run() {
 	app.Run()
 }
 
-func getKratosModule(cfg *conf.Bootstrap) fx.Option {
-	loggerCfg := bootstrap.ProvideLoggerFromConfig(cfg)
-	registryCfg := bootstrap.ProvideRegistryFromConfig(cfg)
-	tracingCfg := bootstrap.ProvideTracingFromConfig(cfg)
-	return bootstrap.KratosModule(
-		bootstrap.LoggerSettings{Level: loggerCfg.Level, Env: loggerCfg.Env},
-		bootstrap.RegistrySettings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
-		bootstrap.TracingSettings{
+func getModule(cfg *conf.Bootstrap) fx.Option {
+	loggerCfg := bootstrap.LoggerFromConfig(cfg)
+	registryCfg := bootstrap.RegistryFromConfig(cfg)
+	tracingCfg := bootstrap.TracingFromConfig(cfg)
+	return bootstrap.Module(
+		log.Settings{Level: loggerCfg.Level, Env: loggerCfg.Env},
+		registry.Settings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
+		tracing.Settings{
 			ServiceName:    tracingCfg.ServiceName,
 			ServiceVersion: tracingCfg.ServiceVersion,
 			JaegerEndpoint: tracingCfg.JaegerEndpoint,
@@ -77,11 +81,11 @@ func provideServiceInfo(cfg *conf.Bootstrap) serviceInfoResult {
 	if hostname == "" {
 		hostname = "unknown"
 	}
-	params := bootstrap.ProvideServiceInfoFromConfig(cfg, hostname)
+	info := bootstrap.ServiceInfoFromConfig(cfg, hostname)
 	return serviceInfoResult{
-		ServiceID:       params.ServiceID,
-		ServiceName:     params.ServiceName,
-		ServiceVersion:  params.ServiceVersion,
-		ServiceMetadata: params.ServiceMetadata,
+		ServiceID:       info.ID,
+		ServiceName:     info.Name,
+		ServiceVersion:  info.Version,
+		ServiceMetadata: info.Metadata,
 	}
 }
