@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -113,4 +114,48 @@ func ProvideLogger(level, env string) fx.Option {
 		),
 		fx.Provide(NewLogger),
 	)
+}
+
+type fxLogger struct {
+	l *zap.Logger
+}
+
+func (f *fxLogger) LogEvent(event fxevent.Event) {
+	switch e := event.(type) {
+	case *fxevent.OnStartExecuted:
+		if e.Err != nil {
+			f.l.Error("OnStart hook failed", zap.String("callee", e.FunctionName), zap.Error(e.Err))
+		}
+	case *fxevent.OnStopExecuted:
+		if e.Err != nil {
+			f.l.Error("OnStop hook failed", zap.String("callee", e.FunctionName), zap.Error(e.Err))
+		}
+	case *fxevent.Provided:
+		if e.Err != nil {
+			f.l.Error("provider failed", zap.Error(e.Err))
+		}
+	case *fxevent.Invoked:
+		if e.Err != nil {
+			f.l.Error("invoke failed", zap.String("function", e.FunctionName), zap.Error(e.Err))
+		}
+	case *fxevent.Started:
+		if e.Err != nil {
+			f.l.Error("start failed", zap.Error(e.Err))
+		}
+	case *fxevent.Stopped:
+		if e.Err != nil {
+			f.l.Error("stop failed", zap.Error(e.Err))
+		}
+	case *fxevent.RolledBack:
+		if e.Err != nil {
+			f.l.Error("rollback failed", zap.Error(e.Err))
+		}
+	}
+}
+
+// FxLogger returns an fx.Option that configures fx logging with zap
+func FxLogger() fx.Option {
+	return fx.WithLogger(func() fxevent.Logger {
+		return &fxLogger{l: zap.L()}
+	})
 }
