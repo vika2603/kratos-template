@@ -42,6 +42,22 @@ func loadBootstrapConfig(params ConfigParams) (ConfigResult, error) {
 	return ConfigResult{Bootstrap: &bc}, nil
 }
 
+func getKratosModule(cfg *conf.Bootstrap) fx.Option {
+	loggerCfg := bootstrap.ProvideLoggerFromConfig(cfg)
+	registryCfg := bootstrap.ProvideRegistryFromConfig(cfg)
+	tracingCfg := bootstrap.ProvideTracingFromConfig(cfg)
+	return bootstrap.KratosModule(
+		bootstrap.LoggerSettings{Level: loggerCfg.Level, Env: loggerCfg.Env},
+		bootstrap.RegistrySettings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
+		bootstrap.TracingSettings{
+			ServiceName:    tracingCfg.ServiceName,
+			ServiceVersion: tracingCfg.ServiceVersion,
+			JaegerEndpoint: tracingCfg.JaegerEndpoint,
+			SampleRate:     tracingCfg.SampleRate,
+		},
+	)
+}
+
 func main() {
 	flag.Parse()
 
@@ -49,9 +65,9 @@ func main() {
 		bootstrap.ProvideConfigWithConsul(flagConf, "config/auth/", ""),
 		fx.Provide(loadBootstrapConfig),
 
-		fx.Provide(provideLoggerFromConfig),
-		fx.Provide(provideRegistryFromConfig),
-		fx.Provide(provideTracingFromConfig),
+		fx.Provide(func(b *conf.Bootstrap) bootstrap.ConfigAccessor { return b }),
+		fx.Provide(getKratosModule),
+
 		fx.Provide(provideServiceInfoFromConfig),
 
 		data.Module,
@@ -65,63 +81,6 @@ func main() {
 	)
 
 	app.Run()
-}
-
-func provideLoggerFromConfig(cfg *conf.Bootstrap) bootstrap.LoggerParams {
-	level := "info"
-	env := "development"
-	if cfg.Log != nil {
-		if cfg.Log.Level != "" {
-			level = cfg.Log.Level
-		}
-		if cfg.Log.Env != "" {
-			env = cfg.Log.Env
-		}
-	}
-	return bootstrap.LoggerParams{Level: level, Env: env}
-}
-
-func provideRegistryFromConfig(cfg *conf.Bootstrap) bootstrap.RegistryParams {
-	address := "localhost:8500"
-	scheme := "http"
-	if cfg.Registry != nil && cfg.Registry.Consul != nil {
-		if cfg.Registry.Consul.Address != "" {
-			address = cfg.Registry.Consul.Address
-		}
-		if cfg.Registry.Consul.Scheme != "" {
-			scheme = cfg.Registry.Consul.Scheme
-		}
-	}
-	return bootstrap.RegistryParams{Address: address, Scheme: scheme}
-}
-
-func provideTracingFromConfig(cfg *conf.Bootstrap) bootstrap.TracingParams {
-	endpoint := "http://localhost:14268/api/traces"
-	sampleRate := 1.0
-	serviceName := "auth"
-	serviceVersion := "v1.0.0"
-	if cfg.Tracing != nil {
-		if cfg.Tracing.Jaeger != nil && cfg.Tracing.Jaeger.Endpoint != "" {
-			endpoint = cfg.Tracing.Jaeger.Endpoint
-		}
-		if cfg.Tracing.SampleRate > 0 {
-			sampleRate = cfg.Tracing.SampleRate
-		}
-	}
-	if cfg.Service != nil {
-		if cfg.Service.Name != "" {
-			serviceName = cfg.Service.Name
-		}
-		if cfg.Service.Version != "" {
-			serviceVersion = cfg.Service.Version
-		}
-	}
-	return bootstrap.TracingParams{
-		ServiceName:    serviceName,
-		ServiceVersion: serviceVersion,
-		JaegerEndpoint: endpoint,
-		SampleRate:     sampleRate,
-	}
 }
 
 type serviceInfoResult struct {
