@@ -9,11 +9,11 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"github.com/hertz-contrib/cors"
 	"github.com/hertz-contrib/logger/accesslog"
-	"github.com/hertz-contrib/requestid"
 
 	"kratos-template/app/gateway/internal/conf"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
 
 type HertzServer struct {
@@ -22,13 +22,13 @@ type HertzServer struct {
 }
 
 func (s *HertzServer) Start(ctx context.Context) error {
-	hlog.Infof("hertz server starting on %s", s.addr)
+	log.Infof("hertz server starting on %s", s.addr)
 	go s.Hertz.Run()
 	return nil
 }
 
 func (s *HertzServer) Stop(ctx context.Context) error {
-	hlog.Info("hertz server stopping...")
+	log.Info("hertz server stopping...")
 	return s.Hertz.Shutdown(ctx)
 }
 
@@ -37,6 +37,8 @@ func (s *HertzServer) Endpoint() (*url.URL, error) {
 }
 
 func NewHertzServer(cfg *conf.Bootstrap) (*HertzServer, *server.Hertz, error) {
+	hlog.SetLogger(adapter.NewHertzAdapter())
+
 	addr := "0.0.0.0:8080"
 	if cfg.Server.Http.Addr != "" {
 		addr = cfg.Server.Http.Addr
@@ -56,18 +58,7 @@ func NewHertzServer(cfg *conf.Bootstrap) (*HertzServer, *server.Hertz, error) {
 		server.WithExitWaitTime(5*time.Second),
 	)
 
-	h.Use(
-		requestid.New(),
-		cors.New(cors.Config{
-			AllowAllOrigins:  true,
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID"},
-			ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
-			AllowCredentials: true,
-			MaxAge:           86400,
-		}),
-		accesslog.New(),
-	)
+	h.Use(accesslog.New())
 
 	registerHealthCheck(h)
 

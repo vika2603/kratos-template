@@ -36,7 +36,7 @@ func NewAuthService(params AuthServiceParams) AuthServiceResult {
 func (s *AuthService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginReply, error) {
 	token, expiresIn, err := s.authUC.Login(ctx, req.Username, req.Password)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.LoginReply{
@@ -49,7 +49,7 @@ func (s *AuthService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Logi
 func (s *AuthService) Refresh(ctx context.Context, req *v1.RefreshRequest) (*v1.RefreshReply, error) {
 	token, expiresIn, err := s.authUC.Refresh(ctx, req.AccessToken)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.RefreshReply{
@@ -62,7 +62,7 @@ func (s *AuthService) Refresh(ctx context.Context, req *v1.RefreshRequest) (*v1.
 func (s *AuthService) Validate(ctx context.Context, req *v1.ValidateRequest) (*v1.ValidateReply, error) {
 	valid, userID, username, err := s.authUC.Validate(ctx, req.AccessToken)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.ValidateReply{
@@ -74,14 +74,10 @@ func (s *AuthService) Validate(ctx context.Context, req *v1.ValidateRequest) (*v
 
 func (s *AuthService) Logout(ctx context.Context, req *v1.LogoutRequest) (*v1.LogoutReply, error) {
 	if err := s.authUC.Logout(ctx, req.AccessToken); err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.LogoutReply{
 		Success: true,
 	}, nil
 }
-
-var Module = fx.Module("service",
-	fx.Provide(NewAuthService),
-)

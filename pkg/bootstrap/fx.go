@@ -4,15 +4,17 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2"
-	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
 
 type AppParams struct {
 	fx.In
-	Logger     kratoslog.Logger
+	Logger     *zap.Logger
 	Registrar  registry.Registrar `optional:"true"`
 	Servers    []transport.Server `group:"servers"`
 	ServiceID  string             `name:"service_id"`
@@ -27,7 +29,7 @@ func NewKratosApp(lc fx.Lifecycle, params AppParams) *kratos.App {
 		kratos.ID(params.ServiceID),
 		kratos.Name(params.Name),
 		kratos.Version(params.Version),
-		kratos.Logger(params.Logger),
+		kratos.Logger(adapter.NewKratosAdapter(params.Logger)),
 		kratos.Server(params.Servers...),
 	}
 
@@ -45,7 +47,7 @@ func NewKratosApp(lc fx.Lifecycle, params AppParams) *kratos.App {
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				if err := app.Run(); err != nil {
-					kratoslog.Fatalf("kratos app run error: %v", err)
+					log.Fatalf("kratos app run error: %v", err)
 				}
 			}()
 			return nil
@@ -53,7 +55,7 @@ func NewKratosApp(lc fx.Lifecycle, params AppParams) *kratos.App {
 		OnStop: func(ctx context.Context) error {
 			if params.ShutdownFn != nil {
 				if err := params.ShutdownFn(); err != nil {
-					kratoslog.Errorf("custom shutdown error: %v", err)
+					log.Errorf("custom shutdown error: %v", err)
 				}
 			}
 			return app.Stop()

@@ -4,30 +4,31 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	kratosgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	assetv1 "kratos-template/api/asset/v1"
 	authv1 "kratos-template/api/auth/v1"
 	userv1 "kratos-template/api/user/v1"
 	"kratos-template/app/gateway/internal/conf"
+	"kratos-template/pkg/log/adapter"
 )
 
 // ClientFactory consolidates shared middleware setup for gRPC clients.
 type ClientFactory struct {
 	cfg    *conf.Bootstrap
-	logger log.Logger
+	logger *zap.Logger
 	reg    registry.Discovery
 }
 
 // NewClientFactory creates a new ClientFactory instance.
-func NewClientFactory(cfg *conf.Bootstrap, logger log.Logger, reg registry.Discovery) *ClientFactory {
+func NewClientFactory(cfg *conf.Bootstrap, logger *zap.Logger, reg registry.Discovery) *ClientFactory {
 	return &ClientFactory{
 		cfg:    cfg,
 		logger: logger,
@@ -50,7 +51,7 @@ func (f *ClientFactory) newGRPCConn(discoveryName, timeoutStr string) (*grpc.Cli
 		kratosgrpc.WithMiddleware(
 			recovery.Recovery(),
 			tracing.Client(),
-			logging.Client(f.logger),
+			logging.Client(adapter.NewKratosAdapter(f.logger)),
 		),
 	)
 	if err != nil {

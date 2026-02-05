@@ -1,147 +1,125 @@
 package log
 
 import (
-	"os"
+	"context"
+	"net/http"
+	"sync/atomic"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type Settings struct {
-	Level string
-	Env   string
+type Level = zapcore.Level
+
+const (
+	DebugLevel = zapcore.DebugLevel
+	InfoLevel  = zapcore.InfoLevel
+	WarnLevel  = zapcore.WarnLevel
+	ErrorLevel = zapcore.ErrorLevel
+	FatalLevel = zapcore.FatalLevel
+)
+
+var (
+	globalLogger       atomic.Pointer[zap.Logger]
+	globalCallerLogger atomic.Pointer[zap.Logger]
+	globalLevel        atomic.Pointer[zap.AtomicLevel]
+	globalFlush        atomic.Value
+)
+
+func init() {
+	logger, level, flush := NewDefault()
+	globalLogger.Store(logger)
+	globalCallerLogger.Store(logger.WithOptions(zap.AddCallerSkip(1)))
+	globalLevel.Store(&level)
+	globalFlush.Store(flush)
 }
 
-type Params struct {
-	fx.In
-	Level string `name:"log_level" optional:"true"`
-	Env   string `name:"env" optional:"true"`
-}
-
-type Result struct {
-	fx.Out
-	Logger log.Logger
-}
-
-type zapLogger struct {
-	logger *zap.Logger
-}
-
-func (l *zapLogger) Log(level log.Level, keyvals ...interface{}) error {
-	if len(keyvals) == 0 || len(keyvals)%2 != 0 {
-		l.logger.Warn("keyvals must be even number")
-		return nil
+func SetGlobal(logger *zap.Logger, level zap.AtomicLevel, flush func() error) {
+	if logger == nil {
+		return
 	}
-
-	fields := make([]zap.Field, 0, len(keyvals)/2)
-	for i := 0; i < len(keyvals); i += 2 {
-		key, ok := keyvals[i].(string)
-		if !ok {
-			continue
-		}
-		fields = append(fields, zap.Any(key, keyvals[i+1]))
-	}
-
-	switch level {
-	case log.LevelDebug:
-		l.logger.Debug("", fields...)
-	case log.LevelInfo:
-		l.logger.Info("", fields...)
-	case log.LevelWarn:
-		l.logger.Warn("", fields...)
-	case log.LevelError:
-		l.logger.Error("", fields...)
-	case log.LevelFatal:
-		l.logger.Fatal("", fields...)
-	}
-	return nil
-}
-
-func New(params Params) (Result, error) {
-	level := zapcore.InfoLevel
-	if params.Level != "" {
-		if err := level.UnmarshalText([]byte(params.Level)); err != nil {
-			return Result{}, err
-		}
-	}
-
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "ts",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		FunctionKey:    zapcore.OmitKey,
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-
-	var encoder zapcore.Encoder
-	if params.Env == "production" {
-		encoder = zapcore.NewJSONEncoder(encoderConfig)
-	} else {
-		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		encoder = zapcore.NewConsoleEncoder(encoderConfig)
-	}
-
-	core := zapcore.NewCore(
-		encoder,
-		zapcore.AddSync(os.Stdout),
-		level,
-	)
-
-	zapLog := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	logger := &zapLogger{logger: zapLog}
-
-	return Result{Logger: logger}, nil
-}
-
-type fxLogger struct {
-	l *zap.Logger
-}
-
-func (f *fxLogger) LogEvent(event fxevent.Event) {
-	switch e := event.(type) {
-	case *fxevent.OnStartExecuted:
-		if e.Err != nil {
-			f.l.Error("OnStart hook failed", zap.String("callee", e.FunctionName), zap.Error(e.Err))
-		}
-	case *fxevent.OnStopExecuted:
-		if e.Err != nil {
-			f.l.Error("OnStop hook failed", zap.String("callee", e.FunctionName), zap.Error(e.Err))
-		}
-	case *fxevent.Provided:
-		if e.Err != nil {
-			f.l.Error("provider failed", zap.Error(e.Err))
-		}
-	case *fxevent.Invoked:
-		if e.Err != nil {
-			f.l.Error("invoke failed", zap.String("function", e.FunctionName), zap.Error(e.Err))
-		}
-	case *fxevent.Started:
-		if e.Err != nil {
-			f.l.Error("start failed", zap.Error(e.Err))
-		}
-	case *fxevent.Stopped:
-		if e.Err != nil {
-			f.l.Error("stop failed", zap.Error(e.Err))
-		}
-	case *fxevent.RolledBack:
-		if e.Err != nil {
-			f.l.Error("rollback failed", zap.Error(e.Err))
-		}
+	globalLogger.Store(logger)
+	globalCallerLogger.Store(logger.WithOptions(zap.AddCallerSkip(1)))
+	globalLevel.Store(&level)
+	if flush != nil {
+		globalFlush.Store(flush)
 	}
 }
 
-func FxLogger() fx.Option {
-	return fx.WithLogger(func() fxevent.Logger {
-		return &fxLogger{l: zap.L()}
+func L() *zap.Logger {
+	return globalLogger.Load()
+}
+
+func callerLogger() *zap.Logger {
+	logger := globalCallerLogger.Load()
+	if logger == nil {
+		return L()
+	}
+	return logger
+}
+
+func SetLevel(level string) {
+	if lvl := globalLevel.Load(); lvl != nil {
+		_ = lvl.UnmarshalText([]byte(level))
+	}
+}
+
+func GetLevel() Level {
+	if lvl := globalLevel.Load(); lvl != nil {
+		return lvl.Level()
+	}
+	return InfoLevel
+}
+
+func Debug(msg string, fields ...Field) { callerLogger().Debug(msg, fields...) }
+func Info(msg string, fields ...Field)  { callerLogger().Info(msg, fields...) }
+func Warn(msg string, fields ...Field)  { callerLogger().Warn(msg, fields...) }
+func Error(msg string, fields ...Field) { callerLogger().Error(msg, fields...) }
+func Fatal(msg string, fields ...Field) { callerLogger().Fatal(msg, fields...) }
+
+func Debugf(format string, args ...any) { callerLogger().Sugar().Debugf(format, args...) }
+func Infof(format string, args ...any)  { callerLogger().Sugar().Infof(format, args...) }
+func Warnf(format string, args ...any)  { callerLogger().Sugar().Warnf(format, args...) }
+func Errorf(format string, args ...any) { callerLogger().Sugar().Errorf(format, args...) }
+func Fatalf(format string, args ...any) { callerLogger().Sugar().Fatalf(format, args...) }
+
+func With(fields ...Field) *zap.Logger { return L().With(fields...) }
+
+func WithContext(ctx context.Context) *zap.Logger {
+	return WithContextLogger(L(), ctx)
+}
+
+func WithContextLogger(logger *zap.Logger, ctx context.Context) *zap.Logger {
+	if logger == nil {
+		return logger
+	}
+	if fields := extractContextFields(ctx); len(fields) > 0 {
+		return logger.With(fields...)
+	}
+	return logger
+}
+
+func Named(name string) *zap.Logger { return L().Named(name) }
+func Sync() error {
+	if flush, ok := globalFlush.Load().(func() error); ok {
+		_ = flush()
+	}
+	return L().Sync()
+}
+
+func Hooks(hooks ...func(zapcore.Entry) error) zap.Option {
+	return zap.Hooks(hooks...)
+}
+
+func IncreaseLevel(lvl Level) zap.Option {
+	return zap.IncreaseLevel(lvl)
+}
+
+func LevelHandler() http.Handler {
+	if lvl := globalLevel.Load(); lvl != nil {
+		return lvl
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "level control not supported", http.StatusNotImplemented)
 	})
 }

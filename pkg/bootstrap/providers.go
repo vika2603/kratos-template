@@ -2,21 +2,15 @@ package bootstrap
 
 import (
 	"kratos-template/pkg/config"
-	"kratos-template/pkg/log"
 	"kratos-template/pkg/registry"
 	"kratos-template/pkg/tracing"
 )
 
-func LoggerFromConfig(cfg config.Accessor) log.Settings {
-	level := "info"
-	env := "development"
+func LogLevelFromConfig(cfg config.Accessor) string {
 	if l := cfg.GetLogLevel(); l != "" {
-		level = l
+		return l
 	}
-	if e := cfg.GetLogEnv(); e != "" {
-		env = e
-	}
-	return log.Settings{Level: level, Env: env}
+	return "info"
 }
 
 func RegistryFromConfig(cfg config.Accessor) registry.Settings {
@@ -32,7 +26,7 @@ func RegistryFromConfig(cfg config.Accessor) registry.Settings {
 }
 
 func TracingFromConfig(cfg config.Accessor) tracing.Settings {
-	endpoint := "http://localhost:14268/api/traces"
+	endpoint := "localhost:4317"
 	sampleRate := 1.0
 	serviceName := cfg.GetServiceName()
 	serviceVersion := cfg.GetServiceVersion()
@@ -44,7 +38,7 @@ func TracingFromConfig(cfg config.Accessor) tracing.Settings {
 		serviceVersion = "v0.0.0"
 	}
 
-	if e := cfg.GetJaegerEndpoint(); e != "" {
+	if e := cfg.GetOTLPEndpoint(); e != "" {
 		endpoint = e
 	}
 	if r := cfg.GetTracingSampleRate(); r > 0 {
@@ -54,7 +48,7 @@ func TracingFromConfig(cfg config.Accessor) tracing.Settings {
 	return tracing.Settings{
 		ServiceName:    serviceName,
 		ServiceVersion: serviceVersion,
-		JaegerEndpoint: endpoint,
+		OTLPEndpoint:   endpoint,
 		SampleRate:     sampleRate,
 	}
 }

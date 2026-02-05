@@ -9,23 +9,7 @@ services:
     ports:
       - "8500:8500"
 
-  temporal:
-    ports:
-      - "7233:7233"
-
-  temporal-ui:
-    ports:
-      - "8088:8080"
-
   jaeger:
     ports:
       - "16686:16686"
       - "4317:4317"
-
-  prometheus:
-    ports:
-      - "9090:9090"
-
-  grafana:
-    ports:
-      - "3000:3000"

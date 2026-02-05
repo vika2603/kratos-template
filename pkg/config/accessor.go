@@ -7,7 +7,7 @@ type Accessor interface {
 	GetServiceVersion() string
 	GetConsulAddress() string
 	GetConsulScheme() string
-	GetJaegerEndpoint() string
+	GetOTLPEndpoint() string
 	GetTracingSampleRate() float64
 	GetLogLevel() string
 	GetLogEnv() string

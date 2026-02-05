@@ -10,7 +10,7 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-func EncodeServer() middleware.Middleware {
+func Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			reply, err := handler(ctx, req)

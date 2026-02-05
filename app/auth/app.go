@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"context"
 	"flag"
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 
 	"kratos-template/app/auth/internal/biz"
 	"kratos-template/app/auth/internal/conf"
@@ -16,6 +18,7 @@ import (
 	"kratos-template/pkg/bootstrap"
 	"kratos-template/pkg/config"
 	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 	"kratos-template/pkg/registry"
 	"kratos-template/pkg/tracing"
 )
@@ -29,16 +32,50 @@ func init() {
 func Run() {
 	flag.Parse()
 
-	app := fx.New(
-		log.FxLogger(),
-		config.ProvideWithConsul(flagConf, "config/auth/", ""),
-		fx.Provide(loadBootstrapConfig),
+	cfg, err := config.New(flagConf, "config/auth/", "")
+	if err != nil {
+		log.Fatalf("load config error: %v", err)
+		return
+	}
 
+	bootstrapCfg, err := loadBootstrapConfig(cfg)
+	if err != nil {
+		log.Fatalf("load bootstrap config error: %v", err)
+		return
+	}
+
+	logger, shutdown, err := log.InitFromSettings(provideLogSettings(bootstrapCfg))
+	if err != nil {
+		log.Fatalf("init log error: %v", err)
+		return
+	}
+
+	app := fx.New(
+		fx.WithLogger(func() fxevent.Logger { return adapter.NewFxAdapter() }),
+		fx.Supply(
+			fx.Annotate(cfg, fx.As(new(kratosconfig.Config))),
+			bootstrapCfg,
+			logger,
+		),
+		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return c.Close()
+				},
+			})
+		}),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{OnStop: shutdown})
+		}),
 		fx.Provide(func(b *conf.Bootstrap) config.Accessor { return b }),
 
-		fx.Provide(getModule),
+		fx.Provide(provideRegistrySettings),
+		fx.Provide(registry.New),
+		fx.Provide(provideTracingSettings),
+		fx.Provide(tracing.New),
 
 		fx.Provide(provideServiceInfo),
+		fx.Provide(bootstrap.NewKratosApp),
 
 		data.Module,
 		biz.Module,
@@ -51,33 +88,48 @@ func Run() {
 	app.Run()
 }
 
-type configResult struct {
-	fx.Out
-	Bootstrap *conf.Bootstrap
-}
-
-func loadBootstrapConfig(cfg kratosconfig.Config) (configResult, error) {
+func loadBootstrapConfig(cfg kratosconfig.Config) (*conf.Bootstrap, error) {
 	var bc conf.Bootstrap
 	if err := cfg.Scan(&bc); err != nil {
-		return configResult{}, err
+		return nil, err
 	}
-	return configResult{Bootstrap: &bc}, nil
+	return &bc, nil
 }
 
-func getModule(cfg *conf.Bootstrap) fx.Option {
-	loggerCfg := bootstrap.LoggerFromConfig(cfg)
-	registryCfg := bootstrap.RegistryFromConfig(cfg)
-	tracingCfg := bootstrap.TracingFromConfig(cfg)
-	return bootstrap.Module(
-		log.Settings{Level: loggerCfg.Level, Env: loggerCfg.Env},
-		registry.Settings{Address: registryCfg.Address, Scheme: registryCfg.Scheme},
-		tracing.Settings{
-			ServiceName:    tracingCfg.ServiceName,
-			ServiceVersion: tracingCfg.ServiceVersion,
-			JaegerEndpoint: tracingCfg.JaegerEndpoint,
-			SampleRate:     tracingCfg.SampleRate,
-		},
-	)
+func provideLogSettings(cfg *conf.Bootstrap) log.Settings {
+	return log.Settings{
+		Level:  bootstrap.LogLevelFromConfig(cfg),
+		Format: "json",
+		Caller: true,
+	}
+}
+
+type registrySettingsResult struct {
+	fx.Out
+	Address string `name:"consul_address"`
+	Scheme  string `name:"consul_scheme"`
+}
+
+func provideRegistrySettings(cfg *conf.Bootstrap) registrySettingsResult {
+	settings := bootstrap.RegistryFromConfig(cfg)
+	return registrySettingsResult{
+		Address: settings.Address,
+		Scheme:  settings.Scheme,
+	}
+}
+
+type tracingSettingsResult struct {
+	fx.Out
+	OTLPEndpoint string  `name:"otlp_endpoint"`
+	SampleRate   float64 `name:"trace_sample_rate"`
+}
+
+func provideTracingSettings(cfg *conf.Bootstrap) tracingSettingsResult {
+	settings := bootstrap.TracingFromConfig(cfg)
+	return tracingSettingsResult{
+		OTLPEndpoint: settings.OTLPEndpoint,
+		SampleRate:   settings.SampleRate,
+	}
 }
 
 type serviceInfoResult struct {

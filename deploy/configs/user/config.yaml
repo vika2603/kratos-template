@@ -1,7 +1,4 @@
 server:
-  http:
-    addr: 0.0.0.0:8082
-    timeout: 30s
   grpc:
     addr: 0.0.0.0:9082
     timeout: 30s
@@ -11,18 +8,14 @@ data:
     driver: postgres
     source: postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
 
-service:
-  name: user
-  version: v1.0.0
-
 registry:
   consul:
     address: consul:8500
     scheme: http
 
 tracing:
-  jaeger:
-    endpoint: http://jaeger:4317
+  otlp:
+    endpoint: jaeger:4317
   sample_rate: 1.0
 
 log:

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        v5.29.3
-// source: conf.proto
+// source: app/gateway/internal/conf/conf.proto
 
 package conf
 
@@ -38,7 +38,7 @@ type Bootstrap struct {
 
 func (x *Bootstrap) Reset() {
 	*x = Bootstrap{}
-	mi := &file_conf_proto_msgTypes[0]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -50,7 +50,7 @@ func (x *Bootstrap) String() string {
 func (*Bootstrap) ProtoMessage() {}
 
 func (x *Bootstrap) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[0]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -63,7 +63,7 @@ func (x *Bootstrap) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Bootstrap.ProtoReflect.Descriptor instead.
 func (*Bootstrap) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{0}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Bootstrap) GetServer() *Server {
@@ -138,7 +138,7 @@ type Server struct {
 
 func (x *Server) Reset() {
 	*x = Server{}
-	mi := &file_conf_proto_msgTypes[1]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -150,7 +150,7 @@ func (x *Server) String() string {
 func (*Server) ProtoMessage() {}
 
 func (x *Server) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[1]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -163,7 +163,7 @@ func (x *Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server.ProtoReflect.Descriptor instead.
 func (*Server) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{1}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Server) GetHttp() *Server_HTTP {
@@ -184,7 +184,7 @@ type Client struct {
 
 func (x *Client) Reset() {
 	*x = Client{}
-	mi := &file_conf_proto_msgTypes[2]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -196,7 +196,7 @@ func (x *Client) String() string {
 func (*Client) ProtoMessage() {}
 
 func (x *Client) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[2]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,7 +209,7 @@ func (x *Client) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Client.ProtoReflect.Descriptor instead.
 func (*Client) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{2}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Client) GetAuth() *Client_Endpoint {
@@ -243,7 +243,7 @@ type Temporal struct {
 
 func (x *Temporal) Reset() {
 	*x = Temporal{}
-	mi := &file_conf_proto_msgTypes[3]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -255,7 +255,7 @@ func (x *Temporal) String() string {
 func (*Temporal) ProtoMessage() {}
 
 func (x *Temporal) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[3]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -268,7 +268,7 @@ func (x *Temporal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Temporal.ProtoReflect.Descriptor instead.
 func (*Temporal) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{3}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Temporal) GetHostPort() string {
@@ -295,7 +295,7 @@ type Service struct {
 
 func (x *Service) Reset() {
 	*x = Service{}
-	mi := &file_conf_proto_msgTypes[4]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -307,7 +307,7 @@ func (x *Service) String() string {
 func (*Service) ProtoMessage() {}
 
 func (x *Service) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[4]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -320,7 +320,7 @@ func (x *Service) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Service.ProtoReflect.Descriptor instead.
 func (*Service) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{4}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Service) GetName() string {
@@ -346,7 +346,7 @@ type Registry struct {
 
 func (x *Registry) Reset() {
 	*x = Registry{}
-	mi := &file_conf_proto_msgTypes[5]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -358,7 +358,7 @@ func (x *Registry) String() string {
 func (*Registry) ProtoMessage() {}
 
 func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[5]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -371,7 +371,7 @@ func (x *Registry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry.ProtoReflect.Descriptor instead.
 func (*Registry) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{5}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Registry) GetConsul() *Registry_Consul {
@@ -383,7 +383,7 @@ func (x *Registry) GetConsul() *Registry_Consul {
 
 type Tracing struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Jaeger        *Tracing_Jaeger        `protobuf:"bytes,1,opt,name=jaeger,proto3" json:"jaeger,omitempty"`
+	Otlp          *Tracing_Otlp          `protobuf:"bytes,1,opt,name=otlp,proto3" json:"otlp,omitempty"`
 	SampleRate    float64                `protobuf:"fixed64,2,opt,name=sample_rate,json=sampleRate,proto3" json:"sample_rate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -391,7 +391,7 @@ type Tracing struct {
 
 func (x *Tracing) Reset() {
 	*x = Tracing{}
-	mi := &file_conf_proto_msgTypes[6]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -403,7 +403,7 @@ func (x *Tracing) String() string {
 func (*Tracing) ProtoMessage() {}
 
 func (x *Tracing) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[6]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -416,12 +416,12 @@ func (x *Tracing) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tracing.ProtoReflect.Descriptor instead.
 func (*Tracing) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{6}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Tracing) GetJaeger() *Tracing_Jaeger {
+func (x *Tracing) GetOtlp() *Tracing_Otlp {
 	if x != nil {
-		return x.Jaeger
+		return x.Otlp
 	}
 	return nil
 }
@@ -443,7 +443,7 @@ type Log struct {
 
 func (x *Log) Reset() {
 	*x = Log{}
-	mi := &file_conf_proto_msgTypes[7]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +455,7 @@ func (x *Log) String() string {
 func (*Log) ProtoMessage() {}
 
 func (x *Log) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[7]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +468,7 @@ func (x *Log) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Log.ProtoReflect.Descriptor instead.
 func (*Log) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{7}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Log) GetLevel() string {
@@ -494,7 +494,7 @@ type Auth struct {
 
 func (x *Auth) Reset() {
 	*x = Auth{}
-	mi := &file_conf_proto_msgTypes[8]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -506,7 +506,7 @@ func (x *Auth) String() string {
 func (*Auth) ProtoMessage() {}
 
 func (x *Auth) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[8]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -519,7 +519,7 @@ func (x *Auth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Auth.ProtoReflect.Descriptor instead.
 func (*Auth) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{8}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Auth) GetJwtSecret() string {
@@ -539,7 +539,7 @@ type RateLimit struct {
 
 func (x *RateLimit) Reset() {
 	*x = RateLimit{}
-	mi := &file_conf_proto_msgTypes[9]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -551,7 +551,7 @@ func (x *RateLimit) String() string {
 func (*RateLimit) ProtoMessage() {}
 
 func (x *RateLimit) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[9]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -564,7 +564,7 @@ func (x *RateLimit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RateLimit.ProtoReflect.Descriptor instead.
 func (*RateLimit) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{9}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RateLimit) GetCapacity() int64 {
@@ -591,7 +591,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_conf_proto_msgTypes[10]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -603,7 +603,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[10]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -616,7 +616,7 @@ func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server_HTTP.ProtoReflect.Descriptor instead.
 func (*Server_HTTP) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{1, 0}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *Server_HTTP) GetAddr() string {
@@ -643,7 +643,7 @@ type Client_Endpoint struct {
 
 func (x *Client_Endpoint) Reset() {
 	*x = Client_Endpoint{}
-	mi := &file_conf_proto_msgTypes[11]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -655,7 +655,7 @@ func (x *Client_Endpoint) String() string {
 func (*Client_Endpoint) ProtoMessage() {}
 
 func (x *Client_Endpoint) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[11]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -668,7 +668,7 @@ func (x *Client_Endpoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Client_Endpoint.ProtoReflect.Descriptor instead.
 func (*Client_Endpoint) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{2, 0}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{2, 0}
 }
 
 func (x *Client_Endpoint) GetDiscoveryName() string {
@@ -695,7 +695,7 @@ type Registry_Consul struct {
 
 func (x *Registry_Consul) Reset() {
 	*x = Registry_Consul{}
-	mi := &file_conf_proto_msgTypes[12]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -707,7 +707,7 @@ func (x *Registry_Consul) String() string {
 func (*Registry_Consul) ProtoMessage() {}
 
 func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[12]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -720,7 +720,7 @@ func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry_Consul.ProtoReflect.Descriptor instead.
 func (*Registry_Consul) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{5, 0}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
 }
 
 func (x *Registry_Consul) GetAddress() string {
@@ -737,28 +737,28 @@ func (x *Registry_Consul) GetScheme() string {
 	return ""
 }
 
-type Tracing_Jaeger struct {
+type Tracing_Otlp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Endpoint      string                 `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Tracing_Jaeger) Reset() {
-	*x = Tracing_Jaeger{}
-	mi := &file_conf_proto_msgTypes[13]
+func (x *Tracing_Otlp) Reset() {
+	*x = Tracing_Otlp{}
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Tracing_Jaeger) String() string {
+func (x *Tracing_Otlp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Tracing_Jaeger) ProtoMessage() {}
+func (*Tracing_Otlp) ProtoMessage() {}
 
-func (x *Tracing_Jaeger) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_proto_msgTypes[13]
+func (x *Tracing_Otlp) ProtoReflect() protoreflect.Message {
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -769,24 +769,23 @@ func (x *Tracing_Jaeger) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Tracing_Jaeger.ProtoReflect.Descriptor instead.
-func (*Tracing_Jaeger) Descriptor() ([]byte, []int) {
-	return file_conf_proto_rawDescGZIP(), []int{6, 0}
+// Deprecated: Use Tracing_Otlp.ProtoReflect.Descriptor instead.
+func (*Tracing_Otlp) Descriptor() ([]byte, []int) {
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{6, 0}
 }
 
-func (x *Tracing_Jaeger) GetEndpoint() string {
+func (x *Tracing_Otlp) GetEndpoint() string {
 	if x != nil {
 		return x.Endpoint
 	}
 	return ""
 }
 
-var File_conf_proto protoreflect.FileDescriptor
+var File_app_gateway_internal_conf_conf_proto protoreflect.FileDescriptor
 
-const file_conf_proto_rawDesc = "" +
+const file_app_gateway_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"\n" +
-	"conf.proto\x12\x17kratos.api.gateway.conf\"\x99\x04\n" +
+	"$app/gateway/internal/conf/conf.proto\x12\x17kratos.api.gateway.conf\"\x99\x04\n" +
 	"\tBootstrap\x127\n" +
 	"\x06server\x18\x01 \x01(\v2\x1f.kratos.api.gateway.conf.ServerR\x06server\x127\n" +
 	"\x06client\x18\x02 \x01(\v2\x1f.kratos.api.gateway.conf.ClientR\x06client\x12=\n" +
@@ -820,12 +819,12 @@ const file_conf_proto_rawDesc = "" +
 	"\x06consul\x18\x01 \x01(\v2(.kratos.api.gateway.conf.Registry.ConsulR\x06consul\x1a:\n" +
 	"\x06Consul\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x16\n" +
-	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x91\x01\n" +
-	"\aTracing\x12?\n" +
-	"\x06jaeger\x18\x01 \x01(\v2'.kratos.api.gateway.conf.Tracing.JaegerR\x06jaeger\x12\x1f\n" +
+	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x89\x01\n" +
+	"\aTracing\x129\n" +
+	"\x04otlp\x18\x01 \x01(\v2%.kratos.api.gateway.conf.Tracing.OtlpR\x04otlp\x12\x1f\n" +
 	"\vsample_rate\x18\x02 \x01(\x01R\n" +
-	"sampleRate\x1a$\n" +
-	"\x06Jaeger\x12\x1a\n" +
+	"sampleRate\x1a\"\n" +
+	"\x04Otlp\x12\x1a\n" +
 	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"-\n" +
 	"\x03Log\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\tR\x05level\x12\x10\n" +
@@ -838,19 +837,19 @@ const file_conf_proto_rawDesc = "" +
 	"\x04rate\x18\x02 \x01(\x03R\x04rateB0Z.kratos-template/app/gateway/internal/conf;confb\x06proto3"
 
 var (
-	file_conf_proto_rawDescOnce sync.Once
-	file_conf_proto_rawDescData []byte
+	file_app_gateway_internal_conf_conf_proto_rawDescOnce sync.Once
+	file_app_gateway_internal_conf_conf_proto_rawDescData []byte
 )
 
-func file_conf_proto_rawDescGZIP() []byte {
-	file_conf_proto_rawDescOnce.Do(func() {
-		file_conf_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_conf_proto_rawDesc), len(file_conf_proto_rawDesc)))
+func file_app_gateway_internal_conf_conf_proto_rawDescGZIP() []byte {
+	file_app_gateway_internal_conf_conf_proto_rawDescOnce.Do(func() {
+		file_app_gateway_internal_conf_conf_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_app_gateway_internal_conf_conf_proto_rawDesc), len(file_app_gateway_internal_conf_conf_proto_rawDesc)))
 	})
-	return file_conf_proto_rawDescData
+	return file_app_gateway_internal_conf_conf_proto_rawDescData
 }
 
-var file_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
-var file_conf_proto_goTypes = []any{
+var file_app_gateway_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_app_gateway_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),       // 0: kratos.api.gateway.conf.Bootstrap
 	(*Server)(nil),          // 1: kratos.api.gateway.conf.Server
 	(*Client)(nil),          // 2: kratos.api.gateway.conf.Client
@@ -864,9 +863,9 @@ var file_conf_proto_goTypes = []any{
 	(*Server_HTTP)(nil),     // 10: kratos.api.gateway.conf.Server.HTTP
 	(*Client_Endpoint)(nil), // 11: kratos.api.gateway.conf.Client.Endpoint
 	(*Registry_Consul)(nil), // 12: kratos.api.gateway.conf.Registry.Consul
-	(*Tracing_Jaeger)(nil),  // 13: kratos.api.gateway.conf.Tracing.Jaeger
+	(*Tracing_Otlp)(nil),    // 13: kratos.api.gateway.conf.Tracing.Otlp
 }
-var file_conf_proto_depIdxs = []int32{
+var file_app_gateway_internal_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.gateway.conf.Bootstrap.server:type_name -> kratos.api.gateway.conf.Server
 	2,  // 1: kratos.api.gateway.conf.Bootstrap.client:type_name -> kratos.api.gateway.conf.Client
 	3,  // 2: kratos.api.gateway.conf.Bootstrap.temporal:type_name -> kratos.api.gateway.conf.Temporal
@@ -881,7 +880,7 @@ var file_conf_proto_depIdxs = []int32{
 	11, // 11: kratos.api.gateway.conf.Client.user:type_name -> kratos.api.gateway.conf.Client.Endpoint
 	11, // 12: kratos.api.gateway.conf.Client.asset:type_name -> kratos.api.gateway.conf.Client.Endpoint
 	12, // 13: kratos.api.gateway.conf.Registry.consul:type_name -> kratos.api.gateway.conf.Registry.Consul
-	13, // 14: kratos.api.gateway.conf.Tracing.jaeger:type_name -> kratos.api.gateway.conf.Tracing.Jaeger
+	13, // 14: kratos.api.gateway.conf.Tracing.otlp:type_name -> kratos.api.gateway.conf.Tracing.Otlp
 	15, // [15:15] is the sub-list for method output_type
 	15, // [15:15] is the sub-list for method input_type
 	15, // [15:15] is the sub-list for extension type_name
@@ -889,26 +888,26 @@ var file_conf_proto_depIdxs = []int32{
 	0,  // [0:15] is the sub-list for field type_name
 }
 
-func init() { file_conf_proto_init() }
-func file_conf_proto_init() {
-	if File_conf_proto != nil {
+func init() { file_app_gateway_internal_conf_conf_proto_init() }
+func file_app_gateway_internal_conf_conf_proto_init() {
+	if File_app_gateway_internal_conf_conf_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_proto_rawDesc), len(file_conf_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_gateway_internal_conf_conf_proto_rawDesc), len(file_app_gateway_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_conf_proto_goTypes,
-		DependencyIndexes: file_conf_proto_depIdxs,
-		MessageInfos:      file_conf_proto_msgTypes,
+		GoTypes:           file_app_gateway_internal_conf_conf_proto_goTypes,
+		DependencyIndexes: file_app_gateway_internal_conf_conf_proto_depIdxs,
+		MessageInfos:      file_app_gateway_internal_conf_conf_proto_msgTypes,
 	}.Build()
-	File_conf_proto = out.File
-	file_conf_proto_goTypes = nil
-	file_conf_proto_depIdxs = nil
+	File_app_gateway_internal_conf_conf_proto = out.File
+	file_app_gateway_internal_conf_conf_proto_goTypes = nil
+	file_app_gateway_internal_conf_conf_proto_depIdxs = nil
 }

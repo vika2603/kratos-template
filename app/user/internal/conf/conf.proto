@@ -48,10 +48,10 @@ message Registry {
 }
 
 message Tracing {
-  message Jaeger {
+  message Otlp {
     string endpoint = 1;
   }
-  Jaeger jaeger = 1;
+  Otlp otlp = 1;
   double sample_rate = 2;
 }
 

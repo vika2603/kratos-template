@@ -3,12 +3,20 @@
 package user
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func rootMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		func(ctx context.Context, c *app.RequestContext) {
+			fmt.Println("u ...any")
+			c.Next(ctx)
+		},
+	}
 }
 
 func _apiMw() []app.HandlerFunc {

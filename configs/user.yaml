@@ -8,18 +8,14 @@ data:
     driver: postgres
     source: postgres://postgres:postgres@localhost:5432/kratos?sslmode=disable
 
-service:
-  name: user
-  version: v1.0.0
-
 registry:
   consul:
     address: localhost:8500
     scheme: http
 
 tracing:
-  jaeger:
-    endpoint: http://localhost:14268/api/traces
+  otlp:
+    endpoint: localhost:4317
   sample_rate: 1.0
 
 log:

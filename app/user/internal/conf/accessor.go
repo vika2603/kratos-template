@@ -1,19 +1,27 @@
 package conf
 
+import "os"
+
 // Implement ConfigAccessor interface for Bootstrap
 
 func (b *Bootstrap) GetServiceName() string {
+	if name := os.Getenv("SERVICE_NAME"); name != "" {
+		return name
+	}
 	if b != nil && b.Service != nil {
 		return b.Service.Name
 	}
-	return ""
+	return "user"
 }
 
 func (b *Bootstrap) GetServiceVersion() string {
+	if version := os.Getenv("SERVICE_VERSION"); version != "" {
+		return version
+	}
 	if b != nil && b.Service != nil {
 		return b.Service.Version
 	}
-	return ""
+	return "v1.0.0"
 }
 
 func (b *Bootstrap) GetConsulAddress() string {
@@ -30,9 +38,9 @@ func (b *Bootstrap) GetConsulScheme() string {
 	return ""
 }
 
-func (b *Bootstrap) GetJaegerEndpoint() string {
-	if b != nil && b.Tracing != nil && b.Tracing.Jaeger != nil {
-		return b.Tracing.Jaeger.Endpoint
+func (b *Bootstrap) GetOTLPEndpoint() string {
+	if b != nil && b.Tracing != nil && b.Tracing.Otlp != nil {
+		return b.Tracing.Otlp.Endpoint
 	}
 	return ""
 }

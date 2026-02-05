@@ -4,18 +4,19 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"go.uber.org/zap"
 
 	authv1 "kratos-template/api/auth/v1"
 	"kratos-template/app/gateway/internal/conf"
+	"kratos-template/pkg/log/adapter"
 )
 
-func NewAuthClient(cfg *conf.Bootstrap, logger log.Logger, reg registry.Discovery) (authv1.AuthServiceClient, error) {
+func NewAuthClient(cfg *conf.Bootstrap, logger *zap.Logger, reg registry.Discovery) (authv1.AuthServiceClient, error) {
 	timeout, err := time.ParseDuration(cfg.Client.Auth.Timeout)
 	if err != nil {
 		timeout = 5 * time.Second
@@ -29,7 +30,7 @@ func NewAuthClient(cfg *conf.Bootstrap, logger log.Logger, reg registry.Discover
 		grpc.WithMiddleware(
 			recovery.Recovery(),
 			tracing.Client(),
-			logging.Client(logger),
+			logging.Client(adapter.NewKratosAdapter(logger)),
 		),
 	)
 	if err != nil {

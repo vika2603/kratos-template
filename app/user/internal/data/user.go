@@ -16,6 +16,10 @@ type UserRepo struct {
 	data *Data
 }
 
+func NewUserRepo(data *Data) biz.UserRepo {
+	return &UserRepo{data: data}
+}
+
 func (r *UserRepo) Create(ctx context.Context, user *model.User) error {
 	return r.data.q.User.WithContext(ctx).Create(user)
 }

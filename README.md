@@ -24,12 +24,8 @@ Production-ready Go microservices scaffold built with Kratos v2, featuring depen
 | Auth | 8081 | 9081 | Internal |
 | User | 8082 | 9082 | Internal |
 | Asset | 8083 | 9083 | Internal |
-| Worker | 8084 | - | Internal only |
 | Consul | 8500 | - | Service discovery |
-| Temporal UI | 8088 | - | Workflow UI |
 | Jaeger | 16686 | - | Tracing UI |
-| Prometheus | 9090 | - | Metrics |
-| Grafana | 3000 | - | Dashboards |
 | PostgreSQL | 5432 | - | Database |
 
 ## Quick Start
@@ -46,9 +42,7 @@ curl http://localhost:8080/healthz
 
 # Access web interfaces
 # Consul UI: http://localhost:8500
-# Temporal UI: http://localhost:8088
 # Jaeger UI: http://localhost:16686
-# Grafana: http://localhost:3000 (admin/admin)
 ```
 
 ## Project Structure
@@ -65,7 +59,6 @@ curl http://localhost:8080/healthz
 │   ├── auth/              # Authentication service
 │   ├── gateway/           # API gateway (BFF)
 │   ├── user/              # User management service
-│   └── worker/            # Temporal workflow worker
 ├── pkg/                    # Shared libraries
 │   ├── bootstrap/         # Service initialization
 │   ├── consul/            # Service discovery client
@@ -75,8 +68,6 @@ curl http://localhost:8080/healthz
 ├── deploy/                 # Deployment configurations
 │   ├── docker-compose.yml # Local development stack
 │   ├── init-db.sql        # Database initialization
-│   ├── prometheus.yml     # Metrics configuration
-│   └── grafana/           # Dashboard provisioning
 └── tools/                  # Code generation tools
     └── gen/               # GORM Gen configuration
 ```
@@ -89,7 +80,7 @@ curl http://localhost:8080/healthz
 
 ## Key Features
 
-- **Microservices Architecture**: Five independent services with clear boundaries
+- **Microservices Architecture**: Four independent services with clear boundaries
 - **Dependency Injection**: Uber FX for clean, testable code structure
 - **Type-Safe ORM**: GORM Gen for compile-time query validation
 - **Service Discovery**: Consul for dynamic service registration and health checks

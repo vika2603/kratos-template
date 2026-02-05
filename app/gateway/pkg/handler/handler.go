@@ -4,7 +4,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
+
+	"kratos-template/pkg/log"
 )
 
 type Responder interface {
@@ -12,12 +13,10 @@ type Responder interface {
 	Fail(c *app.RequestContext, err error)
 }
 
-type DefaultResponder struct {
-	logger log.Logger
-}
+type DefaultResponder struct{}
 
-func Default(logger log.Logger) Responder {
-	return &DefaultResponder{logger: logger}
+func Default() Responder {
+	return &DefaultResponder{}
 }
 
 func (r *DefaultResponder) Success(c *app.RequestContext, resp any) {
@@ -25,9 +24,7 @@ func (r *DefaultResponder) Success(c *app.RequestContext, resp any) {
 }
 
 func (r *DefaultResponder) Fail(c *app.RequestContext, err error) {
-	se := errors.FromError(err)
-
-	if se.Reason != "" {
+	if se := errors.FromError(err); se.Reason != "" {
 		c.JSON(int(se.Code), ErrorResponse{
 			Code:    se.Reason,
 			Message: se.Message,
@@ -35,14 +32,11 @@ func (r *DefaultResponder) Fail(c *app.RequestContext, err error) {
 		return
 	}
 
-	if r.logger != nil {
-		log.NewHelper(r.logger).Errorw(
-			"msg", "unexpected error",
-			"error", err.Error(),
-			"path", string(c.Request.URI().Path()),
-			"method", string(c.Request.Method()),
-		)
-	}
+	log.Error("unexpected error",
+		log.String("error", err.Error()),
+		log.String("path", string(c.Request.URI().Path())),
+		log.String("method", string(c.Request.Method())),
+	)
 
 	c.JSON(consts.StatusInternalServerError, ErrorResponse{
 		Code:    "INTERNAL_ERROR",

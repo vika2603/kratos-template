@@ -36,7 +36,7 @@ func NewUserService(params UserServiceParams) UserServiceResult {
 func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserReply, error) {
 	user, err := s.userUC.CreateUser(ctx, req.Username, req.Email, req.Password)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.CreateUserReply{
@@ -53,7 +53,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest)
 func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
 	user, err := s.userUC.GetUser(ctx, req.Id)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.GetUserReply{
@@ -70,7 +70,7 @@ func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.
 func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserReply, error) {
 	user, err := s.userUC.UpdateUser(ctx, req.Id, req.Username, req.Email)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.UpdateUserReply{
@@ -86,7 +86,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest)
 
 func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserReply, error) {
 	if err := s.userUC.DeleteUser(ctx, req.Id); err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.DeleteUserReply{
@@ -97,7 +97,7 @@ func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest)
 func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersReply, error) {
 	users, total, err := s.userUC.ListUsers(ctx, req.Page, req.PageSize)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	userList := make([]*v1.User, 0, len(users))
@@ -116,7 +116,3 @@ func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (
 		Total: total,
 	}, nil
 }
-
-var Module = fx.Module("service",
-	fx.Provide(NewUserService),
-)

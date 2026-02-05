@@ -5,25 +5,26 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormlogger "gorm.io/gorm/logger"
 
 	"kratos-template/app/asset/internal/biz"
 	"kratos-template/app/asset/internal/conf"
 	"kratos-template/app/asset/internal/data/query"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
 
-func NewDB(cfg *conf.Bootstrap, logger log.Logger) (*gorm.DB, *query.Query, error) {
+func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, *query.Query, error) {
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
 		dsn = cfg.Data.Database.Source
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
+		Logger: adapter.NewGormAdapter(logger),
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed opening connection to postgres: %w", err)
@@ -35,20 +36,20 @@ func NewDB(cfg *conf.Bootstrap, logger log.Logger) (*gorm.DB, *query.Query, erro
 	return db, q, nil
 }
 
-func NewData(db *gorm.DB, q *query.Query, logger log.Logger) (*Data, func(), error) {
-	helper := log.NewHelper(log.With(logger, "module", "asset/data"))
+func NewData(db *gorm.DB, q *query.Query, logger *zap.Logger) (*Data, func(), error) {
+	logger = logger.With(log.String("module", "asset/data"))
 
 	d := &Data{
 		db:  db,
 		q:   q,
-		log: helper,
+		log: logger,
 	}
 
 	cleanup := func() {
-		helper.Info("closing data resources")
+		logger.Info("closing data resources")
 		if sqlDB, err := d.db.DB(); err == nil {
 			if err := sqlDB.Close(); err != nil {
-				helper.Errorf("failed to close db: %v", err)
+				logger.Sugar().Errorf("failed to close db: %v", err)
 			}
 		}
 	}

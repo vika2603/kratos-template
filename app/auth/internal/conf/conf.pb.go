@@ -359,7 +359,7 @@ func (x *Registry) GetConsul() *Registry_Consul {
 
 type Tracing struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Jaeger        *Tracing_Jaeger        `protobuf:"bytes,1,opt,name=jaeger,proto3" json:"jaeger,omitempty"`
+	Otlp          *Tracing_Otlp          `protobuf:"bytes,1,opt,name=otlp,proto3" json:"otlp,omitempty"`
 	SampleRate    float64                `protobuf:"fixed64,2,opt,name=sample_rate,json=sampleRate,proto3" json:"sample_rate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -395,9 +395,9 @@ func (*Tracing) Descriptor() ([]byte, []int) {
 	return file_app_auth_internal_conf_conf_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Tracing) GetJaeger() *Tracing_Jaeger {
+func (x *Tracing) GetOtlp() *Tracing_Otlp {
 	if x != nil {
-		return x.Jaeger
+		return x.Otlp
 	}
 	return nil
 }
@@ -669,27 +669,27 @@ func (x *Registry_Consul) GetScheme() string {
 	return ""
 }
 
-type Tracing_Jaeger struct {
+type Tracing_Otlp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Endpoint      string                 `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Tracing_Jaeger) Reset() {
-	*x = Tracing_Jaeger{}
+func (x *Tracing_Otlp) Reset() {
+	*x = Tracing_Otlp{}
 	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Tracing_Jaeger) String() string {
+func (x *Tracing_Otlp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Tracing_Jaeger) ProtoMessage() {}
+func (*Tracing_Otlp) ProtoMessage() {}
 
-func (x *Tracing_Jaeger) ProtoReflect() protoreflect.Message {
+func (x *Tracing_Otlp) ProtoReflect() protoreflect.Message {
 	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -701,12 +701,12 @@ func (x *Tracing_Jaeger) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Tracing_Jaeger.ProtoReflect.Descriptor instead.
-func (*Tracing_Jaeger) Descriptor() ([]byte, []int) {
+// Deprecated: Use Tracing_Otlp.ProtoReflect.Descriptor instead.
+func (*Tracing_Otlp) Descriptor() ([]byte, []int) {
 	return file_app_auth_internal_conf_conf_proto_rawDescGZIP(), []int{6, 0}
 }
 
-func (x *Tracing_Jaeger) GetEndpoint() string {
+func (x *Tracing_Otlp) GetEndpoint() string {
 	if x != nil {
 		return x.Endpoint
 	}
@@ -751,12 +751,12 @@ const file_app_auth_internal_conf_conf_proto_rawDesc = "" +
 	"\x06consul\x18\x01 \x01(\v2%.kratos.api.auth.conf.Registry.ConsulR\x06consul\x1a:\n" +
 	"\x06Consul\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x16\n" +
-	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x8e\x01\n" +
-	"\aTracing\x12<\n" +
-	"\x06jaeger\x18\x01 \x01(\v2$.kratos.api.auth.conf.Tracing.JaegerR\x06jaeger\x12\x1f\n" +
+	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x86\x01\n" +
+	"\aTracing\x126\n" +
+	"\x04otlp\x18\x01 \x01(\v2\".kratos.api.auth.conf.Tracing.OtlpR\x04otlp\x12\x1f\n" +
 	"\vsample_rate\x18\x02 \x01(\x01R\n" +
-	"sampleRate\x1a$\n" +
-	"\x06Jaeger\x12\x1a\n" +
+	"sampleRate\x1a\"\n" +
+	"\x04Otlp\x12\x1a\n" +
 	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"-\n" +
 	"\x03Log\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\tR\x05level\x12\x10\n" +
@@ -788,7 +788,7 @@ var file_app_auth_internal_conf_conf_proto_goTypes = []any{
 	(*Server_GRPC)(nil),     // 9: kratos.api.auth.conf.Server.GRPC
 	(*Data_Database)(nil),   // 10: kratos.api.auth.conf.Data.Database
 	(*Registry_Consul)(nil), // 11: kratos.api.auth.conf.Registry.Consul
-	(*Tracing_Jaeger)(nil),  // 12: kratos.api.auth.conf.Tracing.Jaeger
+	(*Tracing_Otlp)(nil),    // 12: kratos.api.auth.conf.Tracing.Otlp
 }
 var file_app_auth_internal_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.auth.conf.Bootstrap.server:type_name -> kratos.api.auth.conf.Server
@@ -802,7 +802,7 @@ var file_app_auth_internal_conf_conf_proto_depIdxs = []int32{
 	9,  // 8: kratos.api.auth.conf.Server.grpc:type_name -> kratos.api.auth.conf.Server.GRPC
 	10, // 9: kratos.api.auth.conf.Data.database:type_name -> kratos.api.auth.conf.Data.Database
 	11, // 10: kratos.api.auth.conf.Registry.consul:type_name -> kratos.api.auth.conf.Registry.Consul
-	12, // 11: kratos.api.auth.conf.Tracing.jaeger:type_name -> kratos.api.auth.conf.Tracing.Jaeger
+	12, // 11: kratos.api.auth.conf.Tracing.otlp:type_name -> kratos.api.auth.conf.Tracing.Otlp
 	12, // [12:12] is the sub-list for method output_type
 	12, // [12:12] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name

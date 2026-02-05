@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormlogger "gorm.io/gorm/logger"
 
 	"kratos-template/app/auth/internal/biz"
 	"kratos-template/app/auth/internal/conf"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
 
-func NewDB(cfg *conf.Bootstrap, logger log.Logger) (*gorm.DB, error) {
-	helper := log.NewHelper(log.With(logger, "module", "auth/data/gorm"))
+func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, error) {
+	helper := logger.With(log.String("module", "auth/data/gorm"))
 
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
@@ -24,7 +25,7 @@ func NewDB(cfg *conf.Bootstrap, logger log.Logger) (*gorm.DB, error) {
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
+		Logger: adapter.NewGormAdapter(logger),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to postgres: %w", err)
@@ -42,15 +43,15 @@ func NewDB(cfg *conf.Bootstrap, logger log.Logger) (*gorm.DB, error) {
 			PasswordHash: "$2a$10$64hf5Zc1MygJgdsCF27.zuW3BQrvtf5JvTC1Eei6qW93A7y279a1m",
 		}
 		if err := db.Create(defaultUser).Error; err != nil {
-			helper.Errorf("failed to create default user: %v", err)
+			helper.Sugar().Errorf("failed to create default user: %v", err)
 		}
 	}
 
 	return db, nil
 }
 
-func NewData(db *gorm.DB, logger log.Logger) (*Data, func(), error) {
-	helper := log.NewHelper(log.With(logger, "module", "auth/data"))
+func NewData(db *gorm.DB, logger *zap.Logger) (*Data, func(), error) {
+	helper := logger.With(log.String("module", "auth/data"))
 
 	d := &Data{
 		db:  db,
@@ -61,7 +62,7 @@ func NewData(db *gorm.DB, logger log.Logger) (*Data, func(), error) {
 		helper.Info("closing data resources")
 		if sqlDB, err := d.db.DB(); err == nil {
 			if err := sqlDB.Close(); err != nil {
-				helper.Errorf("failed to close db: %v", err)
+				helper.Sugar().Errorf("failed to close db: %v", err)
 			}
 		}
 	}

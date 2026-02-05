@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -15,5 +15,5 @@ type User struct {
 
 type Data struct {
 	db  *gorm.DB
-	log *log.Helper
+	log *zap.Logger
 }

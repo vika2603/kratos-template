@@ -1,6 +1,6 @@
 server:
   http:
-    addr: 0.0.0.0:8080
+    addr: 0.0.0.0:8089
     timeout: 30s
 
 client:
@@ -18,18 +18,14 @@ temporal:
   host_port: localhost:7233
   namespace: default
 
-service:
-  name: gateway
-  version: v1.0.0
-
 registry:
   consul:
     address: localhost:8500
     scheme: http
 
 tracing:
-  jaeger:
-    endpoint: http://localhost:14268/api/traces
+  otlp:
+    endpoint: localhost:4317
   sample_rate: 1.0
 
 log:

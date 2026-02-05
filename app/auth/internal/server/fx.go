@@ -8,13 +8,6 @@ import (
 var Module = fx.Module("server",
 	fx.Provide(
 		fx.Annotate(
-			NewHTTPServer,
-			fx.As(new(transport.Server)),
-			fx.ResultTags(`group:"servers"`),
-		),
-	),
-	fx.Provide(
-		fx.Annotate(
 			NewGRPCServer,
 			fx.As(new(transport.Server)),
 			fx.ResultTags(`group:"servers"`),

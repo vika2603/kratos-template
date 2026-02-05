@@ -4,21 +4,22 @@ import (
 	nethttp "net/http"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	v1 "kratos-template/api/asset/v1"
 	"kratos-template/app/asset/internal/conf"
+	"kratos-template/pkg/log/adapter"
 )
 
 type HTTPServerParams struct {
 	fx.In
 	Config       *conf.Bootstrap
-	Logger       log.Logger
+	Logger       *zap.Logger
 	AssetService v1.AssetServiceServer
 }
 
@@ -27,7 +28,7 @@ func NewHTTPServer(params HTTPServerParams) (*http.Server, error) {
 		http.Middleware(
 			recovery.Recovery(),
 			tracing.Server(),
-			logging.Server(params.Logger),
+			logging.Server(adapter.NewKratosAdapter(params.Logger)),
 		),
 	}
 

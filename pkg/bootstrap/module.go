@@ -8,21 +8,13 @@ import (
 	"kratos-template/pkg/tracing"
 )
 
-func Module(logger log.Settings, reg registry.Settings, trace tracing.Settings) fx.Option {
+func Module(logLevel string, reg registry.Settings, trace tracing.Settings) fx.Option {
 	return fx.Options(
-		fx.Provide(
-			fx.Annotate(
-				func() string { return logger.Level },
-				fx.ResultTags(`name:"log_level"`),
-			),
-		),
-		fx.Provide(
-			fx.Annotate(
-				func() string { return logger.Env },
-				fx.ResultTags(`name:"env"`),
-			),
-		),
-		fx.Provide(log.New),
+		log.ProvideWithSettings(log.Settings{
+			Level:  logLevel,
+			Format: "json",
+			Caller: true,
+		}),
 
 		fx.Provide(
 			fx.Annotate(
@@ -40,8 +32,8 @@ func Module(logger log.Settings, reg registry.Settings, trace tracing.Settings) 
 
 		fx.Provide(
 			fx.Annotate(
-				func() string { return trace.JaegerEndpoint },
-				fx.ResultTags(`name:"jaeger_endpoint"`),
+				func() string { return trace.OTLPEndpoint },
+				fx.ResultTags(`name:"otlp_endpoint"`),
 			),
 		),
 		fx.Provide(

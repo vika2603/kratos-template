@@ -3,21 +3,22 @@ package server
 import (
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	v1 "kratos-template/api/auth/v1"
 	"kratos-template/app/auth/internal/conf"
+	"kratos-template/pkg/log/adapter"
 )
 
 type GRPCServerParams struct {
 	fx.In
 	Config      *conf.Bootstrap
-	Logger      log.Logger
+	Logger      *zap.Logger
 	AuthService v1.AuthServiceServer
 }
 
@@ -26,7 +27,7 @@ func NewGRPCServer(params GRPCServerParams) (*grpc.Server, error) {
 		grpc.Middleware(
 			recovery.Recovery(),
 			tracing.Server(),
-			logging.Server(params.Logger),
+			logging.Server(adapter.NewKratosAdapter(params.Logger)),
 		),
 	}
 

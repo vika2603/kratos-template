@@ -8,7 +8,7 @@ GOMOD=$(GOCMD) mod
 GOFMT=gofmt
 
 # Binary names
-SERVICES=auth user asset worker gateway
+SERVICES=auth user asset gateway
 
 # Build directory
 BUILD_DIR=bin
@@ -43,9 +43,9 @@ build:
 	@for svc in $(SERVICES); do \
 		echo "Building $$svc..."; \
 		if [ "$$svc" = "gateway" ]; then \
-			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./app/$$svc/cmd/gateway; \
+			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./cmd/$$svc; \
 		else \
-			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./app/$$svc/cmd/server; \
+			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./cmd/$$svc; \
 		fi; \
 	done
 	@echo "Build complete!"
@@ -54,9 +54,9 @@ build:
 build-%:
 	@echo "Building $*..."
 	@if [ "$*" = "gateway" ]; then \
-		$(GOBUILD) -o $(BUILD_DIR)/$* ./app/$*/cmd/gateway; \
+		$(GOBUILD) -o $(BUILD_DIR)/$* ./cmd/$*; \
 	else \
-		$(GOBUILD) -o $(BUILD_DIR)/$* ./app/$*/cmd/server; \
+		$(GOBUILD) -o $(BUILD_DIR)/$* ./cmd/$*; \
 	fi
 
 ## clean: Clean build artifacts
@@ -158,7 +158,7 @@ init-db:
 run-%:
 	@echo "Running $*..."
 	@if [ "$*" = "gateway" ]; then \
-		$(GOCMD) run ./app/$*/cmd/gateway -conf ./app/$*/configs/config.yaml; \
+		$(GOCMD) run ./cmd/$* -conf ./app/$*/configs/config.yaml; \
 	else \
-		$(GOCMD) run ./app/$*/cmd/server -conf ./app/$*/configs/config.yaml; \
+		$(GOCMD) run ./cmd/$* -conf ./app/$*/configs/config.yaml; \
 	fi

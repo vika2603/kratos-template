@@ -7,13 +7,13 @@ RUN apk add --no-cache git
 COPY go.mod go.sum ./
 RUN go mod download
 
+
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/gateway ./cmd/gateway && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/auth ./cmd/auth && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./cmd/user && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/asset ./cmd/asset && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/worker ./cmd/worker
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/asset ./cmd/asset
 
 FROM alpine:3.19 AS base
 RUN apk --no-cache add ca-certificates tzdata
@@ -41,9 +41,3 @@ WORKDIR /app
 COPY --from=builder /out/asset .
 EXPOSE 9083
 ENTRYPOINT ["/app/asset"]
-
-FROM base AS worker
-WORKDIR /app
-COPY --from=builder /out/worker .
-EXPOSE 8084
-ENTRYPOINT ["/app/worker"]

@@ -13,8 +13,8 @@ import (
 	"kratos-template/app/gateway/internal/client"
 	"kratos-template/app/gateway/internal/conf"
 	"kratos-template/app/gateway/internal/server"
-	"kratos-template/app/gateway/pkg/auth"
 	"kratos-template/app/gateway/pkg/handler"
+	pkgauth "kratos-template/pkg/auth"
 	"kratos-template/pkg/bootstrap"
 	"kratos-template/pkg/config"
 	"kratos-template/pkg/log"
@@ -31,18 +31,47 @@ func init() {
 func Run() {
 	flag.Parse()
 
+	cfg, err := config.New(flagConf, "config/gateway/", "")
+	if err != nil {
+		log.Fatalf("load config error: %v", err)
+		return
+	}
+
+	bootstrapCfg, err := loadBootstrapConfig(cfg)
+	if err != nil {
+		log.Fatalf("load bootstrap config error: %v", err)
+		return
+	}
+
+	logger, shutdown, err := log.InitFromSettings(getLogSettings(bootstrapCfg))
+	if err != nil {
+		log.Fatalf("init log error: %v", err)
+		return
+	}
+
 	app := fx.New(
-		log.FxLogger(),
-		config.ProvideWithConsul(flagConf, "config/gateway/", ""),
-		fx.Provide(loadBootstrapConfig),
+		// fx.WithLogger(adapter.NewFxAdapter),
+		fx.Supply(
+			fx.Annotate(cfg, fx.As(new(kratosconfig.Config))),
+			bootstrapCfg,
+			logger,
+		),
+		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return c.Close()
+				},
+			})
+		}),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{OnStop: shutdown})
+		}),
 		fx.Provide(func(b *conf.Bootstrap) config.Accessor { return b }),
 
-		fx.Provide(getLoggerSettings),
 		fx.Provide(getRegistrySettings),
 		fx.Provide(getTracingSettings),
 		fx.Provide(provideServiceInfo),
 
-		fx.Provide(log.New),
 		fx.Provide(registry.New),
 		fx.Provide(tracing.New),
 
@@ -50,7 +79,8 @@ func Run() {
 
 		fx.Provide(server.NewHertzServer, handler.Default),
 
-		fx.Invoke(initAuth),
+		fx.Provide(provideAuthConfig),
+		pkgauth.Module,
 
 		module.Modules(),
 
@@ -65,29 +95,23 @@ func Run() {
 	app.Run()
 }
 
-type configResult struct {
-	fx.Out
-	Bootstrap *conf.Bootstrap
-}
-
-func loadBootstrapConfig(cfg kratosconfig.Config) (configResult, error) {
+func loadBootstrapConfig(cfg kratosconfig.Config) (*conf.Bootstrap, error) {
 	var bc conf.Bootstrap
 	if err := cfg.Scan(&bc); err != nil {
-		return configResult{}, err
+		return nil, err
 	}
-	return configResult{Bootstrap: &bc}, nil
+	return &bc, nil
 }
 
-type loggerSettingsResult struct {
-	fx.Out
-	Level string `name:"log_level"`
-	Env   string `name:"env"`
-}
-
-func getLoggerSettings(cfg *conf.Bootstrap) loggerSettingsResult {
-	return loggerSettingsResult{
-		Level: cfg.Log.Level,
-		Env:   cfg.Log.Env,
+func getLogSettings(cfg *conf.Bootstrap) log.Settings {
+	level := "info"
+	if cfg.Log != nil && cfg.Log.Level != "" {
+		level = cfg.Log.Level
+	}
+	return log.Settings{
+		Level:  level,
+		Format: "json",
+		Caller: true,
 	}
 }
 
@@ -106,20 +130,20 @@ func getRegistrySettings(cfg *conf.Bootstrap) registrySettingsResult {
 
 type tracingSettingsResult struct {
 	fx.Out
-	JaegerEndpoint string  `name:"jaeger_endpoint"`
-	SampleRate     float64 `name:"trace_sample_rate"`
+	OTLPEndpoint string  `name:"otlp_endpoint"`
+	SampleRate   float64 `name:"trace_sample_rate"`
 }
 
 func getTracingSettings(cfg *conf.Bootstrap) tracingSettingsResult {
 	endpoint := ""
 	sampleRate := 1.0
-	if cfg.Tracing != nil && cfg.Tracing.Jaeger != nil {
-		endpoint = cfg.Tracing.Jaeger.Endpoint
+	if cfg.Tracing != nil && cfg.Tracing.Otlp != nil {
+		endpoint = cfg.Tracing.Otlp.Endpoint
 		sampleRate = float64(cfg.Tracing.SampleRate)
 	}
 	return tracingSettingsResult{
-		JaegerEndpoint: endpoint,
-		SampleRate:     sampleRate,
+		OTLPEndpoint: endpoint,
+		SampleRate:   sampleRate,
 	}
 }
 
@@ -145,6 +169,9 @@ func provideServiceInfo(cfg *conf.Bootstrap) serviceInfoResult {
 	}
 }
 
-func initAuth(cfg *conf.Bootstrap) {
-	auth.Init(cfg.Auth.JwtSecret)
+func provideAuthConfig(cfg *conf.Bootstrap) pkgauth.Config {
+	return pkgauth.Config{
+		Secret:      cfg.Auth.JwtSecret,
+		ExpiryHours: 24,
+	}
 }

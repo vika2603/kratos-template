@@ -12,18 +12,14 @@ auth:
   jwt_secret: your-secret-key-change-in-production
   token_expiry: 86400
 
-service:
-  name: auth
-  version: v1.0.0
-
 registry:
   consul:
     address: localhost:8500
     scheme: http
 
 tracing:
-  jaeger:
-    endpoint: http://localhost:14268/api/traces
+  otlp:
+    endpoint: localhost:4317
   sample_rate: 1.0
 
 log:

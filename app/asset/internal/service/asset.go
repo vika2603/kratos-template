@@ -37,7 +37,7 @@ func NewAssetService(params AssetServiceParams) AssetServiceResult {
 func (s *AssetService) CreateAsset(ctx context.Context, req *v1.CreateAssetRequest) (*v1.CreateAssetReply, error) {
 	asset, err := s.assetUC.Create(ctx, req.Name, req.Description, req.OwnerId, req.Value)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.CreateAssetReply{
@@ -48,7 +48,7 @@ func (s *AssetService) CreateAsset(ctx context.Context, req *v1.CreateAssetReque
 func (s *AssetService) GetAsset(ctx context.Context, req *v1.GetAssetRequest) (*v1.GetAssetReply, error) {
 	asset, err := s.assetUC.Get(ctx, req.Id)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.GetAssetReply{
@@ -59,7 +59,7 @@ func (s *AssetService) GetAsset(ctx context.Context, req *v1.GetAssetRequest) (*
 func (s *AssetService) UpdateAsset(ctx context.Context, req *v1.UpdateAssetRequest) (*v1.UpdateAssetReply, error) {
 	asset, err := s.assetUC.Update(ctx, req.Id, req.Name, req.Description, req.Value)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.UpdateAssetReply{
@@ -69,7 +69,7 @@ func (s *AssetService) UpdateAsset(ctx context.Context, req *v1.UpdateAssetReque
 
 func (s *AssetService) DeleteAsset(ctx context.Context, req *v1.DeleteAssetRequest) (*v1.DeleteAssetReply, error) {
 	if err := s.assetUC.Delete(ctx, req.Id); err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	return &v1.DeleteAssetReply{
@@ -80,7 +80,7 @@ func (s *AssetService) DeleteAsset(ctx context.Context, req *v1.DeleteAssetReque
 func (s *AssetService) ListAssets(ctx context.Context, req *v1.ListAssetsRequest) (*v1.ListAssetsReply, error) {
 	assets, total, err := s.assetUC.List(ctx, req.Page, req.PageSize, req.OwnerId)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, err
 	}
 
 	protoAssets := make([]*v1.Asset, 0, len(assets))
@@ -105,7 +105,3 @@ func modelToProto(asset *model.Asset) *v1.Asset {
 		UpdatedAt:   timestamppb.New(asset.UpdatedAt),
 	}
 }
-
-var Module = fx.Module("service",
-	fx.Provide(NewAssetService),
-)

@@ -18,18 +18,14 @@ temporal:
   host_port: temporal:7233
   namespace: default
 
-service:
-  name: gateway
-  version: v1.0.0
-
 registry:
   consul:
     address: consul:8500
     scheme: http
 
 tracing:
-  jaeger:
-    endpoint: http://jaeger:4317
+  otlp:
+    endpoint: jaeger:4317
   sample_rate: 1.0
 
 log:

@@ -7,10 +7,17 @@ import (
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/go-kratos/kratos/v2/log"
+	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/hashicorp/consul/api"
 	"go.uber.org/fx"
+
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
+
+func init() {
+	kratoslog.SetLogger(adapter.NewKratosGlobalAdapter())
+}
 
 func Provide(localPath string) fx.Option {
 	return ProvideWithConsul(localPath, "", "")
@@ -43,6 +50,13 @@ func New(localPath, consulPath, consulAddr string) (config.Config, error) {
 
 	var sources []config.Source
 
+	if localPath != "" {
+		if _, err := os.Stat(localPath); err == nil {
+			sources = append(sources, file.NewSource(localPath))
+			log.Infof("Config: using local file %s", localPath)
+		}
+	}
+
 	if consulAddr != "" && consulPath != "" {
 		consulClient, err := api.NewClient(&api.Config{
 			Address: consulAddr,
@@ -53,13 +67,6 @@ func New(localPath, consulPath, consulAddr string) (config.Config, error) {
 				sources = append(sources, cs)
 				log.Infof("Config: using Consul source %s%s", consulAddr, consulPath)
 			}
-		}
-	}
-
-	if localPath != "" {
-		if _, err := os.Stat(localPath); err == nil {
-			sources = append(sources, file.NewSource(localPath))
-			log.Infof("Config: using local file %s", localPath)
 		}
 	}
 

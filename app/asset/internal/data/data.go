@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"go.uber.org/zap"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 
@@ -12,7 +12,7 @@ import (
 type Data struct {
 	db  *gorm.DB
 	q   *query.Query
-	log *log.Helper
+	log *zap.Logger
 }
 
 func GenerateCode(db *gorm.DB) {
