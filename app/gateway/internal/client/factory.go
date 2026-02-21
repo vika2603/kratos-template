@@ -13,7 +13,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	assetv1 "kratos-template/api/asset/v1"
 	authv1 "kratos-template/api/auth/v1"
 	userv1 "kratos-template/api/user/v1"
 	"kratos-template/app/gateway/internal/conf"
@@ -79,15 +78,6 @@ func (f *ClientFactory) UserClient() (userv1.UserServiceClient, error) {
 	return userv1.NewUserServiceClient(conn), nil
 }
 
-// AssetClient creates an authenticated gRPC client for the Asset service.
-func (f *ClientFactory) AssetClient() (assetv1.AssetServiceClient, error) {
-	conn, err := f.newGRPCConn(f.cfg.Client.Asset.DiscoveryName, f.cfg.Client.Asset.Timeout)
-	if err != nil {
-		return nil, err
-	}
-	return assetv1.NewAssetServiceClient(conn), nil
-}
-
 // ProvideClients returns an fx.Option that provides all gRPC clients at once.
 func ProvideClients() fx.Option {
 	return fx.Options(
@@ -97,9 +87,6 @@ func ProvideClients() fx.Option {
 		}),
 		fx.Provide(func(f *ClientFactory) (userv1.UserServiceClient, error) {
 			return f.UserClient()
-		}),
-		fx.Provide(func(f *ClientFactory) (assetv1.AssetServiceClient, error) {
-			return f.AssetClient()
 		}),
 	)
 }

@@ -3,20 +3,16 @@
 package user
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/cloudwego/hertz/pkg/app"
+
+	authmw "kratos-template/app/gateway/pkg/middleware/auth"
 )
 
 func rootMw() []app.HandlerFunc {
-	// your code...
-	return []app.HandlerFunc{
-		func(ctx context.Context, c *app.RequestContext) {
-			fmt.Println("u ...any")
-			c.Next(ctx)
-		},
+	if mw := authmw.Default(); mw != nil {
+		return []app.HandlerFunc{mw}
 	}
+	return nil
 }
 
 func _apiMw() []app.HandlerFunc {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2"
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 	"go.uber.org/fx"
@@ -11,6 +12,21 @@ import (
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 )
+
+func CommonLifecycleOptions(shutdown func(context.Context) error) fx.Option {
+	return fx.Options(
+		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return c.Close()
+				},
+			})
+		}),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{OnStop: shutdown})
+		}),
+	)
+}
 
 type AppParams struct {
 	fx.In

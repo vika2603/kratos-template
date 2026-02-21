@@ -1,10 +1,30 @@
 package bootstrap
 
 import (
+	"os"
+
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
+
 	"kratos-template/pkg/config"
 	"kratos-template/pkg/registry"
 	"kratos-template/pkg/tracing"
 )
+
+func Hostname() string {
+	hostname, _ := os.Hostname()
+	if hostname == "" {
+		hostname = "unknown"
+	}
+	return hostname
+}
+
+func LoadConfig[T any](cfg kratosconfig.Config) (*T, error) {
+	var bc T
+	if err := cfg.Scan(&bc); err != nil {
+		return nil, err
+	}
+	return &bc, nil
+}
 
 func LogLevelFromConfig(cfg config.Accessor) string {
 	if l := cfg.GetLogLevel(); l != "" {

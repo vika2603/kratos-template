@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"kratos-template/app/auth/internal/biz"
+	"kratos-template/pkg/model"
 )
 
 var _ biz.AuthUserRepo = (*authUserRepo)(nil)
@@ -16,7 +17,7 @@ type authUserRepo struct {
 }
 
 func (r *authUserRepo) GetByUsername(ctx context.Context, username string) (*biz.AuthUser, error) {
-	var user User
+	var user model.User
 	if err := r.data.db.WithContext(ctx).Where("username = ?", username).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, biz.ErrUserNotFound
@@ -30,9 +31,9 @@ func (r *authUserRepo) GetByUsername(ctx context.Context, username string) (*biz
 	}, nil
 }
 
-func (r *authUserRepo) GetByID(ctx context.Context, id uint) (*biz.AuthUser, error) {
-	var user User
-	if err := r.data.db.WithContext(ctx).First(&user, id).Error; err != nil {
+func (r *authUserRepo) GetByID(ctx context.Context, id string) (*biz.AuthUser, error) {
+	var user model.User
+	if err := r.data.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, biz.ErrUserNotFound
 		}

@@ -15,9 +15,9 @@ var (
 
 // Claims represents JWT claims with user information.
 type Claims struct {
-	UserID   int64  `json:"user_id"`
-	Username string `json:"username"`
 	jwt.RegisteredClaims
+	UserID   string `json:"user_id"`
+	Username string `json:"username"`
 }
 
 // JWTManager handles JWT token operations.
@@ -35,7 +35,7 @@ func NewJWTManager(secret string, expiryHours int) *JWTManager {
 }
 
 // GenerateToken creates a new JWT token for the given user.
-func (m *JWTManager) GenerateToken(userID int64, username string) (string, error) {
+func (m *JWTManager) GenerateToken(userID string, username string) (string, error) {
 	claims := &Claims{
 		UserID:   userID,
 		Username: username,
@@ -50,7 +50,7 @@ func (m *JWTManager) GenerateToken(userID int64, username string) (string, error
 }
 
 // GenerateTokenWithExpiry creates a token with a custom expiry duration in seconds.
-func (m *JWTManager) GenerateTokenWithExpiry(userID int64, username string, expirySeconds int64) (string, error) {
+func (m *JWTManager) GenerateTokenWithExpiry(userID string, username string, expirySeconds int64) (string, error) {
 	claims := &Claims{
 		UserID:   userID,
 		Username: username,

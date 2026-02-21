@@ -6,7 +6,7 @@ server:
 data:
   database:
     driver: postgres
-    source: postgres://postgres:postgres@localhost:5432/kratos?sslmode=disable
+    source: postgres://postgres:postgres@localhost:5432/user_db?sslmode=disable
 
 auth:
   jwt_secret: your-secret-key-change-in-production

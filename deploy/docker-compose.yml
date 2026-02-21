@@ -64,7 +64,7 @@ services:
     ports:
       - "9081:9081"
     environment:
-      - DB_DSN=postgres://postgres:postgres@postgres:5432/auth_db?sslmode=disable
+      - DB_DSN=postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
       - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
     volumes:
       - ./configs:/configs:ro
@@ -92,28 +92,6 @@ services:
       - ./configs:/configs:ro
     command: ["-conf", "/configs/user/config.yaml"]
 
-  asset:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
-      target: asset
-    container_name: kratos-asset
-    depends_on:
-      postgres:
-        condition: service_healthy
-      consul:
-        condition: service_healthy
-      auth:
-        condition: service_started
-    ports:
-      - "9083:9083"
-    environment:
-      - DB_DSN=postgres://postgres:postgres@postgres:5432/asset_db?sslmode=disable
-      - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
-    volumes:
-      - ./configs:/configs:ro
-    command: ["-conf", "/configs/asset/config.yaml"]
-
   gateway:
     build:
       context: ..
@@ -126,8 +104,6 @@ services:
       auth:
         condition: service_started
       user:
-        condition: service_started
-      asset:
         condition: service_started
     ports:
       - "8080:8080"

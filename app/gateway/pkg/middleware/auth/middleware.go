@@ -1,59 +1,69 @@
 package auth
 
 import (
-\t"context"
-\t"strings"
+	"context"
+	"strings"
 
-\t"github.com/cloudwego/hertz/pkg/app"
-\t"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
-\tpkgauth "kratos-template/pkg/auth"
+	pkgauth "kratos-template/pkg/auth"
 )
 
+var defaultMiddleware app.HandlerFunc
+
+func Init(jwtManager *pkgauth.JWTManager) {
+	defaultMiddleware = New(jwtManager)
+}
+
+func Default() app.HandlerFunc {
+	return defaultMiddleware
+}
+
 func New(jwtManager *pkgauth.JWTManager) app.HandlerFunc {
-\treturn func(ctx context.Context, c *app.RequestContext) {
-\t\tif jwtManager == nil {
-\t\t\tc.AbortWithStatusJSON(consts.StatusInternalServerError, map[string]any{
-\t\t\t\t"code":    500,
-\t\t\t\t"message": "auth middleware not configured",
-\t\t\t})
-\t\t\treturn
-\t\t}
+	return func(ctx context.Context, c *app.RequestContext) {
+		if jwtManager == nil {
+			c.AbortWithStatusJSON(consts.StatusInternalServerError, map[string]any{
+				"code":    500,
+				"message": "auth middleware not configured",
+			})
+			return
+		}
 
-\t\ttokenString, ok := parseBearerToken(string(c.GetHeader("Authorization")))
-\t\tif !ok {
-\t\t\tc.AbortWithStatusJSON(consts.StatusUnauthorized, map[string]any{
-\t\t\t\t"code":    401,
-\t\t\t\t"message": "missing or invalid authorization header",
-\t\t\t})
-\t\t\treturn
-\t\t}
+		tokenString, ok := parseBearerToken(string(c.GetHeader("Authorization")))
+		if !ok {
+			c.AbortWithStatusJSON(consts.StatusUnauthorized, map[string]any{
+				"code":    401,
+				"message": "missing or invalid authorization header",
+			})
+			return
+		}
 
-\t\tclaims, err := jwtManager.ParseToken(tokenString)
-\t\tif err != nil {
-\t\t\tc.AbortWithStatusJSON(consts.StatusUnauthorized, map[string]any{
-\t\t\t\t"code":    401,
-\t\t\t\t"message": "invalid or expired token",
-\t\t\t})
-\t\t\treturn
-\t\t}
+		claims, err := jwtManager.ParseToken(tokenString)
+		if err != nil {
+			c.AbortWithStatusJSON(consts.StatusUnauthorized, map[string]any{
+				"code":    401,
+				"message": "invalid or expired token",
+			})
+			return
+		}
 
-\t\tc.Set("claims", claims)
-\t\tc.Set("user_id", claims.UserID)
-\t\tc.Set("username", claims.Username)
-\t\tc.Next(ctx)
-\t}
+		c.Set("claims", claims)
+		c.Set("user_id", claims.UserID)
+		c.Set("username", claims.Username)
+		c.Next(ctx)
+	}
 }
 
 func parseBearerToken(value string) (string, bool) {
-\tif value == "" {
-\t\treturn "", false
-\t}
+	if value == "" {
+		return "", false
+	}
 
-\tparts := strings.SplitN(value, " ", 2)
-\tif len(parts) != 2 || parts[0] != "Bearer" {
-\t\treturn "", false
-\t}
+	parts := strings.SplitN(value, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return "", false
+	}
 
-\treturn parts[1], true
+	return parts[1], true
 }

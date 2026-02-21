@@ -1,6 +1,6 @@
 # Kratos v2 Microservices Template
 
-Production-ready Go microservices scaffold built with Kratos v2, featuring dependency injection, service discovery, distributed tracing, and workflow orchestration.
+Production-ready Go microservices scaffold built with Kratos v2, featuring dependency injection, service discovery, and distributed tracing.
 
 ## Tech Stack
 
@@ -11,7 +11,6 @@ Production-ready Go microservices scaffold built with Kratos v2, featuring depen
 | ORM | GORM Gen |
 | Database | PostgreSQL |
 | Service Discovery | Consul |
-| Workflow Engine | Temporal |
 | Tracing | OpenTelemetry + Jaeger |
 | Metrics | Prometheus + Grafana |
 | Protocol Buffers | buf |
@@ -23,7 +22,6 @@ Production-ready Go microservices scaffold built with Kratos v2, featuring depen
 | Gateway | 8080 | - | Public entry point |
 | Auth | 8081 | 9081 | Internal |
 | User | 8082 | 9082 | Internal |
-| Asset | 8083 | 9083 | Internal |
 | Consul | 8500 | - | Service discovery |
 | Jaeger | 16686 | - | Tracing UI |
 | PostgreSQL | 5432 | - | Database |
@@ -50,12 +48,10 @@ curl http://localhost:8080/healthz
 ```
 .
 ├── api/                    # Protocol buffer definitions
-│   ├── asset/v1/          # Asset service API
 │   ├── auth/v1/           # Auth service API
 │   ├── gateway/v1/        # Gateway API
 │   └── user/v1/           # User service API
 ├── app/                    # Service implementations
-│   ├── asset/             # Asset management service
 │   ├── auth/              # Authentication service
 │   ├── gateway/           # API gateway (BFF)
 │   ├── user/              # User management service
@@ -80,12 +76,11 @@ curl http://localhost:8080/healthz
 
 ## Key Features
 
-- **Microservices Architecture**: Four independent services with clear boundaries
+- **Microservices Architecture**: Three independent services with clear boundaries
 - **Dependency Injection**: Uber FX for clean, testable code structure
 - **Type-Safe ORM**: GORM Gen for compile-time query validation
 - **Service Discovery**: Consul for dynamic service registration and health checks
 - **Distributed Tracing**: OpenTelemetry integration with Jaeger backend
-- **Workflow Orchestration**: Temporal for reliable background job processing
 - **API Gateway**: BFF pattern with centralized routing and authentication
 - **Observability**: Full metrics, logs, and traces with Prometheus and Grafana
 

@@ -1,6 +1,6 @@
 version: v2
 modules:
-  - path: api
+  - path: proto
     name: buf.build/kratos-template/api
 lint:
   use:

@@ -8,7 +8,7 @@ GOMOD=$(GOCMD) mod
 GOFMT=gofmt
 
 # Binary names
-SERVICES=auth user asset gateway
+SERVICES=auth user gateway
 
 # Build directory
 BUILD_DIR=bin
@@ -82,7 +82,7 @@ generate: proto gorm
 gen-gateway:
 	@echo "Generating gateway code..."
 	@rm -rf app/gateway/biz
-	@cd app/gateway && for proto in idl/auth.proto idl/asset.proto idl/user.proto; do \
+	@cd app/gateway && for proto in idl/auth.proto idl/user.proto; do \
 		hz update --idl $$proto --module gateway --out_dir . \
 			--customize_package template/package.yaml; \
 	done

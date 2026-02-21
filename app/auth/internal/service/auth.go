@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"go.uber.org/fx"
 
@@ -67,7 +66,7 @@ func (s *AuthService) Validate(ctx context.Context, req *v1.ValidateRequest) (*v
 
 	return &v1.ValidateReply{
 		Valid:    valid,
-		UserId:   fmt.Sprintf("%d", userID),
+		UserId:   userID,
 		Username: username,
 	}, nil
 }

@@ -1,9 +1,7 @@
 package auth
 
 import (
-	"context"
 	"flag"
-	"os"
 
 	"github.com/go-kratos/kratos/v2"
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
@@ -38,13 +36,13 @@ func Run() {
 		return
 	}
 
-	bootstrapCfg, err := loadBootstrapConfig(cfg)
+	bootstrapCfg, err := bootstrap.LoadConfig[conf.Bootstrap](cfg)
 	if err != nil {
 		log.Fatalf("load bootstrap config error: %v", err)
 		return
 	}
 
-	logger, shutdown, err := log.InitFromSettings(provideLogSettings(bootstrapCfg))
+	logger, shutdown, err := log.InitFromSettings(bootstrap.ProvideLogSettings(bootstrapCfg))
 	if err != nil {
 		log.Fatalf("init log error: %v", err)
 		return
@@ -57,24 +55,14 @@ func Run() {
 			bootstrapCfg,
 			logger,
 		),
-		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
-			lc.Append(fx.Hook{
-				OnStop: func(ctx context.Context) error {
-					return c.Close()
-				},
-			})
-		}),
-		fx.Invoke(func(lc fx.Lifecycle) {
-			lc.Append(fx.Hook{OnStop: shutdown})
-		}),
-		fx.Provide(func(b *conf.Bootstrap) config.Accessor { return b }),
+		bootstrap.CommonLifecycleOptions(shutdown),
+		config.ProvideAccessor[*conf.Bootstrap](),
 
-		fx.Provide(provideRegistrySettings),
+		fx.Provide(bootstrap.ProvideRegistrySettings),
 		fx.Provide(registry.New),
-		fx.Provide(provideTracingSettings),
+		fx.Provide(bootstrap.ProvideTracingSettings),
 		fx.Provide(tracing.New),
-
-		fx.Provide(provideServiceInfo),
+		fx.Provide(bootstrap.ProvideServiceInfo),
 		fx.Provide(bootstrap.NewKratosApp),
 
 		data.Module,
@@ -86,70 +74,4 @@ func Run() {
 	)
 
 	app.Run()
-}
-
-func loadBootstrapConfig(cfg kratosconfig.Config) (*conf.Bootstrap, error) {
-	var bc conf.Bootstrap
-	if err := cfg.Scan(&bc); err != nil {
-		return nil, err
-	}
-	return &bc, nil
-}
-
-func provideLogSettings(cfg *conf.Bootstrap) log.Settings {
-	return log.Settings{
-		Level:  bootstrap.LogLevelFromConfig(cfg),
-		Format: "json",
-		Caller: true,
-	}
-}
-
-type registrySettingsResult struct {
-	fx.Out
-	Address string `name:"consul_address"`
-	Scheme  string `name:"consul_scheme"`
-}
-
-func provideRegistrySettings(cfg *conf.Bootstrap) registrySettingsResult {
-	settings := bootstrap.RegistryFromConfig(cfg)
-	return registrySettingsResult{
-		Address: settings.Address,
-		Scheme:  settings.Scheme,
-	}
-}
-
-type tracingSettingsResult struct {
-	fx.Out
-	OTLPEndpoint string  `name:"otlp_endpoint"`
-	SampleRate   float64 `name:"trace_sample_rate"`
-}
-
-func provideTracingSettings(cfg *conf.Bootstrap) tracingSettingsResult {
-	settings := bootstrap.TracingFromConfig(cfg)
-	return tracingSettingsResult{
-		OTLPEndpoint: settings.OTLPEndpoint,
-		SampleRate:   settings.SampleRate,
-	}
-}
-
-type serviceInfoResult struct {
-	fx.Out
-	ServiceID       string            `name:"service_id"`
-	ServiceName     string            `name:"service_name"`
-	ServiceVersion  string            `name:"service_version"`
-	ServiceMetadata map[string]string `name:"service_metadata"`
-}
-
-func provideServiceInfo(cfg *conf.Bootstrap) serviceInfoResult {
-	hostname, _ := os.Hostname()
-	if hostname == "" {
-		hostname = "unknown"
-	}
-	info := bootstrap.ServiceInfoFromConfig(cfg, hostname)
-	return serviceInfoResult{
-		ServiceID:       info.ID,
-		ServiceName:     info.Name,
-		ServiceVersion:  info.Version,
-		ServiceMetadata: info.Metadata,
-	}
 }

@@ -12,8 +12,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/gateway ./cmd/gateway && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/auth ./cmd/auth && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./cmd/user && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/asset ./cmd/asset
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./cmd/user
 
 FROM alpine:3.19 AS base
 RUN apk --no-cache add ca-certificates tzdata
@@ -36,8 +35,3 @@ COPY --from=builder /out/user .
 EXPOSE 9082
 ENTRYPOINT ["/app/user"]
 
-FROM base AS asset
-WORKDIR /app
-COPY --from=builder /out/asset .
-EXPOSE 9083
-ENTRYPOINT ["/app/asset"]

@@ -1,17 +1,44 @@
 syntax = "proto3";
 
-package user.v1;
+package api.user.v1;
 
+import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "kratos-template/api/user/v1;v1";
 
 service UserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserReply) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc GetUser(GetUserRequest) returns (GetUserReply) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{id}"
+    };
+  }
+
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserReply) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{id}"
+      body: "*"
+    };
+  }
+
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserReply) {
+    option (google.api.http) = {
+      delete: "/api/v1/users/{id}"
+    };
+  }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersReply) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
+    };
+  }
 }
 
 message User {
@@ -28,7 +55,7 @@ message CreateUserRequest {
   string password = 3;
 }
 
-message CreateUserResponse {
+message CreateUserReply {
   User user = 1;
 }
 
@@ -36,7 +63,7 @@ message GetUserRequest {
   string id = 1;
 }
 
-message GetUserResponse {
+message GetUserReply {
   User user = 1;
 }
 
@@ -46,7 +73,7 @@ message UpdateUserRequest {
   string email = 3;
 }
 
-message UpdateUserResponse {
+message UpdateUserReply {
   User user = 1;
 }
 
@@ -54,7 +81,7 @@ message DeleteUserRequest {
   string id = 1;
 }
 
-message DeleteUserResponse {
+message DeleteUserReply {
   bool success = 1;
 }
 
@@ -63,7 +90,7 @@ message ListUsersRequest {
   int32 page_size = 2;
 }
 
-message ListUsersResponse {
+message ListUsersReply {
   repeated User users = 1;
   int32 total = 2;
 }

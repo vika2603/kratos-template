@@ -7,22 +7,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	pkgauth "kratos-template/pkg/auth"
+	pkgerr "kratos-template/pkg/errors"
 )
 
 type AuthUserRepo interface {
 	GetByUsername(ctx context.Context, username string) (*AuthUser, error)
-	GetByID(ctx context.Context, id uint) (*AuthUser, error)
+	GetByID(ctx context.Context, id string) (*AuthUser, error)
 }
 
 type AuthUser struct {
-	ID           uint
+	ID           string
 	Username     string
 	PasswordHash string
 }
 
 var (
-	ErrUserNotFound       = errors.New("user not found")
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUserNotFound       = pkgerr.NewNotFound("USER_NOT_FOUND", "user not found")
+	ErrInvalidCredentials = pkgerr.NewUnauthorized("INVALID_CREDENTIALS", "invalid credentials")
 )
 
 type AuthUseCase struct {
@@ -43,7 +44,7 @@ func (uc *AuthUseCase) Login(ctx context.Context, username, password string) (st
 		return "", 0, ErrInvalidCredentials
 	}
 
-	token, err := uc.jwtManager.GenerateToken(int64(user.ID), user.Username)
+	token, err := uc.jwtManager.GenerateToken(user.ID, user.Username)
 	if err != nil {
 		return "", 0, err
 	}
@@ -54,7 +55,7 @@ func (uc *AuthUseCase) Login(ctx context.Context, username, password string) (st
 func (uc *AuthUseCase) Refresh(ctx context.Context, token string) (string, int64, error) {
 	claims, err := uc.jwtManager.ParseToken(token)
 	if err != nil {
-		return "", 0, errors.New("invalid token")
+		return "", 0, ErrInvalidCredentials
 	}
 
 	newToken, err := uc.jwtManager.GenerateToken(claims.UserID, claims.Username)
@@ -65,15 +66,15 @@ func (uc *AuthUseCase) Refresh(ctx context.Context, token string) (string, int64
 	return newToken, uc.jwtManager.ExpirySeconds(), nil
 }
 
-func (uc *AuthUseCase) Validate(ctx context.Context, token string) (bool, uint, string, error) {
+func (uc *AuthUseCase) Validate(ctx context.Context, token string) (bool, string, string, error) {
 	claims, err := uc.jwtManager.ParseToken(token)
 	if err != nil {
-		return false, 0, "", nil
+		return false, "", "", ErrInvalidCredentials
 	}
 
-	user, err := uc.repo.GetByID(ctx, uint(claims.UserID))
+	user, err := uc.repo.GetByID(ctx, claims.UserID)
 	if err != nil {
-		return false, 0, "", nil
+		return false, "", "", err
 	}
 
 	return true, user.ID, user.Username, nil

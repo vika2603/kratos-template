@@ -10,13 +10,6 @@ client:
   user:
     discovery_name: user
     timeout: 5s
-  asset:
-    discovery_name: asset
-    timeout: 5s
-
-temporal:
-  host_port: localhost:7233
-  namespace: default
 
 registry:
   consul:

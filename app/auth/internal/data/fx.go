@@ -17,8 +17,6 @@ import (
 )
 
 func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, error) {
-	helper := logger.With(log.String("module", "auth/data/gorm"))
-
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
 		dsn = cfg.Data.Database.Source
@@ -29,22 +27,6 @@ func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to postgres: %w", err)
-	}
-
-	if err := db.AutoMigrate(&User{}); err != nil {
-		return nil, fmt.Errorf("failed to auto migrate: %w", err)
-	}
-
-	var count int64
-	db.Model(&User{}).Count(&count)
-	if count == 0 {
-		defaultUser := &User{
-			Username:     "admin",
-			PasswordHash: "$2a$10$64hf5Zc1MygJgdsCF27.zuW3BQrvtf5JvTC1Eei6qW93A7y279a1m",
-		}
-		if err := db.Create(defaultUser).Error; err != nil {
-			helper.Sugar().Errorf("failed to create default user: %v", err)
-		}
 	}
 
 	return db, nil

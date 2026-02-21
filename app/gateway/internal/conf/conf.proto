@@ -30,7 +30,6 @@ message Client {
   }
   Endpoint auth = 1;
   Endpoint user = 2;
-  Endpoint asset = 3;
 }
 
 message Service {

@@ -48,7 +48,6 @@ fi
 
 put_config "config/auth/config.yaml" "/configs/auth/config.yaml"
 put_config "config/user/config.yaml" "/configs/user/config.yaml"
-put_config "config/asset/config.yaml" "/configs/asset/config.yaml"
 put_config "config/gateway/config.yaml" "/configs/gateway/config.yaml"
 
 touch "$UPLOAD_MARKER"
