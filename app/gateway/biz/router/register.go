@@ -9,10 +9,11 @@ import (
 
 func Options() fx.Option {
 	r := make(map[string]fx.Option)
-	//INSERT_POINT: DO NOT DELETE THIS LINE!
-	echo.Register(r)
 
+	//INSERT_POINT: DO NOT DELETE THIS LINE!
 	user.Register(r)
+
+	echo.Register(r)
 
 	auth.Register(r)
 

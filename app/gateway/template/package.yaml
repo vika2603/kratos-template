@@ -13,6 +13,7 @@ layouts:
 
       func Options() fx.Option {
           r := make(map[string]fx.Option)
+
           //INSERT_POINT: DO NOT DELETE THIS LINE!
           {{$.DepPkgAlias}}.Register(r)
 

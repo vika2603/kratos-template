@@ -21,11 +21,6 @@ func _v1Mw() []app.HandlerFunc {
 	return nil
 }
 
-func _authMw() []app.HandlerFunc {
-	// your code...
-	return nil
-}
-
 func _echoMw() []app.HandlerFunc {
 	// your code...
 	return nil
