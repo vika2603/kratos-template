@@ -4,6 +4,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/go-kratos/kratos/v2/errors"
+	"go.uber.org/zap"
 
 	"kratos-template/pkg/log"
 )
@@ -33,9 +34,9 @@ func (r *DefaultResponder) Fail(c *app.RequestContext, err error) {
 	}
 
 	log.Error("unexpected error",
-		log.String("error", err.Error()),
-		log.String("path", string(c.Request.URI().Path())),
-		log.String("method", string(c.Request.Method())),
+		zap.String("error", err.Error()),
+		zap.String("path", string(c.Request.URI().Path())),
+		zap.String("method", string(c.Request.Method())),
 	)
 
 	c.JSON(consts.StatusInternalServerError, ErrorResponse{

@@ -9,6 +9,7 @@ package conf
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	conf "kratos-template/pkg/conf"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -25,10 +26,9 @@ type Bootstrap struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Server        *Server                `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	Client        *Client                `protobuf:"bytes,2,opt,name=client,proto3" json:"client,omitempty"`
-	Service       *Service               `protobuf:"bytes,4,opt,name=service,proto3" json:"service,omitempty"`
-	Registry      *Registry              `protobuf:"bytes,5,opt,name=registry,proto3" json:"registry,omitempty"`
-	Tracing       *Tracing               `protobuf:"bytes,6,opt,name=tracing,proto3" json:"tracing,omitempty"`
-	Log           *Log                   `protobuf:"bytes,7,opt,name=log,proto3" json:"log,omitempty"`
+	Service       *conf.Service          `protobuf:"bytes,4,opt,name=service,proto3" json:"service,omitempty"`
+	Registry      *conf.Registry         `protobuf:"bytes,5,opt,name=registry,proto3" json:"registry,omitempty"`
+	Log           *conf.Log              `protobuf:"bytes,7,opt,name=log,proto3" json:"log,omitempty"`
 	Auth          *Auth                  `protobuf:"bytes,8,opt,name=auth,proto3" json:"auth,omitempty"`
 	RateLimit     *RateLimit             `protobuf:"bytes,9,opt,name=rate_limit,json=rateLimit,proto3" json:"rate_limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -79,28 +79,21 @@ func (x *Bootstrap) GetClient() *Client {
 	return nil
 }
 
-func (x *Bootstrap) GetService() *Service {
+func (x *Bootstrap) GetService() *conf.Service {
 	if x != nil {
 		return x.Service
 	}
 	return nil
 }
 
-func (x *Bootstrap) GetRegistry() *Registry {
+func (x *Bootstrap) GetRegistry() *conf.Registry {
 	if x != nil {
 		return x.Registry
 	}
 	return nil
 }
 
-func (x *Bootstrap) GetTracing() *Tracing {
-	if x != nil {
-		return x.Tracing
-	}
-	return nil
-}
-
-func (x *Bootstrap) GetLog() *Log {
+func (x *Bootstrap) GetLog() *conf.Log {
 	if x != nil {
 		return x.Log
 	}
@@ -217,206 +210,6 @@ func (x *Client) GetUser() *Client_Endpoint {
 	return nil
 }
 
-type Service struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Service) Reset() {
-	*x = Service{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Service) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Service) ProtoMessage() {}
-
-func (x *Service) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Service.ProtoReflect.Descriptor instead.
-func (*Service) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *Service) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Service) GetVersion() string {
-	if x != nil {
-		return x.Version
-	}
-	return ""
-}
-
-type Registry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Consul        *Registry_Consul       `protobuf:"bytes,1,opt,name=consul,proto3" json:"consul,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Registry) Reset() {
-	*x = Registry{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Registry) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Registry) ProtoMessage() {}
-
-func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Registry.ProtoReflect.Descriptor instead.
-func (*Registry) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Registry) GetConsul() *Registry_Consul {
-	if x != nil {
-		return x.Consul
-	}
-	return nil
-}
-
-type Tracing struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Otlp          *Tracing_Otlp          `protobuf:"bytes,1,opt,name=otlp,proto3" json:"otlp,omitempty"`
-	SampleRate    float64                `protobuf:"fixed64,2,opt,name=sample_rate,json=sampleRate,proto3" json:"sample_rate,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Tracing) Reset() {
-	*x = Tracing{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Tracing) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Tracing) ProtoMessage() {}
-
-func (x *Tracing) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Tracing.ProtoReflect.Descriptor instead.
-func (*Tracing) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *Tracing) GetOtlp() *Tracing_Otlp {
-	if x != nil {
-		return x.Otlp
-	}
-	return nil
-}
-
-func (x *Tracing) GetSampleRate() float64 {
-	if x != nil {
-		return x.SampleRate
-	}
-	return 0
-}
-
-type Log struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Level         string                 `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
-	Env           string                 `protobuf:"bytes,2,opt,name=env,proto3" json:"env,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Log) Reset() {
-	*x = Log{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Log) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Log) ProtoMessage() {}
-
-func (x *Log) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Log.ProtoReflect.Descriptor instead.
-func (*Log) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *Log) GetLevel() string {
-	if x != nil {
-		return x.Level
-	}
-	return ""
-}
-
-func (x *Log) GetEnv() string {
-	if x != nil {
-		return x.Env
-	}
-	return ""
-}
-
 type Auth struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JwtSecret     string                 `protobuf:"bytes,1,opt,name=jwt_secret,json=jwtSecret,proto3" json:"jwt_secret,omitempty"`
@@ -426,7 +219,7 @@ type Auth struct {
 
 func (x *Auth) Reset() {
 	*x = Auth{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[7]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -438,7 +231,7 @@ func (x *Auth) String() string {
 func (*Auth) ProtoMessage() {}
 
 func (x *Auth) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[7]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +244,7 @@ func (x *Auth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Auth.ProtoReflect.Descriptor instead.
 func (*Auth) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{7}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Auth) GetJwtSecret() string {
@@ -471,7 +264,7 @@ type RateLimit struct {
 
 func (x *RateLimit) Reset() {
 	*x = RateLimit{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -483,7 +276,7 @@ func (x *RateLimit) String() string {
 func (*RateLimit) ProtoMessage() {}
 
 func (x *RateLimit) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -496,7 +289,7 @@ func (x *RateLimit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RateLimit.ProtoReflect.Descriptor instead.
 func (*RateLimit) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{8}
+	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RateLimit) GetCapacity() int64 {
@@ -523,7 +316,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -535,7 +328,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -575,7 +368,7 @@ type Client_Endpoint struct {
 
 func (x *Client_Endpoint) Reset() {
 	*x = Client_Endpoint{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[10]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -587,7 +380,7 @@ func (x *Client_Endpoint) String() string {
 func (*Client_Endpoint) ProtoMessage() {}
 
 func (x *Client_Endpoint) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[10]
+	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -617,114 +410,17 @@ func (x *Client_Endpoint) GetTimeout() string {
 	return ""
 }
 
-type Registry_Consul struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Scheme        string                 `protobuf:"bytes,2,opt,name=scheme,proto3" json:"scheme,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Registry_Consul) Reset() {
-	*x = Registry_Consul{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Registry_Consul) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Registry_Consul) ProtoMessage() {}
-
-func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Registry_Consul.ProtoReflect.Descriptor instead.
-func (*Registry_Consul) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{4, 0}
-}
-
-func (x *Registry_Consul) GetAddress() string {
-	if x != nil {
-		return x.Address
-	}
-	return ""
-}
-
-func (x *Registry_Consul) GetScheme() string {
-	if x != nil {
-		return x.Scheme
-	}
-	return ""
-}
-
-type Tracing_Otlp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Endpoint      string                 `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Tracing_Otlp) Reset() {
-	*x = Tracing_Otlp{}
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Tracing_Otlp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Tracing_Otlp) ProtoMessage() {}
-
-func (x *Tracing_Otlp) ProtoReflect() protoreflect.Message {
-	mi := &file_app_gateway_internal_conf_conf_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Tracing_Otlp.ProtoReflect.Descriptor instead.
-func (*Tracing_Otlp) Descriptor() ([]byte, []int) {
-	return file_app_gateway_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
-}
-
-func (x *Tracing_Otlp) GetEndpoint() string {
-	if x != nil {
-		return x.Endpoint
-	}
-	return ""
-}
-
 var File_app_gateway_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_gateway_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"$app/gateway/internal/conf/conf.proto\x12\x17kratos.api.gateway.conf\"\xda\x03\n" +
+	"$app/gateway/internal/conf/conf.proto\x12\x17kratos.api.gateway.conf\x1a\x13pkg/conf/conf.proto\"\xfa\x02\n" +
 	"\tBootstrap\x127\n" +
 	"\x06server\x18\x01 \x01(\v2\x1f.kratos.api.gateway.conf.ServerR\x06server\x127\n" +
-	"\x06client\x18\x02 \x01(\v2\x1f.kratos.api.gateway.conf.ClientR\x06client\x12:\n" +
-	"\aservice\x18\x04 \x01(\v2 .kratos.api.gateway.conf.ServiceR\aservice\x12=\n" +
-	"\bregistry\x18\x05 \x01(\v2!.kratos.api.gateway.conf.RegistryR\bregistry\x12:\n" +
-	"\atracing\x18\x06 \x01(\v2 .kratos.api.gateway.conf.TracingR\atracing\x12.\n" +
-	"\x03log\x18\a \x01(\v2\x1c.kratos.api.gateway.conf.LogR\x03log\x121\n" +
+	"\x06client\x18\x02 \x01(\v2\x1f.kratos.api.gateway.conf.ClientR\x06client\x12.\n" +
+	"\aservice\x18\x04 \x01(\v2\x14.kratos.conf.ServiceR\aservice\x121\n" +
+	"\bregistry\x18\x05 \x01(\v2\x15.kratos.conf.RegistryR\bregistry\x12\"\n" +
+	"\x03log\x18\a \x01(\v2\x10.kratos.conf.LogR\x03log\x121\n" +
 	"\x04auth\x18\b \x01(\v2\x1d.kratos.api.gateway.conf.AuthR\x04auth\x12A\n" +
 	"\n" +
 	"rate_limit\x18\t \x01(\v2\".kratos.api.gateway.conf.RateLimitR\trateLimit\"x\n" +
@@ -738,24 +434,7 @@ const file_app_gateway_internal_conf_conf_proto_rawDesc = "" +
 	"\x04user\x18\x02 \x01(\v2(.kratos.api.gateway.conf.Client.EndpointR\x04user\x1aK\n" +
 	"\bEndpoint\x12%\n" +
 	"\x0ediscovery_name\x18\x01 \x01(\tR\rdiscoveryName\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\"7\n" +
-	"\aService\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\"\x88\x01\n" +
-	"\bRegistry\x12@\n" +
-	"\x06consul\x18\x01 \x01(\v2(.kratos.api.gateway.conf.Registry.ConsulR\x06consul\x1a:\n" +
-	"\x06Consul\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x16\n" +
-	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x89\x01\n" +
-	"\aTracing\x129\n" +
-	"\x04otlp\x18\x01 \x01(\v2%.kratos.api.gateway.conf.Tracing.OtlpR\x04otlp\x12\x1f\n" +
-	"\vsample_rate\x18\x02 \x01(\x01R\n" +
-	"sampleRate\x1a\"\n" +
-	"\x04Otlp\x12\x1a\n" +
-	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"-\n" +
-	"\x03Log\x12\x14\n" +
-	"\x05level\x18\x01 \x01(\tR\x05level\x12\x10\n" +
-	"\x03env\x18\x02 \x01(\tR\x03env\"%\n" +
+	"\atimeout\x18\x02 \x01(\tR\atimeout\"%\n" +
 	"\x04Auth\x12\x1d\n" +
 	"\n" +
 	"jwt_secret\x18\x01 \x01(\tR\tjwtSecret\";\n" +
@@ -775,41 +454,35 @@ func file_app_gateway_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_app_gateway_internal_conf_conf_proto_rawDescData
 }
 
-var file_app_gateway_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_app_gateway_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_app_gateway_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),       // 0: kratos.api.gateway.conf.Bootstrap
 	(*Server)(nil),          // 1: kratos.api.gateway.conf.Server
 	(*Client)(nil),          // 2: kratos.api.gateway.conf.Client
-	(*Service)(nil),         // 3: kratos.api.gateway.conf.Service
-	(*Registry)(nil),        // 4: kratos.api.gateway.conf.Registry
-	(*Tracing)(nil),         // 5: kratos.api.gateway.conf.Tracing
-	(*Log)(nil),             // 6: kratos.api.gateway.conf.Log
-	(*Auth)(nil),            // 7: kratos.api.gateway.conf.Auth
-	(*RateLimit)(nil),       // 8: kratos.api.gateway.conf.RateLimit
-	(*Server_HTTP)(nil),     // 9: kratos.api.gateway.conf.Server.HTTP
-	(*Client_Endpoint)(nil), // 10: kratos.api.gateway.conf.Client.Endpoint
-	(*Registry_Consul)(nil), // 11: kratos.api.gateway.conf.Registry.Consul
-	(*Tracing_Otlp)(nil),    // 12: kratos.api.gateway.conf.Tracing.Otlp
+	(*Auth)(nil),            // 3: kratos.api.gateway.conf.Auth
+	(*RateLimit)(nil),       // 4: kratos.api.gateway.conf.RateLimit
+	(*Server_HTTP)(nil),     // 5: kratos.api.gateway.conf.Server.HTTP
+	(*Client_Endpoint)(nil), // 6: kratos.api.gateway.conf.Client.Endpoint
+	(*conf.Service)(nil),    // 7: kratos.conf.Service
+	(*conf.Registry)(nil),   // 8: kratos.conf.Registry
+	(*conf.Log)(nil),        // 9: kratos.conf.Log
 }
 var file_app_gateway_internal_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.gateway.conf.Bootstrap.server:type_name -> kratos.api.gateway.conf.Server
 	2,  // 1: kratos.api.gateway.conf.Bootstrap.client:type_name -> kratos.api.gateway.conf.Client
-	3,  // 2: kratos.api.gateway.conf.Bootstrap.service:type_name -> kratos.api.gateway.conf.Service
-	4,  // 3: kratos.api.gateway.conf.Bootstrap.registry:type_name -> kratos.api.gateway.conf.Registry
-	5,  // 4: kratos.api.gateway.conf.Bootstrap.tracing:type_name -> kratos.api.gateway.conf.Tracing
-	6,  // 5: kratos.api.gateway.conf.Bootstrap.log:type_name -> kratos.api.gateway.conf.Log
-	7,  // 6: kratos.api.gateway.conf.Bootstrap.auth:type_name -> kratos.api.gateway.conf.Auth
-	8,  // 7: kratos.api.gateway.conf.Bootstrap.rate_limit:type_name -> kratos.api.gateway.conf.RateLimit
-	9,  // 8: kratos.api.gateway.conf.Server.http:type_name -> kratos.api.gateway.conf.Server.HTTP
-	10, // 9: kratos.api.gateway.conf.Client.auth:type_name -> kratos.api.gateway.conf.Client.Endpoint
-	10, // 10: kratos.api.gateway.conf.Client.user:type_name -> kratos.api.gateway.conf.Client.Endpoint
-	11, // 11: kratos.api.gateway.conf.Registry.consul:type_name -> kratos.api.gateway.conf.Registry.Consul
-	12, // 12: kratos.api.gateway.conf.Tracing.otlp:type_name -> kratos.api.gateway.conf.Tracing.Otlp
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	7,  // 2: kratos.api.gateway.conf.Bootstrap.service:type_name -> kratos.conf.Service
+	8,  // 3: kratos.api.gateway.conf.Bootstrap.registry:type_name -> kratos.conf.Registry
+	9,  // 4: kratos.api.gateway.conf.Bootstrap.log:type_name -> kratos.conf.Log
+	3,  // 5: kratos.api.gateway.conf.Bootstrap.auth:type_name -> kratos.api.gateway.conf.Auth
+	4,  // 6: kratos.api.gateway.conf.Bootstrap.rate_limit:type_name -> kratos.api.gateway.conf.RateLimit
+	5,  // 7: kratos.api.gateway.conf.Server.http:type_name -> kratos.api.gateway.conf.Server.HTTP
+	6,  // 8: kratos.api.gateway.conf.Client.auth:type_name -> kratos.api.gateway.conf.Client.Endpoint
+	6,  // 9: kratos.api.gateway.conf.Client.user:type_name -> kratos.api.gateway.conf.Client.Endpoint
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_app_gateway_internal_conf_conf_proto_init() }
@@ -823,7 +496,7 @@ func file_app_gateway_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_gateway_internal_conf_conf_proto_rawDesc), len(file_app_gateway_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

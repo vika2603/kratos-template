@@ -4,11 +4,19 @@ package auth
 
 import (
 	"github.com/cloudwego/hertz/pkg/app/server"
-
+	"go.uber.org/fx"
 	"kratos-template/app/gateway/biz/handler"
+	authservice "kratos-template/app/gateway/biz/service/auth"
 )
 
-func Register(r *server.Hertz, h *handler.AuthHandler) {
+func Register(r map[string]fx.Option) {
+	r["auth"] = fx.Module("auth",
+		fx.Provide(authservice.NewService, handler.NewAuthHandler),
+		fx.Invoke(RegisterRouter),
+	)
+}
+
+func RegisterRouter(r *server.Hertz, h *handler.AuthHandler) {
 	root := r.Group("/", rootMw()...)
 	{
 		_api := root.Group("/api", _apiMw()...)

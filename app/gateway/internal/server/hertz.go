@@ -40,14 +40,15 @@ func NewHertzServer(cfg *conf.Bootstrap) (*HertzServer, *server.Hertz, error) {
 	hlog.SetLogger(adapter.NewHertzAdapter())
 
 	addr := "0.0.0.0:8080"
-	if cfg.Server.Http.Addr != "" {
-		addr = cfg.Server.Http.Addr
-	}
-
 	timeout := 30 * time.Second
-	if cfg.Server.Http.Timeout != "" {
-		if t, err := time.ParseDuration(cfg.Server.Http.Timeout); err == nil {
-			timeout = t
+	if cfg.Server.GetHttp() != nil {
+		if cfg.Server.Http.Addr != "" {
+			addr = cfg.Server.Http.Addr
+		}
+		if cfg.Server.Http.Timeout != "" {
+			if t, err := time.ParseDuration(cfg.Server.Http.Timeout); err == nil {
+				timeout = t
+			}
 		}
 	}
 

@@ -4,14 +4,10 @@ package user
 
 import (
 	"github.com/cloudwego/hertz/pkg/app"
-
-	authmw "kratos-template/app/gateway/pkg/middleware/auth"
 )
 
 func rootMw() []app.HandlerFunc {
-	if mw := authmw.Default(); mw != nil {
-		return []app.HandlerFunc{mw}
-	}
+	// your code...
 	return nil
 }
 

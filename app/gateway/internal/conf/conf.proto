@@ -4,13 +4,14 @@ package kratos.api.gateway.conf;
 
 option go_package = "kratos-template/app/gateway/internal/conf;conf";
 
+import "pkg/conf/conf.proto";
+
 message Bootstrap {
   Server server = 1;
   Client client = 2;
-  Service service = 4;
-  Registry registry = 5;
-  Tracing tracing = 6;
-  Log log = 7;
+  kratos.conf.Service service = 4;
+  kratos.conf.Registry registry = 5;
+  kratos.conf.Log log = 7;
   Auth auth = 8;
   RateLimit rate_limit = 9;
 }
@@ -30,32 +31,6 @@ message Client {
   }
   Endpoint auth = 1;
   Endpoint user = 2;
-}
-
-message Service {
-  string name = 1;
-  string version = 2;
-}
-
-message Registry {
-  message Consul {
-    string address = 1;
-    string scheme = 2;
-  }
-  Consul consul = 1;
-}
-
-message Tracing {
-  message Otlp {
-    string endpoint = 1;
-  }
-  Otlp otlp = 1;
-  double sample_rate = 2;
-}
-
-message Log {
-  string level = 1;
-  string env = 2;
 }
 
 message Auth {
