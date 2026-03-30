@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.gateway.v1;
+
+import "api.proto";
+
+option go_package = "/testit";
+
+service TestItService {
+  // TestIt is a test method to test the message.
+  // ok
+  rpc TestIt(TestItRequest) returns (TestItResponse) {
+    option (api.get) = "/api/v1/testit";
+    option (api.serializer) = "yaml";
+    option (api.name) = "testit name";
+  }
+}
+
+message TestItRequest {
+  string message = 1 [(api.query) = "message"];
+}
+
+message TestItResponse {
+  string message = 1;
+}

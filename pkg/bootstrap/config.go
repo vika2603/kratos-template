@@ -1,7 +1,6 @@
-package config
+package bootstrap
 
 import (
-	"context"
 	"os"
 
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
@@ -9,8 +8,8 @@ import (
 	"github.com/go-kratos/kratos/v2/config/file"
 	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/hashicorp/consul/api"
-	"go.uber.org/fx"
 
+	"kratos-template/pkg/conf"
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 )
@@ -19,26 +18,7 @@ func init() {
 	kratoslog.SetLogger(adapter.NewKratosGlobalAdapter())
 }
 
-func Provide(localPath string) fx.Option {
-	return ProvideWithConsul(localPath, "", "")
-}
-
-func ProvideWithConsul(localPath, consulPath, consulAddr string) fx.Option {
-	return fx.Options(
-		fx.Provide(func() (config.Config, error) {
-			return New(localPath, consulPath, consulAddr)
-		}),
-		fx.Invoke(func(lc fx.Lifecycle, c config.Config) {
-			lc.Append(fx.Hook{
-				OnStop: func(context.Context) error {
-					return c.Close()
-				},
-			})
-		}),
-	)
-}
-
-func New(localPath, consulPath, consulAddr string) (config.Config, error) {
+func NewConfig(localPath, consulPath, consulAddr string) (config.Config, error) {
 	if consulAddr == "" {
 		consulAddr = os.Getenv("CONSUL_ADDR")
 	}
@@ -76,4 +56,40 @@ func New(localPath, consulPath, consulAddr string) (config.Config, error) {
 	}
 
 	return c, nil
+}
+
+func LoadConfig[T any](cfg config.Config) (*T, error) {
+	var bc T
+	if err := cfg.Scan(&bc); err != nil {
+		return nil, err
+	}
+	return &bc, nil
+}
+
+func ScanCommonConfig(cfg config.Config) (*conf.CommonConfig, error) {
+	var cc conf.CommonConfig
+	if err := cfg.Scan(&cc); err != nil {
+		return nil, err
+	}
+	if name := os.Getenv("SERVICE_NAME"); name != "" {
+		if cc.Service == nil {
+			cc.Service = &conf.Service{}
+		}
+		cc.Service.Name = name
+	}
+	if version := os.Getenv("SERVICE_VERSION"); version != "" {
+		if cc.Service == nil {
+			cc.Service = &conf.Service{}
+		}
+		cc.Service.Version = version
+	}
+	return &cc, nil
+}
+
+func Hostname() string {
+	hostname, _ := os.Hostname()
+	if hostname == "" {
+		hostname = "unknown"
+	}
+	return hostname
 }

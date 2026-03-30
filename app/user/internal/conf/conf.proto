@@ -4,13 +4,14 @@ package kratos.api.user.conf;
 
 option go_package = "kratos-template/app/user/internal/conf;conf";
 
+import "pkg/conf/conf.proto";
+
 message Bootstrap {
   Server server = 1;
   Data data = 2;
-  Service service = 3;
-  Registry registry = 4;
-  Tracing tracing = 5;
-  Log log = 6;
+  kratos.conf.Service service = 4;
+  kratos.conf.Registry registry = 5;
+  kratos.conf.Log log = 7;
 }
 
 message Server {
@@ -32,30 +33,4 @@ message Data {
     string source = 2;
   }
   Database database = 1;
-}
-
-message Service {
-  string name = 1;
-  string version = 2;
-}
-
-message Registry {
-  message Consul {
-    string address = 1;
-    string scheme = 2;
-  }
-  Consul consul = 1;
-}
-
-message Tracing {
-  message Otlp {
-    string endpoint = 1;
-  }
-  Otlp otlp = 1;
-  double sample_rate = 2;
-}
-
-message Log {
-  string level = 1;
-  string env = 2;
 }

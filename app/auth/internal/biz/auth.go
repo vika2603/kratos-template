@@ -6,8 +6,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	kratosErrors "github.com/go-kratos/kratos/v2/errors"
+
 	pkgauth "kratos-template/pkg/auth"
-	pkgerr "kratos-template/pkg/errors"
 )
 
 type AuthUserRepo interface {
@@ -22,8 +23,8 @@ type AuthUser struct {
 }
 
 var (
-	ErrUserNotFound       = pkgerr.NewNotFound("USER_NOT_FOUND", "user not found")
-	ErrInvalidCredentials = pkgerr.NewUnauthorized("INVALID_CREDENTIALS", "invalid credentials")
+	ErrUserNotFound       = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
+	ErrInvalidCredentials = kratosErrors.Unauthorized("INVALID_CREDENTIALS", "invalid credentials")
 )
 
 type AuthUseCase struct {

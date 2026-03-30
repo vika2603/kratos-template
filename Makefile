@@ -1,4 +1,4 @@
-.PHONY: all build clean test generate proto docker help
+.PHONY: all build clean test generate proto conf docker help openapi build-protoc-gen-hertz-openapi
 
 # Go parameters
 GOCMD=go
@@ -75,15 +75,14 @@ test-%:
 	@echo "Testing $*..."
 	$(GOTEST) -v -race -cover ./app/$*/...
 
-## generate: Generate all code (proto + gorm)
-generate: proto gorm
+## generate: Generate all code (proto + conf + gorm)
+generate: proto conf gorm
 
 ## gen-gateway: Generate gateway code with hz
 gen-gateway:
 	@echo "Generating gateway code..."
-	@rm -rf app/gateway/biz
-	@cd app/gateway && for proto in idl/auth.proto idl/user.proto; do \
-		hz update --idl $$proto --module gateway --out_dir . \
+	@cd app/gateway && for proto in $$(find idl -maxdepth 1 -name '*.proto'); do \
+		hz update -I ./third_party/hertz --idl $$proto --out_dir . \
 			--customize_package template/package.yaml; \
 	done
 	@$(GOFMT) -w app/gateway/
@@ -94,6 +93,15 @@ proto:
 	@echo "Generating protobuf code..."
 	buf generate
 	@echo "Proto generation complete!"
+
+## conf: Generate config protobuf code
+conf:
+	@echo "Generating config protobuf code..."
+	protoc -I . --go_out=. --go_opt=paths=source_relative pkg/conf/conf.proto
+	protoc -I . --go_out=. --go_opt=paths=source_relative app/auth/internal/conf/conf.proto
+	protoc -I . --go_out=. --go_opt=paths=source_relative app/user/internal/conf/conf.proto
+	protoc -I . --go_out=. --go_opt=paths=source_relative app/gateway/internal/conf/conf.proto
+	@echo "Config proto generation complete!"
 
 ## gorm: Generate GORM query code
 gorm:
@@ -154,11 +162,20 @@ init-db:
 	$(DOCKER_COMPOSE) exec -T postgres psql -U postgres -f /docker-entrypoint-initdb.d/init-db.sql
 	@echo "Database initialized!"
 
+## build-protoc-gen-hertz-openapi: Build the Hertz OpenAPI protoc plugin
+build-protoc-gen-hertz-openapi:
+	$(GOBUILD) -o $(BUILD_DIR)/protoc-gen-hertz-openapi ./tools/protoc-gen-hertz-openapi
+
+## openapi: Generate OpenAPI spec from proto files
+openapi: build-protoc-gen-hertz-openapi
+	@mkdir -p docs
+	protoc -I app/gateway/third_party/hertz -I app/gateway/idl \
+		--plugin=protoc-gen-hertz-openapi=./$(BUILD_DIR)/protoc-gen-hertz-openapi \
+		--hertz-openapi_out=. \
+		"--hertz-openapi_opt=title=Gateway API,version=1.0.0,output=docs/openapi.yaml,Mapi.proto=hertz/api" \
+		$$(find app/gateway/idl -maxdepth 1 -name '*.proto')
+
 ## run-%: Run specific service locally (e.g., make run-auth)
 run-%:
 	@echo "Running $*..."
-	@if [ "$*" = "gateway" ]; then \
-		$(GOCMD) run ./cmd/$* -conf ./app/$*/configs/config.yaml; \
-	else \
-		$(GOCMD) run ./cmd/$* -conf ./app/$*/configs/config.yaml; \
-	fi
+	$(GOCMD) run ./cmd/$* -conf configs/$*.yaml

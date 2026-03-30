@@ -1,16 +1,17 @@
 package router
 
 import (
-	"go.uber.org/fx"
 	auth "kratos-template/app/gateway/biz/router/auth"
 	echo "kratos-template/app/gateway/biz/router/echo"
 	user "kratos-template/app/gateway/biz/router/user"
+
+	"go.uber.org/fx"
 )
 
 func Options() fx.Option {
 	r := make(map[string]fx.Option)
 
-	//INSERT_POINT: DO NOT DELETE THIS LINE!
+	// INSERT_POINT: DO NOT DELETE THIS LINE!
 	user.Register(r)
 
 	echo.Register(r)

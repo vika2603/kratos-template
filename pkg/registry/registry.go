@@ -9,11 +9,6 @@ import (
 	"go.uber.org/fx"
 )
 
-type Settings struct {
-	Address string
-	Scheme  string
-}
-
 type Params struct {
 	fx.In
 	Address string `name:"consul_address"`

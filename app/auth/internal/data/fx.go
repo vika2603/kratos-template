@@ -12,7 +12,6 @@ import (
 
 	"kratos-template/app/auth/internal/biz"
 	"kratos-template/app/auth/internal/conf"
-	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 )
 
@@ -33,7 +32,7 @@ func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, error) {
 }
 
 func NewData(db *gorm.DB, logger *zap.Logger) (*Data, func(), error) {
-	helper := logger.With(log.String("module", "auth/data"))
+	helper := logger.With(zap.String("module", "auth/data"))
 
 	d := &Data{
 		db:  db,

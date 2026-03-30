@@ -6,7 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	pkgerr "kratos-template/pkg/errors"
+	kratosErrors "github.com/go-kratos/kratos/v2/errors"
+
 	"kratos-template/pkg/model"
 )
 
@@ -21,9 +22,9 @@ type UserRepo interface {
 }
 
 var (
-	ErrUserNotFound   = pkgerr.NewNotFound("USER_NOT_FOUND", "user not found")
-	ErrUsernameExists = pkgerr.NewConflict("USERNAME_EXISTS", "username already exists")
-	ErrEmailExists    = pkgerr.NewConflict("EMAIL_EXISTS", "email already exists")
+	ErrUserNotFound   = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
+	ErrUsernameExists = kratosErrors.Conflict("USERNAME_EXISTS", "username already exists")
+	ErrEmailExists    = kratosErrors.Conflict("EMAIL_EXISTS", "email already exists")
 )
 
 type UserUseCase struct {

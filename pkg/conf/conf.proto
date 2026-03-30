@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package kratos.conf;
+
+option go_package = "kratos-template/pkg/conf;conf";
+
+message Service {
+  string name = 1;
+  string version = 2;
+}
+
+message Registry {
+  message Consul {
+    string address = 1;
+    string scheme = 2;
+  }
+  Consul consul = 1;
+}
+
+message Log {
+  string level = 1;
+  string env = 2;
+}
+
+message CommonConfig {
+  Service service = 1;
+  Registry registry = 2;
+  Log log = 4;
+}

@@ -1,3 +1,7 @@
+service:
+  name: user
+  version: v1.0.0
+
 server:
   grpc:
     addr: 0.0.0.0:9082
@@ -12,11 +16,6 @@ registry:
   consul:
     address: localhost:8500
     scheme: http
-
-tracing:
-  otlp:
-    endpoint: localhost:4317
-  sample_rate: 1.0
 
 log:
   level: info

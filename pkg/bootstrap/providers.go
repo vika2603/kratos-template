@@ -1,103 +1,104 @@
 package bootstrap
 
 import (
-	"os"
+	"context"
 
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
+	"go.uber.org/fx"
 
-	"kratos-template/pkg/config"
+	"kratos-template/pkg/conf"
+	"kratos-template/pkg/log"
 	"kratos-template/pkg/registry"
-	"kratos-template/pkg/tracing"
 )
 
-func Hostname() string {
-	hostname, _ := os.Hostname()
-	if hostname == "" {
-		hostname = "unknown"
-	}
-	return hostname
+type RegistrySettingsResult struct {
+	fx.Out
+	Address string `name:"consul_address"`
+	Scheme  string `name:"consul_scheme"`
 }
 
-func LoadConfig[T any](cfg kratosconfig.Config) (*T, error) {
-	var bc T
-	if err := cfg.Scan(&bc); err != nil {
-		return nil, err
-	}
-	return &bc, nil
+type ServiceInfoResult struct {
+	fx.Out
+	ServiceID       string            `name:"service_id"`
+	ServiceName     string            `name:"service_name"`
+	ServiceVersion  string            `name:"service_version"`
+	ServiceMetadata map[string]string `name:"service_metadata"`
 }
 
-func LogLevelFromConfig(cfg config.Accessor) string {
-	if l := cfg.GetLogLevel(); l != "" {
-		return l
-	}
-	return "info"
-}
-
-func RegistryFromConfig(cfg config.Accessor) registry.Settings {
-	address := "localhost:8500"
-	scheme := "http"
-	if a := cfg.GetConsulAddress(); a != "" {
-		address = a
-	}
-	if s := cfg.GetConsulScheme(); s != "" {
-		scheme = s
-	}
-	return registry.Settings{Address: address, Scheme: scheme}
-}
-
-func TracingFromConfig(cfg config.Accessor) tracing.Settings {
-	endpoint := "localhost:4317"
-	sampleRate := 1.0
-	serviceName := cfg.GetServiceName()
-	serviceVersion := cfg.GetServiceVersion()
-
-	if serviceName == "" {
-		serviceName = "unknown"
-	}
-	if serviceVersion == "" {
-		serviceVersion = "v0.0.0"
+func ProvideLogSettings(cfg *conf.CommonConfig) log.Config {
+	level := cfg.GetLog().GetLevel()
+	if level == "" {
+		level = "info"
 	}
 
-	if e := cfg.GetOTLPEndpoint(); e != "" {
-		endpoint = e
-	}
-	if r := cfg.GetTracingSampleRate(); r > 0 {
-		sampleRate = r
+	env := cfg.GetLog().GetEnv()
+	format := "json"
+	development := false
+	if env == "development" {
+		format = "console"
+		development = true
 	}
 
-	return tracing.Settings{
-		ServiceName:    serviceName,
-		ServiceVersion: serviceVersion,
-		OTLPEndpoint:   endpoint,
-		SampleRate:     sampleRate,
+	return log.Config{
+		Level:       level,
+		Format:      format,
+		Development: development,
+		Caller:      true,
 	}
 }
 
-type ServiceInfo struct {
-	ID       string
-	Name     string
-	Version  string
-	Metadata map[string]string
+func ProvideRegistrySettings(cfg *conf.CommonConfig) RegistrySettingsResult {
+	address := cfg.GetRegistry().GetConsul().GetAddress()
+	if address == "" {
+		address = "localhost:8500"
+	}
+	scheme := cfg.GetRegistry().GetConsul().GetScheme()
+	if scheme == "" {
+		scheme = "http"
+	}
+	return RegistrySettingsResult{
+		Address: address,
+		Scheme:  scheme,
+	}
 }
 
-func ServiceInfoFromConfig(cfg config.Accessor, idSuffix string) ServiceInfo {
-	name := cfg.GetServiceName()
-	version := cfg.GetServiceVersion()
-
+func ProvideServiceInfo(cfg *conf.CommonConfig) ServiceInfoResult {
+	name := cfg.GetService().GetName()
 	if name == "" {
 		name = "unknown"
 	}
+	version := cfg.GetService().GetVersion()
 	if version == "" {
 		version = "v0.0.0"
 	}
-	if idSuffix == "" {
-		idSuffix = "unknown"
+	hostname := Hostname()
+	return ServiceInfoResult{
+		ServiceID:       name + "-" + hostname,
+		ServiceName:     name,
+		ServiceVersion:  version,
+		ServiceMetadata: nil,
 	}
+}
 
-	return ServiceInfo{
-		ID:       name + "-" + idSuffix,
-		Name:     name,
-		Version:  version,
-		Metadata: nil,
-	}
+func CommonProviders() fx.Option {
+	return fx.Options(
+		fx.Provide(ProvideRegistrySettings),
+		fx.Provide(registry.New),
+		fx.Provide(ProvideServiceInfo),
+	)
+}
+
+func CommonLifecycleOptions(shutdown func(context.Context) error) fx.Option {
+	return fx.Options(
+		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return c.Close()
+				},
+			})
+		}),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{OnStop: shutdown})
+		}),
+	)
 }

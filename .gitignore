@@ -1,3 +1,8 @@
+# Build output
+/bin/
+/output
+
+# Go build artifacts
 *.o
 *.a
 *.so
@@ -15,23 +20,46 @@ _testmain.go
 *.exe~
 *.test
 *.prof
+
+# Archives and binary assets
 *.rar
 *.zip
 *.gz
 *.psd
 *.bmd
-*.cfg
 *.pptx
+
+# Logs
 *.log
 *nohup.out
-*settings.pyc
-*.sublime-project
-*.sublime-workspace
-!.gitkeep
-.DS_Store
+
+# IDE and editor
 /.idea
 /.vscode
-/output
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+
+# Local config
+*.cfg
 *.local.yml
+*settings.pyc
+
+# Claude Code local settings
+.claude/settings.local.json
+app/*/.claude/settings.local.json
+
+# Tool working data
+.sisyphus/
+
+# Nested repos (use submodule if needed)
+/hertz-template/
+
+# Hertz
 dumped_hertz_remote_config.json
+
+# Keep
+!.gitkeep
 		  

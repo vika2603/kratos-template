@@ -82,14 +82,14 @@ func (a *GormAdapter) Trace(ctx context.Context, begin time.Time, fc func() (sql
 	sql, rows := fc()
 
 	l := log.WithContextLogger(a.logger, ctx).With(
-		log.Duration("elapsed", elapsed),
-		log.String("sql", sql),
-		log.Int64("rows", rows),
+		zap.Duration("elapsed", elapsed),
+		zap.String("sql", sql),
+		zap.Int64("rows", rows),
 	)
 
 	switch {
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
-		l.Error("query error", log.NamedError("err", err))
+		l.Error("query error", zap.NamedError("err", err))
 	case elapsed > a.slowThreshold && a.slowThreshold > 0:
 		l.Warn(fmt.Sprintf("slow query >= %v", a.slowThreshold))
 	case a.level >= gormlogger.Info:

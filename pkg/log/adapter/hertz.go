@@ -113,6 +113,4 @@ func (a *HertzAdapter) SetLevel(level hlog.Level) {
 	a.level = level
 }
 
-func (a *HertzAdapter) SetOutput(_ io.Writer) {
-	// Output is managed by the underlying logger, this is a no-op
-}
+func (a *HertzAdapter) SetOutput(_ io.Writer) {}

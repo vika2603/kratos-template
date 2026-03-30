@@ -9,6 +9,7 @@ package conf
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	conf "kratos-template/pkg/conf"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -25,10 +26,9 @@ type Bootstrap struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Server        *Server                `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	Data          *Data                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	Service       *Service               `protobuf:"bytes,3,opt,name=service,proto3" json:"service,omitempty"`
-	Registry      *Registry              `protobuf:"bytes,4,opt,name=registry,proto3" json:"registry,omitempty"`
-	Tracing       *Tracing               `protobuf:"bytes,5,opt,name=tracing,proto3" json:"tracing,omitempty"`
-	Log           *Log                   `protobuf:"bytes,6,opt,name=log,proto3" json:"log,omitempty"`
+	Service       *conf.Service          `protobuf:"bytes,4,opt,name=service,proto3" json:"service,omitempty"`
+	Registry      *conf.Registry         `protobuf:"bytes,5,opt,name=registry,proto3" json:"registry,omitempty"`
+	Log           *conf.Log              `protobuf:"bytes,7,opt,name=log,proto3" json:"log,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,28 +77,21 @@ func (x *Bootstrap) GetData() *Data {
 	return nil
 }
 
-func (x *Bootstrap) GetService() *Service {
+func (x *Bootstrap) GetService() *conf.Service {
 	if x != nil {
 		return x.Service
 	}
 	return nil
 }
 
-func (x *Bootstrap) GetRegistry() *Registry {
+func (x *Bootstrap) GetRegistry() *conf.Registry {
 	if x != nil {
 		return x.Registry
 	}
 	return nil
 }
 
-func (x *Bootstrap) GetTracing() *Tracing {
-	if x != nil {
-		return x.Tracing
-	}
-	return nil
-}
-
-func (x *Bootstrap) GetLog() *Log {
+func (x *Bootstrap) GetLog() *conf.Log {
 	if x != nil {
 		return x.Log
 	}
@@ -201,206 +194,6 @@ func (x *Data) GetDatabase() *Data_Database {
 	return nil
 }
 
-type Service struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Service) Reset() {
-	*x = Service{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Service) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Service) ProtoMessage() {}
-
-func (x *Service) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Service.ProtoReflect.Descriptor instead.
-func (*Service) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *Service) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Service) GetVersion() string {
-	if x != nil {
-		return x.Version
-	}
-	return ""
-}
-
-type Registry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Consul        *Registry_Consul       `protobuf:"bytes,1,opt,name=consul,proto3" json:"consul,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Registry) Reset() {
-	*x = Registry{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Registry) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Registry) ProtoMessage() {}
-
-func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Registry.ProtoReflect.Descriptor instead.
-func (*Registry) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Registry) GetConsul() *Registry_Consul {
-	if x != nil {
-		return x.Consul
-	}
-	return nil
-}
-
-type Tracing struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Otlp          *Tracing_Otlp          `protobuf:"bytes,1,opt,name=otlp,proto3" json:"otlp,omitempty"`
-	SampleRate    float64                `protobuf:"fixed64,2,opt,name=sample_rate,json=sampleRate,proto3" json:"sample_rate,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Tracing) Reset() {
-	*x = Tracing{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Tracing) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Tracing) ProtoMessage() {}
-
-func (x *Tracing) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Tracing.ProtoReflect.Descriptor instead.
-func (*Tracing) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *Tracing) GetOtlp() *Tracing_Otlp {
-	if x != nil {
-		return x.Otlp
-	}
-	return nil
-}
-
-func (x *Tracing) GetSampleRate() float64 {
-	if x != nil {
-		return x.SampleRate
-	}
-	return 0
-}
-
-type Log struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Level         string                 `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
-	Env           string                 `protobuf:"bytes,2,opt,name=env,proto3" json:"env,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Log) Reset() {
-	*x = Log{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Log) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Log) ProtoMessage() {}
-
-func (x *Log) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Log.ProtoReflect.Descriptor instead.
-func (*Log) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *Log) GetLevel() string {
-	if x != nil {
-		return x.Level
-	}
-	return ""
-}
-
-func (x *Log) GetEnv() string {
-	if x != nil {
-		return x.Env
-	}
-	return ""
-}
-
 type Server_HTTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
@@ -411,7 +204,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[7]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -423,7 +216,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[7]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +256,7 @@ type Server_GRPC struct {
 
 func (x *Server_GRPC) Reset() {
 	*x = Server_GRPC{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +268,7 @@ func (x *Server_GRPC) String() string {
 func (*Server_GRPC) ProtoMessage() {}
 
 func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -515,7 +308,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -527,7 +320,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,114 +350,17 @@ func (x *Data_Database) GetSource() string {
 	return ""
 }
 
-type Registry_Consul struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Scheme        string                 `protobuf:"bytes,2,opt,name=scheme,proto3" json:"scheme,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Registry_Consul) Reset() {
-	*x = Registry_Consul{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Registry_Consul) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Registry_Consul) ProtoMessage() {}
-
-func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Registry_Consul.ProtoReflect.Descriptor instead.
-func (*Registry_Consul) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{4, 0}
-}
-
-func (x *Registry_Consul) GetAddress() string {
-	if x != nil {
-		return x.Address
-	}
-	return ""
-}
-
-func (x *Registry_Consul) GetScheme() string {
-	if x != nil {
-		return x.Scheme
-	}
-	return ""
-}
-
-type Tracing_Otlp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Endpoint      string                 `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Tracing_Otlp) Reset() {
-	*x = Tracing_Otlp{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Tracing_Otlp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Tracing_Otlp) ProtoMessage() {}
-
-func (x *Tracing_Otlp) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Tracing_Otlp.ProtoReflect.Descriptor instead.
-func (*Tracing_Otlp) Descriptor() ([]byte, []int) {
-	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
-}
-
-func (x *Tracing_Otlp) GetEndpoint() string {
-	if x != nil {
-		return x.Endpoint
-	}
-	return ""
-}
-
 var File_app_user_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\"\xcc\x02\n" +
+	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\x1a\x13pkg/conf/conf.proto\"\xf8\x01\n" +
 	"\tBootstrap\x124\n" +
 	"\x06server\x18\x01 \x01(\v2\x1c.kratos.api.user.conf.ServerR\x06server\x12.\n" +
-	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\x127\n" +
-	"\aservice\x18\x03 \x01(\v2\x1d.kratos.api.user.conf.ServiceR\aservice\x12:\n" +
-	"\bregistry\x18\x04 \x01(\v2\x1e.kratos.api.user.conf.RegistryR\bregistry\x127\n" +
-	"\atracing\x18\x05 \x01(\v2\x1d.kratos.api.user.conf.TracingR\atracing\x12+\n" +
-	"\x03log\x18\x06 \x01(\v2\x19.kratos.api.user.conf.LogR\x03log\"\xe2\x01\n" +
+	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\x12.\n" +
+	"\aservice\x18\x04 \x01(\v2\x14.kratos.conf.ServiceR\aservice\x121\n" +
+	"\bregistry\x18\x05 \x01(\v2\x15.kratos.conf.RegistryR\bregistry\x12\"\n" +
+	"\x03log\x18\a \x01(\v2\x10.kratos.conf.LogR\x03log\"\xe2\x01\n" +
 	"\x06Server\x125\n" +
 	"\x04http\x18\x01 \x01(\v2!.kratos.api.user.conf.Server.HTTPR\x04http\x125\n" +
 	"\x04grpc\x18\x02 \x01(\v2!.kratos.api.user.conf.Server.GRPCR\x04grpc\x1a4\n" +
@@ -678,24 +374,7 @@ const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.user.conf.Data.DatabaseR\bdatabase\x1a:\n" +
 	"\bDatabase\x12\x16\n" +
 	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x16\n" +
-	"\x06source\x18\x02 \x01(\tR\x06source\"7\n" +
-	"\aService\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\"\x85\x01\n" +
-	"\bRegistry\x12=\n" +
-	"\x06consul\x18\x01 \x01(\v2%.kratos.api.user.conf.Registry.ConsulR\x06consul\x1a:\n" +
-	"\x06Consul\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x16\n" +
-	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"\x86\x01\n" +
-	"\aTracing\x126\n" +
-	"\x04otlp\x18\x01 \x01(\v2\".kratos.api.user.conf.Tracing.OtlpR\x04otlp\x12\x1f\n" +
-	"\vsample_rate\x18\x02 \x01(\x01R\n" +
-	"sampleRate\x1a\"\n" +
-	"\x04Otlp\x12\x1a\n" +
-	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"-\n" +
-	"\x03Log\x12\x14\n" +
-	"\x05level\x18\x01 \x01(\tR\x05level\x12\x10\n" +
-	"\x03env\x18\x02 \x01(\tR\x03envB-Z+kratos-template/app/user/internal/conf;confb\x06proto3"
+	"\x06source\x18\x02 \x01(\tR\x06sourceB-Z+kratos-template/app/user/internal/conf;confb\x06proto3"
 
 var (
 	file_app_user_internal_conf_conf_proto_rawDescOnce sync.Once
@@ -709,38 +388,32 @@ func file_app_user_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_app_user_internal_conf_conf_proto_rawDescData
 }
 
-var file_app_user_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_app_user_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_app_user_internal_conf_conf_proto_goTypes = []any{
-	(*Bootstrap)(nil),       // 0: kratos.api.user.conf.Bootstrap
-	(*Server)(nil),          // 1: kratos.api.user.conf.Server
-	(*Data)(nil),            // 2: kratos.api.user.conf.Data
-	(*Service)(nil),         // 3: kratos.api.user.conf.Service
-	(*Registry)(nil),        // 4: kratos.api.user.conf.Registry
-	(*Tracing)(nil),         // 5: kratos.api.user.conf.Tracing
-	(*Log)(nil),             // 6: kratos.api.user.conf.Log
-	(*Server_HTTP)(nil),     // 7: kratos.api.user.conf.Server.HTTP
-	(*Server_GRPC)(nil),     // 8: kratos.api.user.conf.Server.GRPC
-	(*Data_Database)(nil),   // 9: kratos.api.user.conf.Data.Database
-	(*Registry_Consul)(nil), // 10: kratos.api.user.conf.Registry.Consul
-	(*Tracing_Otlp)(nil),    // 11: kratos.api.user.conf.Tracing.Otlp
+	(*Bootstrap)(nil),     // 0: kratos.api.user.conf.Bootstrap
+	(*Server)(nil),        // 1: kratos.api.user.conf.Server
+	(*Data)(nil),          // 2: kratos.api.user.conf.Data
+	(*Server_HTTP)(nil),   // 3: kratos.api.user.conf.Server.HTTP
+	(*Server_GRPC)(nil),   // 4: kratos.api.user.conf.Server.GRPC
+	(*Data_Database)(nil), // 5: kratos.api.user.conf.Data.Database
+	(*conf.Service)(nil),  // 6: kratos.conf.Service
+	(*conf.Registry)(nil), // 7: kratos.conf.Registry
+	(*conf.Log)(nil),      // 8: kratos.conf.Log
 }
 var file_app_user_internal_conf_conf_proto_depIdxs = []int32{
-	1,  // 0: kratos.api.user.conf.Bootstrap.server:type_name -> kratos.api.user.conf.Server
-	2,  // 1: kratos.api.user.conf.Bootstrap.data:type_name -> kratos.api.user.conf.Data
-	3,  // 2: kratos.api.user.conf.Bootstrap.service:type_name -> kratos.api.user.conf.Service
-	4,  // 3: kratos.api.user.conf.Bootstrap.registry:type_name -> kratos.api.user.conf.Registry
-	5,  // 4: kratos.api.user.conf.Bootstrap.tracing:type_name -> kratos.api.user.conf.Tracing
-	6,  // 5: kratos.api.user.conf.Bootstrap.log:type_name -> kratos.api.user.conf.Log
-	7,  // 6: kratos.api.user.conf.Server.http:type_name -> kratos.api.user.conf.Server.HTTP
-	8,  // 7: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
-	9,  // 8: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
-	10, // 9: kratos.api.user.conf.Registry.consul:type_name -> kratos.api.user.conf.Registry.Consul
-	11, // 10: kratos.api.user.conf.Tracing.otlp:type_name -> kratos.api.user.conf.Tracing.Otlp
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	1, // 0: kratos.api.user.conf.Bootstrap.server:type_name -> kratos.api.user.conf.Server
+	2, // 1: kratos.api.user.conf.Bootstrap.data:type_name -> kratos.api.user.conf.Data
+	6, // 2: kratos.api.user.conf.Bootstrap.service:type_name -> kratos.conf.Service
+	7, // 3: kratos.api.user.conf.Bootstrap.registry:type_name -> kratos.conf.Registry
+	8, // 4: kratos.api.user.conf.Bootstrap.log:type_name -> kratos.conf.Log
+	3, // 5: kratos.api.user.conf.Server.http:type_name -> kratos.api.user.conf.Server.HTTP
+	4, // 6: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
+	5, // 7: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
+	8, // [8:8] is the sub-list for method output_type
+	8, // [8:8] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_app_user_internal_conf_conf_proto_init() }
@@ -754,7 +427,7 @@ func file_app_user_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_user_internal_conf_conf_proto_rawDesc), len(file_app_user_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
