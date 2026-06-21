@@ -9,7 +9,6 @@ server:
 
 data:
   database:
-    driver: postgres
     source: postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
 
 auth:

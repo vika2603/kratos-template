@@ -1,6 +1,8 @@
 package biz
 
 import (
+	"os"
+
 	"go.uber.org/fx"
 
 	"kratos-template/app/auth/internal/conf"
@@ -12,9 +14,13 @@ func NewAuthUseCase(repo AuthUserRepo, cfg *conf.Bootstrap) *AuthUseCase {
 	if expiryHours < 1 {
 		expiryHours = 1
 	}
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = cfg.Auth.JwtSecret
+	}
 	return &AuthUseCase{
 		repo:       repo,
-		jwtManager: pkgauth.NewJWTManager(cfg.Auth.JwtSecret, expiryHours),
+		jwtManager: pkgauth.NewJWTManager(secret, expiryHours),
 	}
 }
 

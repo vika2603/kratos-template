@@ -7,28 +7,28 @@ import "google/api/annotations.proto";
 option go_package = "kratos-template/api/auth/v1;v1";
 
 service AuthService {
-  rpc Login(LoginRequest) returns (LoginReply) {
+  rpc Login(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/login"
       body: "*"
     };
   }
 
-  rpc Refresh(RefreshRequest) returns (RefreshReply) {
+  rpc Refresh(RefreshRequest) returns (RefreshResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/refresh"
       body: "*"
     };
   }
 
-  rpc Validate(ValidateRequest) returns (ValidateReply) {
+  rpc Validate(ValidateRequest) returns (ValidateResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/validate"
       body: "*"
     };
   }
 
-  rpc Logout(LogoutRequest) returns (LogoutReply) {
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/logout"
       body: "*"
@@ -41,7 +41,7 @@ message LoginRequest {
   string password = 2;
 }
 
-message LoginReply {
+message LoginResponse {
   string access_token = 1;
   string token_type = 2;
   int64 expires_in = 3;
@@ -51,7 +51,7 @@ message RefreshRequest {
   string access_token = 1;
 }
 
-message RefreshReply {
+message RefreshResponse {
   string access_token = 1;
   string token_type = 2;
   int64 expires_in = 3;
@@ -61,7 +61,7 @@ message ValidateRequest {
   string access_token = 1;
 }
 
-message ValidateReply {
+message ValidateResponse {
   bool valid = 1;
   string user_id = 2;
   string username = 3;
@@ -71,6 +71,6 @@ message LogoutRequest {
   string access_token = 1;
 }
 
-message LogoutReply {
+message LogoutResponse {
   bool success = 1;
 }

@@ -10,18 +10,11 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/gateway ./cmd/gateway && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/auth ./cmd/auth && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./cmd/user
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/auth ./app/auth/cmd/auth && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./app/user/cmd/user
 
 FROM alpine:3.19 AS base
 RUN apk --no-cache add ca-certificates tzdata
-
-FROM base AS gateway
-WORKDIR /app
-COPY --from=builder /out/gateway .
-EXPOSE 8080
-ENTRYPOINT ["/app/gateway"]
 
 FROM base AS auth
 WORKDIR /app

@@ -1,11 +1,13 @@
 version: v2
 modules:
-  - path: proto
-    name: buf.build/kratos-template/api
+  # Whole repo is one module so config protos can import "pkg/conf/conf.proto".
+  - path: .
 lint:
   use:
-    - DEFAULT
+    - STANDARD
   except:
+    # Disabled: clash with kratos conventions (co-located config protos).
+    - PACKAGE_DIRECTORY_MATCH
     - PACKAGE_VERSION_SUFFIX
     - FIELD_LOWER_SNAKE_CASE
 breaking:

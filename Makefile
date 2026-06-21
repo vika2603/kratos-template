@@ -1,181 +1,78 @@
-.PHONY: all build clean test generate proto conf docker help openapi build-protoc-gen-hertz-openapi
+.DEFAULT_GOAL := help
 
-# Go parameters
-GOCMD=go
-GOBUILD=$(GOCMD) build
-GOTEST=$(GOCMD) test
-GOMOD=$(GOCMD) mod
-GOFMT=gofmt
+# Add new services here; build/ run targets iterate over this list.
+SERVICES  := auth user
+BUILD_DIR := bin
+COMPOSE   := docker compose -f deploy/docker-compose.yml
 
-# Binary names
-SERVICES=auth user gateway
+.PHONY: help generate proto gorm build clean test lint fmt tidy up down logs
 
-# Build directory
-BUILD_DIR=bin
-
-# Docker
-DOCKER_COMPOSE=docker-compose -f deploy/docker-compose.yml
-
-all: generate build
-
-## help: Show this help message
+## help: list available targets
 help:
-	@echo "Usage: make [target]"
-	@echo ""
-	@echo "Targets:"
-	@echo "  all        - Generate code and build all services"
-	@echo "  build      - Build all services"
-	@echo "  clean      - Clean build artifacts"
-	@echo "  test       - Run tests"
-	@echo "  generate   - Generate proto and GORM code"
-	@echo "  proto      - Generate protobuf code using buf"
-	@echo "  gorm       - Generate GORM query code"
-	@echo "  docker     - Build Docker images"
-	@echo "  docker-up  - Start all services with Docker Compose"
-	@echo "  docker-down- Stop all services"
-	@echo "  fmt        - Format Go code"
-	@echo "  lint       - Run linter"
-	@echo "  tidy       - Tidy Go modules"
+	@grep -hE '^## ' $(MAKEFILE_LIST) | sed 's/## //' | awk -F': ' '{printf "  %-14s %s\n", $$1, $$2}'
 
-## build: Build all services
-build:
-	@echo "Building services..."
-	@for svc in $(SERVICES); do \
-		echo "Building $$svc..."; \
-		if [ "$$svc" = "gateway" ]; then \
-			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./cmd/$$svc; \
-		else \
-			$(GOBUILD) -o $(BUILD_DIR)/$$svc ./cmd/$$svc; \
-		fi; \
-	done
-	@echo "Build complete!"
+# codegen (run after changing proto or models)
 
-## build-%: Build specific service (e.g., make build-auth)
-build-%:
-	@echo "Building $*..."
-	@if [ "$*" = "gateway" ]; then \
-		$(GOBUILD) -o $(BUILD_DIR)/$* ./cmd/$*; \
-	else \
-		$(GOBUILD) -o $(BUILD_DIR)/$* ./cmd/$*; \
-	fi
+## generate: regenerate everything (proto + gorm)
+generate: proto gorm
 
-## clean: Clean build artifacts
-clean:
-	@echo "Cleaning..."
-	@rm -rf $(BUILD_DIR)/*
-	@echo "Clean complete!"
-
-## test: Run all tests
-test:
-	@echo "Running tests..."
-	$(GOTEST) -v -race -cover ./...
-
-## test-%: Run tests for specific service (e.g., make test-auth)
-test-%:
-	@echo "Testing $*..."
-	$(GOTEST) -v -race -cover ./app/$*/...
-
-## generate: Generate all code (proto + conf + gorm)
-generate: proto conf gorm
-
-## gen-gateway: Generate gateway code with hz
-gen-gateway:
-	@echo "Generating gateway code..."
-	@cd app/gateway && for proto in $$(find idl -maxdepth 1 -name '*.proto'); do \
-		hz update -I ./third_party/hertz --idl $$proto --out_dir . \
-			--customize_package template/package.yaml; \
-	done
-	@$(GOFMT) -w app/gateway/
-	@cd app/gateway && go build ./...
-
-## proto: Generate protobuf code using buf
+## proto: generate gRPC/protobuf code via buf
 proto:
-	@echo "Generating protobuf code..."
 	buf generate
-	@echo "Proto generation complete!"
 
-## conf: Generate config protobuf code
-conf:
-	@echo "Generating config protobuf code..."
-	protoc -I . --go_out=. --go_opt=paths=source_relative pkg/conf/conf.proto
-	protoc -I . --go_out=. --go_opt=paths=source_relative app/auth/internal/conf/conf.proto
-	protoc -I . --go_out=. --go_opt=paths=source_relative app/user/internal/conf/conf.proto
-	protoc -I . --go_out=. --go_opt=paths=source_relative app/gateway/internal/conf/conf.proto
-	@echo "Config proto generation complete!"
-
-## gorm: Generate GORM query code
+## gorm: generate type-safe GORM query code
 gorm:
-	@echo "Generating GORM code..."
-	$(GOCMD) run tools/gen/main.go
-	@echo "GORM generation complete!"
+	go run tools/gen/main.go
 
-## docker: Build Docker images for all services
-docker:
-	@echo "Building Docker images..."
-	@for svc in $(SERVICES); do \
-		echo "Building $$svc image..."; \
-		docker build -t kratos-template-$$svc:latest -f app/$$svc/Dockerfile .; \
-	done
-	@echo "Docker build complete!"
+# develop
 
-## docker-up: Start all services with Docker Compose
-docker-up:
-	@echo "Starting services..."
-	$(DOCKER_COMPOSE) up -d
-	@echo "Services started!"
-
-## docker-down: Stop all services
-docker-down:
-	@echo "Stopping services..."
-	$(DOCKER_COMPOSE) down
-	@echo "Services stopped!"
-
-## docker-logs: View logs for all services
-docker-logs:
-	$(DOCKER_COMPOSE) logs -f
-
-## docker-logs-%: View logs for specific service
-docker-logs-%:
-	$(DOCKER_COMPOSE) logs -f $*
-
-## fmt: Format Go code
-fmt:
-	@echo "Formatting code..."
-	$(GOFMT) -s -w .
-	@echo "Format complete!"
-
-## lint: Run linter
-lint:
-	@echo "Running linter..."
-	golangci-lint run ./...
-	@echo "Lint complete!"
-
-## tidy: Tidy Go modules
-tidy:
-	@echo "Tidying modules..."
-	$(GOMOD) tidy
-	@echo "Tidy complete!"
-
-## init-db: Initialize database
-init-db:
-	@echo "Initializing database..."
-	$(DOCKER_COMPOSE) exec -T postgres psql -U postgres -f /docker-entrypoint-initdb.d/init-db.sql
-	@echo "Database initialized!"
-
-## build-protoc-gen-hertz-openapi: Build the Hertz OpenAPI protoc plugin
-build-protoc-gen-hertz-openapi:
-	$(GOBUILD) -o $(BUILD_DIR)/protoc-gen-hertz-openapi ./tools/protoc-gen-hertz-openapi
-
-## openapi: Generate OpenAPI spec from proto files
-openapi: build-protoc-gen-hertz-openapi
-	@mkdir -p docs
-	protoc -I app/gateway/third_party/hertz -I app/gateway/idl \
-		--plugin=protoc-gen-hertz-openapi=./$(BUILD_DIR)/protoc-gen-hertz-openapi \
-		--hertz-openapi_out=. \
-		"--hertz-openapi_opt=title=Gateway API,version=1.0.0,output=docs/openapi.yaml,Mapi.proto=hertz/api" \
-		$$(find app/gateway/idl -maxdepth 1 -name '*.proto')
-
-## run-%: Run specific service locally (e.g., make run-auth)
+## run-<svc>: run one service locally (e.g. make run-auth)
 run-%:
-	@echo "Running $*..."
-	$(GOCMD) run ./cmd/$* -conf configs/$*.yaml
+	go run ./app/$*/cmd/$* -conf configs/$*.yaml
+
+## test: run all tests (race + coverage)
+test:
+	go test -race -cover ./...
+
+## lint: run golangci-lint
+lint:
+	golangci-lint run ./...
+
+## fmt: format all Go code
+fmt:
+	gofmt -s -w .
+
+## tidy: tidy go modules
+tidy:
+	go mod tidy
+
+# build
+
+## build: build all services into bin/
+build:
+	@for svc in $(SERVICES); do \
+		echo "building $$svc..."; \
+		go build -o $(BUILD_DIR)/$$svc ./app/$$svc/cmd/$$svc; \
+	done
+
+## build-<svc>: build one service (e.g. make build-auth)
+build-%:
+	go build -o $(BUILD_DIR)/$* ./app/$*/cmd/$*
+
+## clean: remove build artifacts
+clean:
+	rm -rf $(BUILD_DIR)
+
+# deploy stack (Postgres + Consul + Jaeger + services)
+
+## up: build and start the full stack
+up:
+	$(COMPOSE) up -d --build
+
+## down: stop the stack
+down:
+	$(COMPOSE) down
+
+## logs: follow stack logs
+logs:
+	$(COMPOSE) logs -f

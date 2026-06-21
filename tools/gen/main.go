@@ -6,13 +6,23 @@ import (
 	"kratos-template/pkg/model"
 )
 
-func main() {
-	g := gen.NewGenerator(gen.Config{
-		OutPath:      "./app/user/internal/data/query",
-		ModelPkgPath: "kratos-template/pkg/model",
-		Mode:         gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
-	})
+// targets lists the per-service query packages to generate. Each service keeps
+// its own generated package (internal boundary forbids sharing), regenerated
+// from the shared models in pkg/model.
+var targets = []string{
+	"./app/user/internal/data/query",
+	"./app/auth/internal/data/query",
+}
 
-	g.ApplyBasic(model.User{})
-	g.Execute()
+func main() {
+	for _, out := range targets {
+		g := gen.NewGenerator(gen.Config{
+			OutPath:      out,
+			ModelPkgPath: "kratos-template/pkg/model",
+			Mode:         gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
+		})
+
+		g.ApplyBasic(model.User{})
+		g.Execute()
+	}
 }

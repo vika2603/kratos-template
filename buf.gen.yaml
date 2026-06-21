@@ -1,19 +1,18 @@
 version: v2
 managed:
   enabled: false
+# Output path follows each file's go_package (module prefix stripped); plugins
+# run via `go tool`, pinned in go.mod.
 plugins:
-  - local: protoc-gen-go
-    out: api
+  - local: ["go", "tool", "protoc-gen-go"]
+    out: .
     opt:
-      - paths=source_relative
+      - paths=import
+      - module=kratos-template
 
-  - local: protoc-gen-go-grpc
-    out: api
+  - local: ["go", "tool", "protoc-gen-go-grpc"]
+    out: .
     opt:
-      - paths=source_relative
+      - paths=import
+      - module=kratos-template
       - require_unimplemented_servers=false
-
-  - local: protoc-gen-go-http
-    out: api
-    opt:
-      - paths=source_relative

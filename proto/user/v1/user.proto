@@ -8,33 +8,33 @@ import "google/protobuf/timestamp.proto";
 option go_package = "kratos-template/api/user/v1;v1";
 
 service UserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserReply) {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
     option (google.api.http) = {
       post: "/api/v1/users"
       body: "*"
     };
   }
 
-  rpc GetUser(GetUserRequest) returns (GetUserReply) {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
     option (google.api.http) = {
       get: "/api/v1/users/{id}"
     };
   }
 
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserReply) {
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
     option (google.api.http) = {
       put: "/api/v1/users/{id}"
       body: "*"
     };
   }
 
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserReply) {
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
     option (google.api.http) = {
       delete: "/api/v1/users/{id}"
     };
   }
 
-  rpc ListUsers(ListUsersRequest) returns (ListUsersReply) {
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option (google.api.http) = {
       get: "/api/v1/users"
     };
@@ -55,7 +55,7 @@ message CreateUserRequest {
   string password = 3;
 }
 
-message CreateUserReply {
+message CreateUserResponse {
   User user = 1;
 }
 
@@ -63,7 +63,7 @@ message GetUserRequest {
   string id = 1;
 }
 
-message GetUserReply {
+message GetUserResponse {
   User user = 1;
 }
 
@@ -73,7 +73,7 @@ message UpdateUserRequest {
   string email = 3;
 }
 
-message UpdateUserReply {
+message UpdateUserResponse {
   User user = 1;
 }
 
@@ -81,7 +81,7 @@ message DeleteUserRequest {
   string id = 1;
 }
 
-message DeleteUserReply {
+message DeleteUserResponse {
   bool success = 1;
 }
 
@@ -90,7 +90,7 @@ message ListUsersRequest {
   int32 page_size = 2;
 }
 
-message ListUsersReply {
+message ListUsersResponse {
   repeated User users = 1;
   int32 total = 2;
 }

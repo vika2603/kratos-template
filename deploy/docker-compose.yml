@@ -65,6 +65,7 @@ services:
       - "9081:9081"
     environment:
       - DB_DSN=postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
+      - JWT_SECRET=dev-secret-change-in-prod
       - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
     volumes:
       - ./configs:/configs:ro
@@ -91,32 +92,6 @@ services:
     volumes:
       - ./configs:/configs:ro
     command: ["-conf", "/configs/user/config.yaml"]
-
-  gateway:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
-      target: gateway
-    container_name: kratos-gateway
-    depends_on:
-      consul:
-        condition: service_healthy
-      auth:
-        condition: service_started
-      user:
-        condition: service_started
-    ports:
-      - "8080:8080"
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
-    volumes:
-      - ./configs:/configs:ro
-    command: ["-conf", "/configs/gateway/config.yaml"]
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
 volumes:
   postgres_data:

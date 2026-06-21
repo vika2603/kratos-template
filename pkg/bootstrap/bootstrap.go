@@ -1,10 +1,14 @@
 package bootstrap
 
 import (
+	"context"
+
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 
 	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 )
 
 func Run[T any](configPath, consulPath string, opts ...fx.Option) {
@@ -28,8 +32,14 @@ func Run[T any](configPath, consulPath string, opts ...fx.Option) {
 		log.Fatalf("init log error: %v", err)
 	}
 
+	tracerShutdown, err := InitTracer(cc.GetService().GetName(), cc.GetService().GetVersion())
+	if err != nil {
+		log.Errorf("init tracer error: %v", err)
+		tracerShutdown = func(context.Context) error { return nil }
+	}
+
 	allOpts := []fx.Option{
-		// fx.WithLogger(func() fxevent.Logger { return adapter.NewFxAdapter() }),
+		fx.WithLogger(func() fxevent.Logger { return adapter.NewFxAdapter() }),
 		fx.Supply(
 			fx.Annotate(cfg, fx.As(new(kratosconfig.Config))),
 			bc,
@@ -37,6 +47,9 @@ func Run[T any](configPath, consulPath string, opts ...fx.Option) {
 			logger,
 		),
 		CommonLifecycleOptions(shutdown),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{OnStop: tracerShutdown})
+		}),
 		CommonProviders(),
 	}
 	allOpts = append(allOpts, opts...)

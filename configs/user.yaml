@@ -9,14 +9,9 @@ server:
 
 data:
   database:
-    driver: postgres
-    source: postgres://postgres:postgres@localhost:5432/kratos?sslmode=disable
+    source: postgres://postgres:postgres@localhost:5432/user_db?sslmode=disable
 
-registry:
-  consul:
-    address: localhost:8500
-    scheme: http
-
+# (no registry → standalone local run; set CONSUL_ADDR to register)
 log:
   level: info
   env: development

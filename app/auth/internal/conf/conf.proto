@@ -4,34 +4,26 @@ package kratos.api.auth.conf;
 
 option go_package = "kratos-template/app/auth/internal/conf;conf";
 
-import "pkg/conf/conf.proto";
-
+// Bootstrap holds this service's private config only. Common config
+// (service / registry / log) lives in pkg/conf and is scanned separately
+// by pkg/bootstrap.
 message Bootstrap {
   Server server = 1;
   Data data = 2;
   Auth auth = 3;
-  kratos.conf.Service service = 4;
-  kratos.conf.Registry registry = 5;
-  kratos.conf.Log log = 7;
 }
 
 message Server {
-  message HTTP {
-    string addr = 1;
-    string timeout = 2;
-  }
   message GRPC {
     string addr = 1;
     string timeout = 2;
   }
-  HTTP http = 1;
-  GRPC grpc = 2;
+  GRPC grpc = 1;
 }
 
 message Data {
   message Database {
-    string driver = 1;
-    string source = 2;
+    string source = 1;
   }
   Database database = 1;
 }

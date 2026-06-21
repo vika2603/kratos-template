@@ -5,7 +5,7 @@ import (
 	"go.uber.org/fx"
 )
 
-var Module = fx.Module("server",
+var Module = fx.Module("user.server",
 	fx.Provide(
 		fx.Annotate(
 			NewGRPCServer,

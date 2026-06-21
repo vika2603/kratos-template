@@ -9,18 +9,13 @@ server:
 
 data:
   database:
-    driver: postgres
     source: postgres://postgres:postgres@localhost:5432/user_db?sslmode=disable
 
 auth:
   jwt_secret: your-secret-key-change-in-production
   token_expiry: 86400
 
-registry:
-  consul:
-    address: localhost:8500
-    scheme: http
-
+# (no registry → standalone local run; set CONSUL_ADDR to register)
 log:
   level: info
   env: development

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"go.uber.org/fx"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	v1 "kratos-template/api/user/v1"
@@ -15,31 +14,17 @@ type UserService struct {
 	userUC *biz.UserUseCase
 }
 
-type UserServiceParams struct {
-	fx.In
-	UserUseCase *biz.UserUseCase
+func NewUserService(uc *biz.UserUseCase) v1.UserServiceServer {
+	return &UserService{userUC: uc}
 }
 
-type UserServiceResult struct {
-	fx.Out
-	UserService v1.UserServiceServer
-}
-
-func NewUserService(params UserServiceParams) UserServiceResult {
-	return UserServiceResult{
-		UserService: &UserService{
-			userUC: params.UserUseCase,
-		},
-	}
-}
-
-func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserReply, error) {
+func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserResponse, error) {
 	user, err := s.userUC.CreateUser(ctx, req.Username, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.CreateUserReply{
+	return &v1.CreateUserResponse{
 		User: &v1.User{
 			Id:        user.ID,
 			Username:  user.Username,
@@ -50,13 +35,13 @@ func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest)
 	}, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
+func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserResponse, error) {
 	user, err := s.userUC.GetUser(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.GetUserReply{
+	return &v1.GetUserResponse{
 		User: &v1.User{
 			Id:        user.ID,
 			Username:  user.Username,
@@ -67,13 +52,13 @@ func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.
 	}, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserReply, error) {
+func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error) {
 	user, err := s.userUC.UpdateUser(ctx, req.Id, req.Username, req.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.UpdateUserReply{
+	return &v1.UpdateUserResponse{
 		User: &v1.User{
 			Id:        user.ID,
 			Username:  user.Username,
@@ -84,17 +69,17 @@ func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest)
 	}, nil
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserReply, error) {
+func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error) {
 	if err := s.userUC.DeleteUser(ctx, req.Id); err != nil {
 		return nil, err
 	}
 
-	return &v1.DeleteUserReply{
+	return &v1.DeleteUserResponse{
 		Success: true,
 	}, nil
 }
 
-func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersReply, error) {
+func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponse, error) {
 	users, total, err := s.userUC.ListUsers(ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, err
@@ -111,7 +96,7 @@ func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (
 		})
 	}
 
-	return &v1.ListUsersReply{
+	return &v1.ListUsersResponse{
 		Users: userList,
 		Total: total,
 	}, nil

@@ -49,9 +49,6 @@ func ProvideLogSettings(cfg *conf.CommonConfig) log.Config {
 
 func ProvideRegistrySettings(cfg *conf.CommonConfig) RegistrySettingsResult {
 	address := cfg.GetRegistry().GetConsul().GetAddress()
-	if address == "" {
-		address = "localhost:8500"
-	}
 	scheme := cfg.GetRegistry().GetConsul().GetScheme()
 	if scheme == "" {
 		scheme = "http"
