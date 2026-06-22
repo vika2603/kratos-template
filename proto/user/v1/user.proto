@@ -39,6 +39,9 @@ service UserService {
       get: "/api/v1/users"
     };
   }
+
+  // Internal RPC (no HTTP annotation): auth calls it to verify a login.
+  rpc VerifyCredentials(VerifyCredentialsRequest) returns (VerifyCredentialsResponse);
 }
 
 message User {
@@ -93,4 +96,14 @@ message ListUsersRequest {
 message ListUsersResponse {
   repeated User users = 1;
   int32 total = 2;
+}
+
+message VerifyCredentialsRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message VerifyCredentialsResponse {
+  string user_id = 1;
+  string username = 2;
 }

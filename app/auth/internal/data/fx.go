@@ -7,7 +7,7 @@ import (
 )
 
 var Module = fx.Module("auth.data",
-	fx.Provide(NewDB),
+	fx.Provide(NewUserClientConn),
 	fx.Provide(NewData),
 	fx.Provide(NewAuthUserRepo),
 	fx.Invoke(registerLifecycle),

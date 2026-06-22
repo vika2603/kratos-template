@@ -587,6 +587,110 @@ func (x *ListUsersResponse) GetTotal() int32 {
 	return 0
 }
 
+type VerifyCredentialsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyCredentialsRequest) Reset() {
+	*x = VerifyCredentialsRequest{}
+	mi := &file_proto_user_v1_user_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyCredentialsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyCredentialsRequest) ProtoMessage() {}
+
+func (x *VerifyCredentialsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_v1_user_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyCredentialsRequest.ProtoReflect.Descriptor instead.
+func (*VerifyCredentialsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_v1_user_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *VerifyCredentialsRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *VerifyCredentialsRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type VerifyCredentialsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyCredentialsResponse) Reset() {
+	*x = VerifyCredentialsResponse{}
+	mi := &file_proto_user_v1_user_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyCredentialsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyCredentialsResponse) ProtoMessage() {}
+
+func (x *VerifyCredentialsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_v1_user_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyCredentialsResponse.ProtoReflect.Descriptor instead.
+func (*VerifyCredentialsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_v1_user_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *VerifyCredentialsResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *VerifyCredentialsResponse) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
 var File_proto_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_v1_user_proto_rawDesc = "" +
@@ -625,7 +729,13 @@ const file_proto_user_v1_user_proto_rawDesc = "" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"R\n" +
 	"\x11ListUsersResponse\x12'\n" +
 	"\x05users\x18\x01 \x03(\v2\x11.api.user.v1.UserR\x05users\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total2\x94\x04\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"R\n" +
+	"\x18VerifyCredentialsRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"P\n" +
+	"\x19VerifyCredentialsResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername2\xf8\x04\n" +
 	"\vUserService\x12g\n" +
 	"\n" +
 	"CreateUser\x12\x1e.api.user.v1.CreateUserRequest\x1a\x1f.api.user.v1.CreateUserResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/api/v1/users\x12`\n" +
@@ -634,7 +744,8 @@ const file_proto_user_v1_user_proto_rawDesc = "" +
 	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\x1a\x12/api/v1/users/{id}\x12i\n" +
 	"\n" +
 	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12a\n" +
-	"\tListUsers\x12\x1d.api.user.v1.ListUsersRequest\x1a\x1e.api.user.v1.ListUsersResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/usersB Z\x1ekratos-template/api/user/v1;v1b\x06proto3"
+	"\tListUsers\x12\x1d.api.user.v1.ListUsersRequest\x1a\x1e.api.user.v1.ListUsersResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12b\n" +
+	"\x11VerifyCredentials\x12%.api.user.v1.VerifyCredentialsRequest\x1a&.api.user.v1.VerifyCredentialsResponseB Z\x1ekratos-template/api/user/v1;v1b\x06proto3"
 
 var (
 	file_proto_user_v1_user_proto_rawDescOnce sync.Once
@@ -648,24 +759,26 @@ func file_proto_user_v1_user_proto_rawDescGZIP() []byte {
 	return file_proto_user_v1_user_proto_rawDescData
 }
 
-var file_proto_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_proto_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_proto_user_v1_user_proto_goTypes = []any{
-	(*User)(nil),                  // 0: api.user.v1.User
-	(*CreateUserRequest)(nil),     // 1: api.user.v1.CreateUserRequest
-	(*CreateUserResponse)(nil),    // 2: api.user.v1.CreateUserResponse
-	(*GetUserRequest)(nil),        // 3: api.user.v1.GetUserRequest
-	(*GetUserResponse)(nil),       // 4: api.user.v1.GetUserResponse
-	(*UpdateUserRequest)(nil),     // 5: api.user.v1.UpdateUserRequest
-	(*UpdateUserResponse)(nil),    // 6: api.user.v1.UpdateUserResponse
-	(*DeleteUserRequest)(nil),     // 7: api.user.v1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),    // 8: api.user.v1.DeleteUserResponse
-	(*ListUsersRequest)(nil),      // 9: api.user.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),     // 10: api.user.v1.ListUsersResponse
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*User)(nil),                      // 0: api.user.v1.User
+	(*CreateUserRequest)(nil),         // 1: api.user.v1.CreateUserRequest
+	(*CreateUserResponse)(nil),        // 2: api.user.v1.CreateUserResponse
+	(*GetUserRequest)(nil),            // 3: api.user.v1.GetUserRequest
+	(*GetUserResponse)(nil),           // 4: api.user.v1.GetUserResponse
+	(*UpdateUserRequest)(nil),         // 5: api.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),        // 6: api.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),         // 7: api.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),        // 8: api.user.v1.DeleteUserResponse
+	(*ListUsersRequest)(nil),          // 9: api.user.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 10: api.user.v1.ListUsersResponse
+	(*VerifyCredentialsRequest)(nil),  // 11: api.user.v1.VerifyCredentialsRequest
+	(*VerifyCredentialsResponse)(nil), // 12: api.user.v1.VerifyCredentialsResponse
+	(*timestamppb.Timestamp)(nil),     // 13: google.protobuf.Timestamp
 }
 var file_proto_user_v1_user_proto_depIdxs = []int32{
-	11, // 0: api.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	11, // 1: api.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 0: api.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	13, // 1: api.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: api.user.v1.CreateUserResponse.user:type_name -> api.user.v1.User
 	0,  // 3: api.user.v1.GetUserResponse.user:type_name -> api.user.v1.User
 	0,  // 4: api.user.v1.UpdateUserResponse.user:type_name -> api.user.v1.User
@@ -675,13 +788,15 @@ var file_proto_user_v1_user_proto_depIdxs = []int32{
 	5,  // 8: api.user.v1.UserService.UpdateUser:input_type -> api.user.v1.UpdateUserRequest
 	7,  // 9: api.user.v1.UserService.DeleteUser:input_type -> api.user.v1.DeleteUserRequest
 	9,  // 10: api.user.v1.UserService.ListUsers:input_type -> api.user.v1.ListUsersRequest
-	2,  // 11: api.user.v1.UserService.CreateUser:output_type -> api.user.v1.CreateUserResponse
-	4,  // 12: api.user.v1.UserService.GetUser:output_type -> api.user.v1.GetUserResponse
-	6,  // 13: api.user.v1.UserService.UpdateUser:output_type -> api.user.v1.UpdateUserResponse
-	8,  // 14: api.user.v1.UserService.DeleteUser:output_type -> api.user.v1.DeleteUserResponse
-	10, // 15: api.user.v1.UserService.ListUsers:output_type -> api.user.v1.ListUsersResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
+	11, // 11: api.user.v1.UserService.VerifyCredentials:input_type -> api.user.v1.VerifyCredentialsRequest
+	2,  // 12: api.user.v1.UserService.CreateUser:output_type -> api.user.v1.CreateUserResponse
+	4,  // 13: api.user.v1.UserService.GetUser:output_type -> api.user.v1.GetUserResponse
+	6,  // 14: api.user.v1.UserService.UpdateUser:output_type -> api.user.v1.UpdateUserResponse
+	8,  // 15: api.user.v1.UserService.DeleteUser:output_type -> api.user.v1.DeleteUserResponse
+	10, // 16: api.user.v1.UserService.ListUsers:output_type -> api.user.v1.ListUsersResponse
+	12, // 17: api.user.v1.UserService.VerifyCredentials:output_type -> api.user.v1.VerifyCredentialsResponse
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -698,7 +813,7 @@ func file_proto_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_user_v1_user_proto_rawDesc), len(file_proto_user_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

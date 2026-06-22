@@ -6,12 +6,10 @@ import (
 	"kratos-template/pkg/model"
 )
 
-// targets lists the per-service query packages to generate. Each service keeps
-// its own generated package (internal boundary forbids sharing), regenerated
-// from the shared models in pkg/model.
+// targets lists the per-service query packages to generate. auth owns no table
+// (it reads users via the user service), so only user is here.
 var targets = []string{
 	"./app/user/internal/data/query",
-	"./app/auth/internal/data/query",
 }
 
 func main() {

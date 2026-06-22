@@ -22,8 +22,8 @@ All services are **gRPC-only**.
 
 | Service | gRPC | Notes |
 |---------|------|-------|
-| auth | 9081 | JWT login / refresh / validate |
-| user | 9082 | User CRUD |
+| auth | 9081 | JWT login / refresh / validate (calls user over gRPC; owns no DB) |
+| user | 9082 | User CRUD; owner of the `users` table |
 | PostgreSQL | 5432 | Database |
 | Consul | 8500 | Service discovery + config (UI at :8500) |
 | Jaeger | 16686 | Tracing UI (OTLP collector on 4317) |
@@ -61,8 +61,8 @@ On startup, Consul auto-loads each service's config from `deploy/configs/<svc>/c
 │       ├── conf/            # Service-private config proto + generated code
 │       ├── server/          # gRPC server, middleware & route registration
 │       ├── service/         # Implements the pb XxxServer; DTO ↔ domain mapping
-│       ├── biz/             # Use cases + Repo interfaces + domain errors
-│       └── data/            # Repo implementations (GORM Gen) + query/ (generated)
+│       ├── biz/             # Use cases + Repo interfaces + domain types/errors
+│       └── data/            # Repo impls: GORM Gen (owns a table) or a gRPC client to another service
 ├── pkg/                     # Cross-service, business-agnostic infrastructure
 │   ├── bootstrap/           # Generic startup wiring (config, log, tracer, kratos app)
 │   ├── log/                 # zap logger + kratos/gorm adapters
@@ -88,6 +88,14 @@ server ──▶ service ──▶ biz ◀── data
 Wiring is done with Uber FX: one `fx.go` per layer exposing a `Module` named
 `<svc>.<layer>`, assembled in `cmd/<svc>/main.go` via `bootstrap.Run[conf.Bootstrap]`.
 
+The `data` layer implements `biz.Repo` against whatever backs the data — its own
+database, or **another service over gRPC**. Each table has a single owning service;
+others reach it through that owner's API rather than sharing the table. The auth
+service owns no table: its `AuthUserRepo` is a Kratos gRPC client to the user
+service (endpoint `discovery:///user` via Consul, or a direct `host:port` locally).
+bcrypt verification stays in the user service behind the internal `VerifyCredentials`
+RPC, so password hashes never cross the wire.
+
 ## Configuration
 
 Config is **independent per service** — each service loads only its own:
@@ -104,7 +112,8 @@ Environment variables (highest priority) override config values:
 
 | Env | Overrides | Read by |
 |-----|-----------|---------|
-| `DB_DSN` | database connection string | service data layer |
+| `DB_DSN` | database connection string | data layer of table-owning services (user) |
+| `USER_SERVICE_ENDPOINT` | user-service gRPC target | auth data layer |
 | `JWT_SECRET` | auth token signing secret | auth service |
 | `CONSUL_ADDR` | Consul address (config source + registry) | bootstrap, registry |
 | `CONSUL_CONFIG_PATH` | Consul key prefix | bootstrap |

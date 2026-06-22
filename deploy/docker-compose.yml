@@ -57,14 +57,13 @@ services:
       target: auth
     container_name: kratos-auth
     depends_on:
-      postgres:
-        condition: service_healthy
       consul:
         condition: service_healthy
+      user:
+        condition: service_started
     ports:
       - "9081:9081"
     environment:
-      - DB_DSN=postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
       - JWT_SECRET=dev-secret-change-in-prod
       - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
     volumes:
@@ -82,8 +81,6 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
-      auth:
-        condition: service_started
     ports:
       - "9082:9082"
     environment:

@@ -22,10 +22,11 @@ message Server {
 }
 
 message Data {
-  message Database {
-    string source = 1;
+  message UserService {
+    // host:port (local) or discovery:///user (via registry)
+    string endpoint = 1;
   }
-  Database database = 1;
+  UserService user_service = 1;
 }
 
 message Auth {

@@ -79,6 +79,18 @@ func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest)
 	}, nil
 }
 
+func (s *UserService) VerifyCredentials(ctx context.Context, req *v1.VerifyCredentialsRequest) (*v1.VerifyCredentialsResponse, error) {
+	user, err := s.userUC.VerifyCredentials(ctx, req.Username, req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.VerifyCredentialsResponse{
+		UserId:   user.ID,
+		Username: user.Username,
+	}, nil
+}
+
 func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponse, error) {
 	users, total, err := s.userUC.ListUsers(ctx, req.Page, req.PageSize)
 	if err != nil {

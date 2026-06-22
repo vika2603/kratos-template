@@ -2,9 +2,6 @@ package biz
 
 import (
 	"context"
-	"errors"
-
-	"golang.org/x/crypto/bcrypt"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 
@@ -12,20 +9,16 @@ import (
 )
 
 type AuthUserRepo interface {
-	GetByUsername(ctx context.Context, username string) (*AuthUser, error)
+	VerifyCredentials(ctx context.Context, username, password string) (*AuthUser, error)
 	GetByID(ctx context.Context, id string) (*AuthUser, error)
 }
 
 type AuthUser struct {
-	ID           string
-	Username     string
-	PasswordHash string
+	ID       string
+	Username string
 }
 
-var (
-	ErrUserNotFound       = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
-	ErrInvalidCredentials = kratosErrors.Unauthorized("INVALID_CREDENTIALS", "invalid credentials")
-)
+var ErrInvalidCredentials = kratosErrors.Unauthorized("INVALID_CREDENTIALS", "invalid credentials")
 
 type AuthUseCase struct {
 	repo       AuthUserRepo
@@ -33,16 +26,9 @@ type AuthUseCase struct {
 }
 
 func (uc *AuthUseCase) Login(ctx context.Context, username, password string) (string, int64, error) {
-	user, err := uc.repo.GetByUsername(ctx, username)
+	user, err := uc.repo.VerifyCredentials(ctx, username, password)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return "", 0, ErrInvalidCredentials
-		}
 		return "", 0, err
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", 0, ErrInvalidCredentials
 	}
 
 	token, err := uc.jwtManager.GenerateToken(user.ID, user.Username)
@@ -73,6 +59,7 @@ func (uc *AuthUseCase) Validate(ctx context.Context, token string) (bool, string
 		return false, "", "", ErrInvalidCredentials
 	}
 
+	// token can outlive its user (deleted/disabled), so re-check
 	user, err := uc.repo.GetByID(ctx, claims.UserID)
 	if err != nil {
 		return false, "", "", err
@@ -82,5 +69,6 @@ func (uc *AuthUseCase) Validate(ctx context.Context, token string) (bool, string
 }
 
 func (uc *AuthUseCase) Logout(ctx context.Context, token string) error {
+	// no-op: stateless JWT. TODO: token denylist (e.g. Redis) to truly revoke.
 	return nil
 }

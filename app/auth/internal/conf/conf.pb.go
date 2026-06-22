@@ -130,7 +130,7 @@ func (x *Server) GetGrpc() *Server_GRPC {
 
 type Data struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Database      *Data_Database         `protobuf:"bytes,1,opt,name=database,proto3" json:"database,omitempty"`
+	UserService   *Data_UserService      `protobuf:"bytes,1,opt,name=user_service,json=userService,proto3" json:"user_service,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -165,9 +165,9 @@ func (*Data) Descriptor() ([]byte, []int) {
 	return file_app_auth_internal_conf_conf_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Data) GetDatabase() *Data_Database {
+func (x *Data) GetUserService() *Data_UserService {
 	if x != nil {
-		return x.Database
+		return x.UserService
 	}
 	return nil
 }
@@ -276,27 +276,28 @@ func (x *Server_GRPC) GetTimeout() string {
 	return ""
 }
 
-type Data_Database struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+type Data_UserService struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// host:port (local) or discovery:///user (via registry)
+	Endpoint      string `protobuf:"bytes,1,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Data_Database) Reset() {
-	*x = Data_Database{}
+func (x *Data_UserService) Reset() {
+	*x = Data_UserService{}
 	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Data_Database) String() string {
+func (x *Data_UserService) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Data_Database) ProtoMessage() {}
+func (*Data_UserService) ProtoMessage() {}
 
-func (x *Data_Database) ProtoReflect() protoreflect.Message {
+func (x *Data_UserService) ProtoReflect() protoreflect.Message {
 	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -308,14 +309,14 @@ func (x *Data_Database) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Data_Database.ProtoReflect.Descriptor instead.
-func (*Data_Database) Descriptor() ([]byte, []int) {
+// Deprecated: Use Data_UserService.ProtoReflect.Descriptor instead.
+func (*Data_UserService) Descriptor() ([]byte, []int) {
 	return file_app_auth_internal_conf_conf_proto_rawDescGZIP(), []int{2, 0}
 }
 
-func (x *Data_Database) GetSource() string {
+func (x *Data_UserService) GetEndpoint() string {
 	if x != nil {
-		return x.Source
+		return x.Endpoint
 	}
 	return ""
 }
@@ -333,11 +334,11 @@ const file_app_auth_internal_conf_conf_proto_rawDesc = "" +
 	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.auth.conf.Server.GRPCR\x04grpc\x1a4\n" +
 	"\x04GRPC\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\"k\n" +
-	"\x04Data\x12?\n" +
-	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.auth.conf.Data.DatabaseR\bdatabase\x1a\"\n" +
-	"\bDatabase\x12\x16\n" +
-	"\x06source\x18\x01 \x01(\tR\x06source\"H\n" +
+	"\atimeout\x18\x02 \x01(\tR\atimeout\"|\n" +
+	"\x04Data\x12I\n" +
+	"\fuser_service\x18\x01 \x01(\v2&.kratos.api.auth.conf.Data.UserServiceR\vuserService\x1a)\n" +
+	"\vUserService\x12\x1a\n" +
+	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"H\n" +
 	"\x04Auth\x12\x1d\n" +
 	"\n" +
 	"jwt_secret\x18\x01 \x01(\tR\tjwtSecret\x12!\n" +
@@ -357,19 +358,19 @@ func file_app_auth_internal_conf_conf_proto_rawDescGZIP() []byte {
 
 var file_app_auth_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_app_auth_internal_conf_conf_proto_goTypes = []any{
-	(*Bootstrap)(nil),     // 0: kratos.api.auth.conf.Bootstrap
-	(*Server)(nil),        // 1: kratos.api.auth.conf.Server
-	(*Data)(nil),          // 2: kratos.api.auth.conf.Data
-	(*Auth)(nil),          // 3: kratos.api.auth.conf.Auth
-	(*Server_GRPC)(nil),   // 4: kratos.api.auth.conf.Server.GRPC
-	(*Data_Database)(nil), // 5: kratos.api.auth.conf.Data.Database
+	(*Bootstrap)(nil),        // 0: kratos.api.auth.conf.Bootstrap
+	(*Server)(nil),           // 1: kratos.api.auth.conf.Server
+	(*Data)(nil),             // 2: kratos.api.auth.conf.Data
+	(*Auth)(nil),             // 3: kratos.api.auth.conf.Auth
+	(*Server_GRPC)(nil),      // 4: kratos.api.auth.conf.Server.GRPC
+	(*Data_UserService)(nil), // 5: kratos.api.auth.conf.Data.UserService
 }
 var file_app_auth_internal_conf_conf_proto_depIdxs = []int32{
 	1, // 0: kratos.api.auth.conf.Bootstrap.server:type_name -> kratos.api.auth.conf.Server
 	2, // 1: kratos.api.auth.conf.Bootstrap.data:type_name -> kratos.api.auth.conf.Data
 	3, // 2: kratos.api.auth.conf.Bootstrap.auth:type_name -> kratos.api.auth.conf.Auth
 	4, // 3: kratos.api.auth.conf.Server.grpc:type_name -> kratos.api.auth.conf.Server.GRPC
-	5, // 4: kratos.api.auth.conf.Data.database:type_name -> kratos.api.auth.conf.Data.Database
+	5, // 4: kratos.api.auth.conf.Data.user_service:type_name -> kratos.api.auth.conf.Data.UserService
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

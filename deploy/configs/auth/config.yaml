@@ -8,8 +8,9 @@ server:
     timeout: 30s
 
 data:
-  database:
-    source: postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
+  # auth owns no DB; it resolves the user service through the registry (Consul).
+  user_service:
+    endpoint: discovery:///user
 
 auth:
   jwt_secret: your-secret-key-change-in-production

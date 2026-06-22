@@ -3,35 +3,45 @@ package biz
 import (
 	"context"
 	"errors"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
-
-	"kratos-template/pkg/model"
 )
 
+// User is the biz-layer domain type; the data layer maps it to/from pkg/model.User.
+type User struct {
+	ID           string
+	Username     string
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 type UserRepo interface {
-	Create(ctx context.Context, user *model.User) error
-	GetByID(ctx context.Context, id string) (*model.User, error)
-	GetByUsername(ctx context.Context, username string) (*model.User, error)
-	GetByEmail(ctx context.Context, email string) (*model.User, error)
-	Update(ctx context.Context, user *model.User) error
+	Create(ctx context.Context, user *User) error
+	GetByID(ctx context.Context, id string) (*User, error)
+	GetByUsername(ctx context.Context, username string) (*User, error)
+	GetByEmail(ctx context.Context, email string) (*User, error)
+	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, offset, limit int) ([]*model.User, int64, error)
+	List(ctx context.Context, offset, limit int) ([]*User, int64, error)
 }
 
 var (
-	ErrUserNotFound   = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
-	ErrUsernameExists = kratosErrors.Conflict("USERNAME_EXISTS", "username already exists")
-	ErrEmailExists    = kratosErrors.Conflict("EMAIL_EXISTS", "email already exists")
+	ErrUserNotFound       = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
+	ErrUsernameExists     = kratosErrors.Conflict("USERNAME_EXISTS", "username already exists")
+	ErrEmailExists        = kratosErrors.Conflict("EMAIL_EXISTS", "email already exists")
+	ErrInvalidCredentials = kratosErrors.Unauthorized("INVALID_CREDENTIALS", "invalid credentials")
 )
 
 type UserUseCase struct {
 	repo UserRepo
 }
 
-func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password string) (*model.User, error) {
+func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password string) (*User, error) {
 	existingUser, err := uc.repo.GetByUsername(ctx, username)
 	if err != nil && !errors.Is(err, ErrUserNotFound) {
 		return nil, err
@@ -53,7 +63,7 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password
 		return nil, err
 	}
 
-	user := &model.User{
+	user := &User{
 		Username:     username,
 		Email:        email,
 		PasswordHash: string(hashedPassword),
@@ -66,7 +76,25 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password
 	return user, nil
 }
 
-func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*model.User, error) {
+// VerifyCredentials checks a password. Same error for missing user or bad
+// password, so callers can't tell which.
+func (uc *UserUseCase) VerifyCredentials(ctx context.Context, username, password string) (*User, error) {
+	user, err := uc.repo.GetByUsername(ctx, username)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	return user, nil
+}
+
+func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*User, error) {
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
@@ -77,7 +105,7 @@ func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*model.User, err
 	return user, nil
 }
 
-func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email string) (*model.User, error) {
+func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email string) (*User, error) {
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
@@ -127,7 +155,7 @@ func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
 	return uc.repo.Delete(ctx, user.ID)
 }
 
-func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*model.User, int32, error) {
+func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*User, int32, error) {
 	if page <= 0 {
 		page = 1
 	}

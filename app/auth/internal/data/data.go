@@ -1,55 +1,60 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"go.uber.org/zap"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/registry"
+	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	ggrpc "google.golang.org/grpc"
 
+	userv1 "kratos-template/api/user/v1"
 	"kratos-template/app/auth/internal/conf"
-	"kratos-template/app/auth/internal/data/query"
 	"kratos-template/pkg/log"
-	"kratos-template/pkg/log/adapter"
 )
 
+// Data's only resource is a gRPC client to the user service — auth owns no DB.
 type Data struct {
-	db *gorm.DB
-	q  *query.Query
+	user userv1.UserServiceClient
 }
 
-func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, *query.Query, error) {
-	dsn := os.Getenv("DB_DSN")
-	if dsn == "" {
-		dsn = cfg.Data.Database.Source
+// NewUserClientConn dials the user service (discovery used when a registry exists).
+func NewUserClientConn(cfg *conf.Bootstrap, disc registry.Discovery) (*ggrpc.ClientConn, error) {
+	endpoint := os.Getenv("USER_SERVICE_ENDPOINT")
+	if endpoint == "" {
+		endpoint = cfg.GetData().GetUserService().GetEndpoint()
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: adapter.NewGormAdapter(logger),
-	})
+	opts := []kgrpc.ClientOption{
+		kgrpc.WithEndpoint(endpoint),
+		kgrpc.WithMiddleware(
+			recovery.Recovery(),
+			tracing.Client(),
+		),
+	}
+	if disc != nil {
+		opts = append(opts, kgrpc.WithDiscovery(disc))
+	}
+
+	conn, err := kgrpc.DialInsecure(context.Background(), opts...)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed opening connection to postgres: %w", err)
+		return nil, fmt.Errorf("failed dialing user service at %q: %w", endpoint, err)
 	}
-
-	query.SetDefault(db)
-	q := query.Use(db)
-
-	return db, q, nil
+	return conn, nil
 }
 
-func NewData(db *gorm.DB, q *query.Query) (*Data, func(), error) {
+func NewData(conn *ggrpc.ClientConn) (*Data, func(), error) {
 	d := &Data{
-		db: db,
-		q:  q,
+		user: userv1.NewUserServiceClient(conn),
 	}
 
 	cleanup := func() {
 		log.Info("closing data resources")
-		if sqlDB, err := d.db.DB(); err == nil {
-			if err := sqlDB.Close(); err != nil {
-				log.Errorf("failed to close db: %v", err)
-			}
+		if err := conn.Close(); err != nil {
+			log.Errorf("failed to close user service conn: %v", err)
 		}
 	}
 

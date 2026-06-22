@@ -2,16 +2,14 @@ package data
 
 import (
 	"context"
-	"errors"
 
-	"gorm.io/gorm"
-
+	userv1 "kratos-template/api/user/v1"
 	"kratos-template/app/auth/internal/biz"
-	"kratos-template/pkg/model"
 )
 
 var _ biz.AuthUserRepo = (*authUserRepo)(nil)
 
+// authUserRepo implements biz.AuthUserRepo via the user service over gRPC.
 type authUserRepo struct {
 	data *Data
 }
@@ -20,32 +18,21 @@ func NewAuthUserRepo(data *Data) biz.AuthUserRepo {
 	return &authUserRepo{data: data}
 }
 
-func (r *authUserRepo) GetByUsername(ctx context.Context, username string) (*biz.AuthUser, error) {
-	user, err := r.data.q.User.WithContext(ctx).Where(r.data.q.User.Username.Eq(username)).First()
+func (r *authUserRepo) VerifyCredentials(ctx context.Context, username, password string) (*biz.AuthUser, error) {
+	resp, err := r.data.user.VerifyCredentials(ctx, &userv1.VerifyCredentialsRequest{
+		Username: username,
+		Password: password,
+	})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, biz.ErrUserNotFound
-		}
 		return nil, err
 	}
-	return toAuthUser(user), nil
+	return &biz.AuthUser{ID: resp.UserId, Username: resp.Username}, nil
 }
 
 func (r *authUserRepo) GetByID(ctx context.Context, id string) (*biz.AuthUser, error) {
-	user, err := r.data.q.User.WithContext(ctx).Where(r.data.q.User.ID.Eq(id)).First()
+	resp, err := r.data.user.GetUser(ctx, &userv1.GetUserRequest{Id: id})
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, biz.ErrUserNotFound
-		}
 		return nil, err
 	}
-	return toAuthUser(user), nil
-}
-
-func toAuthUser(user *model.User) *biz.AuthUser {
-	return &biz.AuthUser{
-		ID:           user.ID,
-		Username:     user.Username,
-		PasswordHash: user.PasswordHash,
-	}
+	return &biz.AuthUser{ID: resp.User.Id, Username: resp.User.Username}, nil
 }
