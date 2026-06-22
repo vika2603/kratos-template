@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"cmp"
 	"os"
 
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
@@ -18,15 +19,11 @@ func init() {
 	kratoslog.SetLogger(adapter.NewKratosGlobalAdapter())
 }
 
-func NewConfig(localPath, consulPath, consulAddr string) (config.Config, error) {
-	if consulAddr == "" {
-		consulAddr = os.Getenv("CONSUL_ADDR")
-	}
+const consulAddrEnv = "CONSUL_ADDR"
 
-	consulConfigPath := os.Getenv("CONSUL_CONFIG_PATH")
-	if consulConfigPath != "" {
-		consulPath = consulConfigPath
-	}
+func NewConfig(localPath, consulPath, consulAddr string) (config.Config, error) {
+	consulAddr = cmp.Or(consulAddr, os.Getenv(consulAddrEnv))
+	consulPath = cmp.Or(os.Getenv("CONSUL_CONFIG_PATH"), consulPath)
 
 	var sources []config.Source
 
@@ -86,7 +83,7 @@ func ScanCommonConfig(cfg config.Config) (*conf.CommonConfig, error) {
 	return &cc, nil
 }
 
-func Hostname() string {
+func hostname() string {
 	hostname, _ := os.Hostname()
 	if hostname == "" {
 		hostname = "unknown"

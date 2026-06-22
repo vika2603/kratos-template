@@ -20,14 +20,14 @@ type Claims struct {
 }
 
 type JWTManager struct {
-	secret      []byte
-	expiryHours int
+	secret []byte
+	expiry time.Duration
 }
 
-func NewJWTManager(secret string, expiryHours int) *JWTManager {
+func NewJWTManager(secret string, expiry time.Duration) *JWTManager {
 	return &JWTManager{
-		secret:      []byte(secret),
-		expiryHours: expiryHours,
+		secret: []byte(secret),
+		expiry: expiry,
 	}
 }
 
@@ -36,7 +36,7 @@ func (m *JWTManager) GenerateToken(userID string, username string) (string, erro
 		UserID:   userID,
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(m.expiryHours) * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -68,5 +68,5 @@ func (m *JWTManager) ParseToken(tokenString string) (*Claims, error) {
 }
 
 func (m *JWTManager) ExpirySeconds() int64 {
-	return int64(m.expiryHours) * 3600
+	return int64(m.expiry.Seconds())
 }

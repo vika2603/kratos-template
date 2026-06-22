@@ -50,16 +50,7 @@ _testmain.go
 # Claude Code local settings
 .claude/settings.local.json
 app/*/.claude/settings.local.json
-
-# Tool working data
-.sisyphus/
-
-# Nested repos (use submodule if needed)
-/hertz-template/
-
-# Hertz
-dumped_hertz_remote_config.json
+CLAUDE.local.md
 
 # Keep
 !.gitkeep
-		  

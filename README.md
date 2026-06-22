@@ -115,7 +115,7 @@ Environment variables (highest priority) override config values:
 | `DB_DSN` | database connection string | data layer of table-owning services (user) |
 | `USER_SERVICE_ENDPOINT` | user-service gRPC target | auth data layer |
 | `JWT_SECRET` | auth token signing secret | auth service |
-| `CONSUL_ADDR` | Consul address (config source + registry) | bootstrap, registry |
+| `CONSUL_ADDR` | Consul address (config source + registry) | bootstrap |
 | `CONSUL_CONFIG_PATH` | Consul key prefix | bootstrap |
 | `SERVICE_NAME` / `SERVICE_VERSION` | service identity | bootstrap |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | tracing endpoint; unset disables tracing | bootstrap |

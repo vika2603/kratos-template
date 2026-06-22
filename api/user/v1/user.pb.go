@@ -7,7 +7,6 @@
 package v1
 
 import (
-	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -695,7 +694,7 @@ var File_proto_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x18proto/user/v1/user.proto\x12\vapi.user.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x01\n" +
+	"\x18proto/user/v1/user.proto\x12\vapi.user.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
@@ -735,16 +734,16 @@ const file_proto_user_v1_user_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"P\n" +
 	"\x19VerifyCredentialsResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername2\xf8\x04\n" +
-	"\vUserService\x12g\n" +
+	"\busername\x18\x02 \x01(\tR\busername2\xf0\x03\n" +
+	"\vUserService\x12M\n" +
 	"\n" +
-	"CreateUser\x12\x1e.api.user.v1.CreateUserRequest\x1a\x1f.api.user.v1.CreateUserResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/api/v1/users\x12`\n" +
-	"\aGetUser\x12\x1b.api.user.v1.GetUserRequest\x1a\x1c.api.user.v1.GetUserResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12l\n" +
+	"CreateUser\x12\x1e.api.user.v1.CreateUserRequest\x1a\x1f.api.user.v1.CreateUserResponse\x12D\n" +
+	"\aGetUser\x12\x1b.api.user.v1.GetUserRequest\x1a\x1c.api.user.v1.GetUserResponse\x12M\n" +
 	"\n" +
-	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\x1a\x12/api/v1/users/{id}\x12i\n" +
+	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\x12M\n" +
 	"\n" +
-	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12a\n" +
-	"\tListUsers\x12\x1d.api.user.v1.ListUsersRequest\x1a\x1e.api.user.v1.ListUsersResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12b\n" +
+	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\x12J\n" +
+	"\tListUsers\x12\x1d.api.user.v1.ListUsersRequest\x1a\x1e.api.user.v1.ListUsersResponse\x12b\n" +
 	"\x11VerifyCredentials\x12%.api.user.v1.VerifyCredentialsRequest\x1a&.api.user.v1.VerifyCredentialsResponseB Z\x1ekratos-template/api/user/v1;v1b\x06proto3"
 
 var (

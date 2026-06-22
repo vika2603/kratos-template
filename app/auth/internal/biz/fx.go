@@ -1,7 +1,9 @@
 package biz
 
 import (
+	"cmp"
 	"os"
+	"time"
 
 	"go.uber.org/fx"
 
@@ -10,17 +12,14 @@ import (
 )
 
 func NewAuthUseCase(repo AuthUserRepo, cfg *conf.Bootstrap) *AuthUseCase {
-	expiryHours := int(cfg.Auth.TokenExpiry / 3600)
-	if expiryHours < 1 {
-		expiryHours = 1
+	expiry := time.Duration(cfg.Auth.TokenExpiry) * time.Second
+	if expiry <= 0 {
+		expiry = 24 * time.Hour
 	}
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = cfg.Auth.JwtSecret
-	}
+	secret := cmp.Or(os.Getenv("JWT_SECRET"), cfg.Auth.JwtSecret)
 	return &AuthUseCase{
 		repo:       repo,
-		jwtManager: pkgauth.NewJWTManager(secret, expiryHours),
+		jwtManager: pkgauth.NewJWTManager(secret, expiry),
 	}
 }
 

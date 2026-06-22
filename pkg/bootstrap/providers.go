@@ -1,7 +1,9 @@
 package bootstrap
 
 import (
+	"cmp"
 	"context"
+	"os"
 
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
@@ -48,7 +50,7 @@ func ProvideLogSettings(cfg *conf.CommonConfig) log.Config {
 }
 
 func ProvideRegistrySettings(cfg *conf.CommonConfig) RegistrySettingsResult {
-	address := cfg.GetRegistry().GetConsul().GetAddress()
+	address := cmp.Or(os.Getenv(consulAddrEnv), cfg.GetRegistry().GetConsul().GetAddress())
 	scheme := cfg.GetRegistry().GetConsul().GetScheme()
 	if scheme == "" {
 		scheme = "http"
@@ -68,7 +70,7 @@ func ProvideServiceInfo(cfg *conf.CommonConfig) ServiceInfoResult {
 	if version == "" {
 		version = "v0.0.0"
 	}
-	hostname := Hostname()
+	hostname := hostname()
 	return ServiceInfoResult{
 		ServiceID:       name + "-" + hostname,
 		ServiceName:     name,

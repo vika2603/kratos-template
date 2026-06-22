@@ -1,8 +1,6 @@
 package registry
 
 import (
-	"os"
-
 	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
@@ -24,10 +22,7 @@ type Result struct {
 }
 
 func New(params Params) (Result, error) {
-	addr := os.Getenv("CONSUL_ADDR")
-	if addr == "" {
-		addr = params.Address
-	}
+	addr := params.Address
 
 	// No Consul configured (e.g. local single-service run) — skip registration
 	// so the service can start standalone. Registrar stays nil; kratos skips it.

@@ -9,6 +9,7 @@ package conf
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -167,7 +168,7 @@ func (x *Data) GetDatabase() *Data_Database {
 type Server_GRPC struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
-	Timeout       string                 `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	Timeout       *durationpb.Duration   `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -209,11 +210,11 @@ func (x *Server_GRPC) GetAddr() string {
 	return ""
 }
 
-func (x *Server_GRPC) GetTimeout() string {
+func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 	if x != nil {
 		return x.Timeout
 	}
-	return ""
+	return nil
 }
 
 type Data_Database struct {
@@ -264,15 +265,15 @@ var File_app_user_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\"q\n" +
+	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\x1a\x1egoogle/protobuf/duration.proto\"q\n" +
 	"\tBootstrap\x124\n" +
 	"\x06server\x18\x01 \x01(\v2\x1c.kratos.api.user.conf.ServerR\x06server\x12.\n" +
-	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\"u\n" +
+	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\"\x90\x01\n" +
 	"\x06Server\x125\n" +
-	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.user.conf.Server.GRPCR\x04grpc\x1a4\n" +
+	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.user.conf.Server.GRPCR\x04grpc\x1aO\n" +
 	"\x04GRPC\x12\x12\n" +
-	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\"k\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x123\n" +
+	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"k\n" +
 	"\x04Data\x12?\n" +
 	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.user.conf.Data.DatabaseR\bdatabase\x1a\"\n" +
 	"\bDatabase\x12\x16\n" +
@@ -292,22 +293,24 @@ func file_app_user_internal_conf_conf_proto_rawDescGZIP() []byte {
 
 var file_app_user_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_app_user_internal_conf_conf_proto_goTypes = []any{
-	(*Bootstrap)(nil),     // 0: kratos.api.user.conf.Bootstrap
-	(*Server)(nil),        // 1: kratos.api.user.conf.Server
-	(*Data)(nil),          // 2: kratos.api.user.conf.Data
-	(*Server_GRPC)(nil),   // 3: kratos.api.user.conf.Server.GRPC
-	(*Data_Database)(nil), // 4: kratos.api.user.conf.Data.Database
+	(*Bootstrap)(nil),           // 0: kratos.api.user.conf.Bootstrap
+	(*Server)(nil),              // 1: kratos.api.user.conf.Server
+	(*Data)(nil),                // 2: kratos.api.user.conf.Data
+	(*Server_GRPC)(nil),         // 3: kratos.api.user.conf.Server.GRPC
+	(*Data_Database)(nil),       // 4: kratos.api.user.conf.Data.Database
+	(*durationpb.Duration)(nil), // 5: google.protobuf.Duration
 }
 var file_app_user_internal_conf_conf_proto_depIdxs = []int32{
 	1, // 0: kratos.api.user.conf.Bootstrap.server:type_name -> kratos.api.user.conf.Server
 	2, // 1: kratos.api.user.conf.Bootstrap.data:type_name -> kratos.api.user.conf.Data
 	3, // 2: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
 	4, // 3: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	5, // 4: kratos.api.user.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_app_user_internal_conf_conf_proto_init() }

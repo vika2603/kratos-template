@@ -1,8 +1,6 @@
 package server
 
 import (
-	"time"
-
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -35,12 +33,8 @@ func NewGRPCServer(params GRPCServerParams) (*grpc.Server, error) {
 		opts = append(opts, grpc.Address(params.Config.Server.Grpc.Addr))
 	}
 
-	if params.Config.Server.Grpc.Timeout != "" {
-		timeout, err := time.ParseDuration(params.Config.Server.Grpc.Timeout)
-		if err != nil {
-			return nil, err
-		}
-		opts = append(opts, grpc.Timeout(timeout))
+	if t := params.Config.Server.Grpc.GetTimeout(); t != nil {
+		opts = append(opts, grpc.Timeout(t.AsDuration()))
 	}
 
 	srv := grpc.NewServer(opts...)

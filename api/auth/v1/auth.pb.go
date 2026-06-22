@@ -7,7 +7,6 @@
 package v1
 
 import (
-	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -434,7 +433,7 @@ var File_proto_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_proto_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x18proto/auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1cgoogle/api/annotations.proto\"F\n" +
+	"\x18proto/auth/v1/auth.proto\x12\vapi.auth.v1\"F\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"p\n" +
@@ -461,12 +460,12 @@ const file_proto_auth_v1_auth_proto_rawDesc = "" +
 	"\rLogoutRequest\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"*\n" +
 	"\x0eLogoutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xa1\x03\n" +
-	"\vAuthService\x12]\n" +
-	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12e\n" +
-	"\aRefresh\x12\x1b.api.auth.v1.RefreshRequest\x1a\x1c.api.auth.v1.RefreshResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12i\n" +
-	"\bValidate\x12\x1c.api.auth.v1.ValidateRequest\x1a\x1d.api.auth.v1.ValidateResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/auth/validate\x12a\n" +
-	"\x06Logout\x12\x1a.api.auth.v1.LogoutRequest\x1a\x1b.api.auth.v1.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logoutB Z\x1ekratos-template/api/auth/v1;v1b\x06proto3"
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x9f\x02\n" +
+	"\vAuthService\x12>\n" +
+	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\x12D\n" +
+	"\aRefresh\x12\x1b.api.auth.v1.RefreshRequest\x1a\x1c.api.auth.v1.RefreshResponse\x12G\n" +
+	"\bValidate\x12\x1c.api.auth.v1.ValidateRequest\x1a\x1d.api.auth.v1.ValidateResponse\x12A\n" +
+	"\x06Logout\x12\x1a.api.auth.v1.LogoutRequest\x1a\x1b.api.auth.v1.LogoutResponseB Z\x1ekratos-template/api/auth/v1;v1b\x06proto3"
 
 var (
 	file_proto_auth_v1_auth_proto_rawDescOnce sync.Once

@@ -2,45 +2,18 @@ syntax = "proto3";
 
 package api.user.v1;
 
-import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "kratos-template/api/user/v1;v1";
 
 service UserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/users"
-      body: "*"
-    };
-  }
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
 
-  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/users/{id}"
-    };
-  }
-
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
-    option (google.api.http) = {
-      put: "/api/v1/users/{id}"
-      body: "*"
-    };
-  }
-
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (google.api.http) = {
-      delete: "/api/v1/users/{id}"
-    };
-  }
-
-  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/users"
-    };
-  }
-
-  // Internal RPC (no HTTP annotation): auth calls it to verify a login.
+  // auth calls this to verify a login; password hash never leaves this service.
   rpc VerifyCredentials(VerifyCredentialsRequest) returns (VerifyCredentialsResponse);
 }
 

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"os"
@@ -23,10 +24,7 @@ type Data struct {
 
 // NewUserClientConn dials the user service (discovery used when a registry exists).
 func NewUserClientConn(cfg *conf.Bootstrap, disc registry.Discovery) (*ggrpc.ClientConn, error) {
-	endpoint := os.Getenv("USER_SERVICE_ENDPOINT")
-	if endpoint == "" {
-		endpoint = cfg.GetData().GetUserService().GetEndpoint()
-	}
+	endpoint := cmp.Or(os.Getenv("USER_SERVICE_ENDPOINT"), cfg.GetData().GetUserService().GetEndpoint())
 
 	opts := []kgrpc.ClientOption{
 		kgrpc.WithEndpoint(endpoint),

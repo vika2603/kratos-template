@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package kratos.api.user.conf;
 
+import "google/protobuf/duration.proto";
+
 option go_package = "kratos-template/app/user/internal/conf;conf";
 
 // Bootstrap holds this service's private config only. Common config
@@ -15,7 +17,7 @@ message Bootstrap {
 message Server {
   message GRPC {
     string addr = 1;
-    string timeout = 2;
+    google.protobuf.Duration timeout = 2;
   }
   GRPC grpc = 1;
 }

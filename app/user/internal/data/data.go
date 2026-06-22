@@ -1,6 +1,7 @@
 package data
 
 import (
+	"cmp"
 	"fmt"
 	"os"
 
@@ -20,10 +21,7 @@ type Data struct {
 }
 
 func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, *query.Query, error) {
-	dsn := os.Getenv("DB_DSN")
-	if dsn == "" {
-		dsn = cfg.Data.Database.Source
-	}
+	dsn := cmp.Or(os.Getenv("DB_DSN"), cfg.Data.Database.Source)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: adapter.NewGormAdapter(logger),
