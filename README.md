@@ -68,7 +68,7 @@ On startup, Consul auto-loads each service's config from `deploy/configs/<svc>/c
 │   ├── log/                 # zap logger + kratos/gorm adapters
 │   ├── registry/            # Consul registrar / discovery
 │   ├── auth/                # JWT manager
-│   ├── conf/                # Shared config proto (service / registry / log)
+│   ├── conf/                # Shared config proto (registry / log)
 │   └── model/               # Shared GORM data models
 ├── configs/<svc>.yaml       # Local run config (per service)
 ├── deploy/                  # Dockerfile, docker-compose, init scripts, prod configs
@@ -104,9 +104,13 @@ Config is **independent per service** — each service loads only its own:
 - **Prod:** Consul, key prefix `config/<svc>/`.
 - **Priority:** env vars > Consul > local file.
 
-Each YAML splits into a **common section** (`service` / `registry` / `log`, defined
-once in `pkg/conf`) and a **service-private section** (`server` / `data` and anything
+Each YAML splits into a **common section** (`registry` / `log`, defined once in
+`pkg/conf`) and a **service-private section** (`server` / `data` and anything
 service-specific such as auth's `jwt_secret`, defined in `app/<svc>/internal/conf`).
+
+Service **name** and **version** are not configured — name is the literal passed to
+`bootstrap.Run` in `main.go`, version is stamped at build time via `-ldflags` (run
+`make build`; local runs report `dev`). Check a binary with `<svc> -version`.
 
 Environment variables (highest priority) override config values:
 
@@ -117,7 +121,6 @@ Environment variables (highest priority) override config values:
 | `JWT_SECRET` | auth token signing secret | auth service |
 | `CONSUL_ADDR` | Consul address (config source + registry) | bootstrap |
 | `CONSUL_CONFIG_PATH` | Consul key prefix | bootstrap |
-| `SERVICE_NAME` / `SERVICE_VERSION` | service identity | bootstrap |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | tracing endpoint; unset disables tracing | bootstrap |
 
 ## Common Commands

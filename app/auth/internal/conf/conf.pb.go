@@ -22,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Bootstrap holds this service's private config only. Common config
+// Bootstrap holds this service's private config only. Shared config
 // (service / registry / log) lives in pkg/conf and is scanned separately
 // by pkg/bootstrap.
 type Bootstrap struct {

@@ -55,6 +55,8 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile
       target: auth
+      args:
+        VERSION: ${VERSION:-dev}
     container_name: kratos-auth
     depends_on:
       consul:
@@ -75,6 +77,8 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile
       target: user
+      args:
+        VERSION: ${VERSION:-dev}
     container_name: kratos-user
     depends_on:
       postgres:

@@ -1,9 +1,11 @@
 .DEFAULT_GOAL := help
 
-# Add new services here; build/ run targets iterate over this list.
-SERVICES  := auth user
 BUILD_DIR := bin
 COMPOSE   := docker compose -f deploy/docker-compose.yml
+
+VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+LDFLAGS   := -ldflags "-s -w -X kratos-template/pkg/bootstrap.Version=$(VERSION)"
+export VERSION   # so docker-compose build args pick it up via `make up`
 
 .PHONY: help generate proto gorm build clean test lint fmt tidy up down logs
 
@@ -28,7 +30,7 @@ gorm:
 
 ## run-<svc>: run one service locally (e.g. make run-auth)
 run-%:
-	go run ./app/$*/cmd/$* -conf configs/$*.yaml
+	go run ./app/$*/cmd/$*
 
 ## test: run all tests (race + coverage)
 test:
@@ -50,14 +52,11 @@ tidy:
 
 ## build: build all services into bin/
 build:
-	@for svc in $(SERVICES); do \
-		echo "building $$svc..."; \
-		go build -o $(BUILD_DIR)/$$svc ./app/$$svc/cmd/$$svc; \
-	done
+	go build $(LDFLAGS) -o $(BUILD_DIR)/ ./app/*/cmd/*
 
 ## build-<svc>: build one service (e.g. make build-auth)
 build-%:
-	go build -o $(BUILD_DIR)/$* ./app/$*/cmd/$*
+	go build $(LDFLAGS) -o $(BUILD_DIR)/$* ./app/$*/cmd/$*
 
 ## clean: remove build artifacts
 clean:

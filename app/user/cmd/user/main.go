@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-
 	"kratos-template/app/user/internal/biz"
 	"kratos-template/app/user/internal/conf"
 	"kratos-template/app/user/internal/data"
@@ -11,15 +9,8 @@ import (
 	"kratos-template/pkg/bootstrap"
 )
 
-var flagConf string
-
-func init() {
-	flag.StringVar(&flagConf, "conf", "configs/user.yaml", "config path")
-}
-
 func main() {
-	flag.Parse()
-	bootstrap.Run[conf.Bootstrap](flagConf, "config/user/",
+	bootstrap.Run[conf.Bootstrap]("user",
 		bootstrap.WithKratosApp(),
 		data.Module,
 		biz.Module,

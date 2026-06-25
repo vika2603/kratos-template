@@ -30,7 +30,6 @@ func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, *query.Query, err
 		return nil, nil, fmt.Errorf("failed opening connection to postgres: %w", err)
 	}
 
-	query.SetDefault(db)
 	q := query.Use(db)
 
 	return db, q, nil

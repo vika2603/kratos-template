@@ -21,58 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Service struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Service) Reset() {
-	*x = Service{}
-	mi := &file_pkg_conf_conf_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Service) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Service) ProtoMessage() {}
-
-func (x *Service) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_conf_conf_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Service.ProtoReflect.Descriptor instead.
-func (*Service) Descriptor() ([]byte, []int) {
-	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Service) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Service) GetVersion() string {
-	if x != nil {
-		return x.Version
-	}
-	return ""
-}
-
 type Registry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Consul        *Registry_Consul       `protobuf:"bytes,1,opt,name=consul,proto3" json:"consul,omitempty"`
@@ -82,7 +30,7 @@ type Registry struct {
 
 func (x *Registry) Reset() {
 	*x = Registry{}
-	mi := &file_pkg_conf_conf_proto_msgTypes[1]
+	mi := &file_pkg_conf_conf_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +42,7 @@ func (x *Registry) String() string {
 func (*Registry) ProtoMessage() {}
 
 func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_conf_conf_proto_msgTypes[1]
+	mi := &file_pkg_conf_conf_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +55,7 @@ func (x *Registry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry.ProtoReflect.Descriptor instead.
 func (*Registry) Descriptor() ([]byte, []int) {
-	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{1}
+	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Registry) GetConsul() *Registry_Consul {
@@ -127,7 +75,7 @@ type Log struct {
 
 func (x *Log) Reset() {
 	*x = Log{}
-	mi := &file_pkg_conf_conf_proto_msgTypes[2]
+	mi := &file_pkg_conf_conf_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +87,7 @@ func (x *Log) String() string {
 func (*Log) ProtoMessage() {}
 
 func (x *Log) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_conf_conf_proto_msgTypes[2]
+	mi := &file_pkg_conf_conf_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,7 +100,7 @@ func (x *Log) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Log.ProtoReflect.Descriptor instead.
 func (*Log) Descriptor() ([]byte, []int) {
-	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{2}
+	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Log) GetLevel() string {
@@ -169,30 +117,30 @@ func (x *Log) GetEnv() string {
 	return ""
 }
 
-type CommonConfig struct {
+// Name and version are baked into the binary (see bootstrap.Run), not configured.
+type Shared struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Service       *Service               `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
-	Registry      *Registry              `protobuf:"bytes,2,opt,name=registry,proto3" json:"registry,omitempty"`
-	Log           *Log                   `protobuf:"bytes,4,opt,name=log,proto3" json:"log,omitempty"`
+	Registry      *Registry              `protobuf:"bytes,1,opt,name=registry,proto3" json:"registry,omitempty"`
+	Log           *Log                   `protobuf:"bytes,2,opt,name=log,proto3" json:"log,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CommonConfig) Reset() {
-	*x = CommonConfig{}
-	mi := &file_pkg_conf_conf_proto_msgTypes[3]
+func (x *Shared) Reset() {
+	*x = Shared{}
+	mi := &file_pkg_conf_conf_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CommonConfig) String() string {
+func (x *Shared) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CommonConfig) ProtoMessage() {}
+func (*Shared) ProtoMessage() {}
 
-func (x *CommonConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_conf_conf_proto_msgTypes[3]
+func (x *Shared) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_conf_conf_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -203,26 +151,19 @@ func (x *CommonConfig) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CommonConfig.ProtoReflect.Descriptor instead.
-func (*CommonConfig) Descriptor() ([]byte, []int) {
-	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use Shared.ProtoReflect.Descriptor instead.
+func (*Shared) Descriptor() ([]byte, []int) {
+	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CommonConfig) GetService() *Service {
-	if x != nil {
-		return x.Service
-	}
-	return nil
-}
-
-func (x *CommonConfig) GetRegistry() *Registry {
+func (x *Shared) GetRegistry() *Registry {
 	if x != nil {
 		return x.Registry
 	}
 	return nil
 }
 
-func (x *CommonConfig) GetLog() *Log {
+func (x *Shared) GetLog() *Log {
 	if x != nil {
 		return x.Log
 	}
@@ -239,7 +180,7 @@ type Registry_Consul struct {
 
 func (x *Registry_Consul) Reset() {
 	*x = Registry_Consul{}
-	mi := &file_pkg_conf_conf_proto_msgTypes[4]
+	mi := &file_pkg_conf_conf_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -251,7 +192,7 @@ func (x *Registry_Consul) String() string {
 func (*Registry_Consul) ProtoMessage() {}
 
 func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_conf_conf_proto_msgTypes[4]
+	mi := &file_pkg_conf_conf_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -264,7 +205,7 @@ func (x *Registry_Consul) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry_Consul.ProtoReflect.Descriptor instead.
 func (*Registry_Consul) Descriptor() ([]byte, []int) {
-	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{1, 0}
+	return file_pkg_conf_conf_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *Registry_Consul) GetAddress() string {
@@ -285,10 +226,7 @@ var File_pkg_conf_conf_proto protoreflect.FileDescriptor
 
 const file_pkg_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"\x13pkg/conf/conf.proto\x12\vkratos.conf\"7\n" +
-	"\aService\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\"|\n" +
+	"\x13pkg/conf/conf.proto\x12\vkratos.conf\"|\n" +
 	"\bRegistry\x124\n" +
 	"\x06consul\x18\x01 \x01(\v2\x1c.kratos.conf.Registry.ConsulR\x06consul\x1a:\n" +
 	"\x06Consul\x12\x18\n" +
@@ -296,11 +234,10 @@ const file_pkg_conf_conf_proto_rawDesc = "" +
 	"\x06scheme\x18\x02 \x01(\tR\x06scheme\"-\n" +
 	"\x03Log\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\tR\x05level\x12\x10\n" +
-	"\x03env\x18\x02 \x01(\tR\x03env\"\x95\x01\n" +
-	"\fCommonConfig\x12.\n" +
-	"\aservice\x18\x01 \x01(\v2\x14.kratos.conf.ServiceR\aservice\x121\n" +
-	"\bregistry\x18\x02 \x01(\v2\x15.kratos.conf.RegistryR\bregistry\x12\"\n" +
-	"\x03log\x18\x04 \x01(\v2\x10.kratos.conf.LogR\x03logB\x1fZ\x1dkratos-template/pkg/conf;confb\x06proto3"
+	"\x03env\x18\x02 \x01(\tR\x03env\"_\n" +
+	"\x06Shared\x121\n" +
+	"\bregistry\x18\x01 \x01(\v2\x15.kratos.conf.RegistryR\bregistry\x12\"\n" +
+	"\x03log\x18\x02 \x01(\v2\x10.kratos.conf.LogR\x03logB\x1fZ\x1dkratos-template/pkg/conf;confb\x06proto3"
 
 var (
 	file_pkg_conf_conf_proto_rawDescOnce sync.Once
@@ -314,24 +251,22 @@ func file_pkg_conf_conf_proto_rawDescGZIP() []byte {
 	return file_pkg_conf_conf_proto_rawDescData
 }
 
-var file_pkg_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_pkg_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_pkg_conf_conf_proto_goTypes = []any{
-	(*Service)(nil),         // 0: kratos.conf.Service
-	(*Registry)(nil),        // 1: kratos.conf.Registry
-	(*Log)(nil),             // 2: kratos.conf.Log
-	(*CommonConfig)(nil),    // 3: kratos.conf.CommonConfig
-	(*Registry_Consul)(nil), // 4: kratos.conf.Registry.Consul
+	(*Registry)(nil),        // 0: kratos.conf.Registry
+	(*Log)(nil),             // 1: kratos.conf.Log
+	(*Shared)(nil),          // 2: kratos.conf.Shared
+	(*Registry_Consul)(nil), // 3: kratos.conf.Registry.Consul
 }
 var file_pkg_conf_conf_proto_depIdxs = []int32{
-	4, // 0: kratos.conf.Registry.consul:type_name -> kratos.conf.Registry.Consul
-	0, // 1: kratos.conf.CommonConfig.service:type_name -> kratos.conf.Service
-	1, // 2: kratos.conf.CommonConfig.registry:type_name -> kratos.conf.Registry
-	2, // 3: kratos.conf.CommonConfig.log:type_name -> kratos.conf.Log
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	3, // 0: kratos.conf.Registry.consul:type_name -> kratos.conf.Registry.Consul
+	0, // 1: kratos.conf.Shared.registry:type_name -> kratos.conf.Registry
+	1, // 2: kratos.conf.Shared.log:type_name -> kratos.conf.Log
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_pkg_conf_conf_proto_init() }
@@ -345,7 +280,7 @@ func file_pkg_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_conf_conf_proto_rawDesc), len(file_pkg_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

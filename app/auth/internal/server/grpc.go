@@ -29,11 +29,11 @@ func NewGRPCServer(params GRPCServerParams) (*grpc.Server, error) {
 		),
 	}
 
-	if params.Config.Server.Grpc.Addr != "" {
-		opts = append(opts, grpc.Address(params.Config.Server.Grpc.Addr))
+	if addr := params.Config.GetServer().GetGrpc().GetAddr(); addr != "" {
+		opts = append(opts, grpc.Address(addr))
 	}
 
-	if t := params.Config.Server.Grpc.GetTimeout(); t != nil {
+	if t := params.Config.GetServer().GetGrpc().GetTimeout(); t != nil {
 		opts = append(opts, grpc.Timeout(t.AsDuration()))
 	}
 

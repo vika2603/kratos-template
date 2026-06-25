@@ -4,11 +4,6 @@ package kratos.conf;
 
 option go_package = "kratos-template/pkg/conf;conf";
 
-message Service {
-  string name = 1;
-  string version = 2;
-}
-
 message Registry {
   message Consul {
     string address = 1;
@@ -22,8 +17,8 @@ message Log {
   string env = 2;
 }
 
-message CommonConfig {
-  Service service = 1;
-  Registry registry = 2;
-  Log log = 4;
+// Name and version are baked into the binary (see bootstrap.Run), not configured.
+message Shared {
+  Registry registry = 1;
+  Log log = 2;
 }

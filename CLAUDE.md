@@ -37,14 +37,17 @@ Wiring is Uber FX, not Kratos wire. Each layer has one `fx.go` exposing
 `var Module = fx.Module("<svc>.<layer>", …)`. `cmd/<svc>/main.go` is the only assembly point:
 
 ```go
-bootstrap.Run[conf.Bootstrap](flagConf, "config/<svc>/",
+bootstrap.Run[conf.Bootstrap]("<svc>",
     bootstrap.WithKratosApp(), data.Module, biz.Module, service.Module, server.Module)
 ```
 
-- `bootstrap.Run` loads config, inits zap + OTEL tracer, and supplies into the FX graph:
-  `kratosconfig.Config`, `*conf.Bootstrap` (service-private), `*conf.CommonConfig` (shared),
-  `*zap.Logger`, plus registry/discovery and service identity via **named** tags
-  (`name:"service_id"`, etc. — see `pkg/bootstrap/providers.go`).
+- `bootstrap.Run` takes the service name (its compile-time identity; also derives the
+  config paths `configs/<svc>.yaml` + `config/<svc>/`), owns flag parsing (`-conf`,
+  `-version` — add shared flags here), loads config, inits zap + OTEL tracer, and supplies
+  into the FX graph: `kratosconfig.Config`, `*conf.Bootstrap` (service-private),
+  `*conf.Shared` (registry/log), `*zap.Logger`, plus registry/discovery and service
+  identity via **named** tags (`name:"service_id"`, etc. — see `pkg/bootstrap/providers.go`).
+  Version is baked in via `-ldflags` (see Makefile), not config.
 - The **server** Module annotates its gRPC server into `group:"servers"` as a
   `transport.Server`; `NewKratosApp` collects that group. A new transport must join the group.
 - Resource constructors return `(*T, func(), error)`; the `func()` cleanup is registered onto
@@ -66,7 +69,8 @@ bootstrap.Run[conf.Bootstrap](flagConf, "config/<svc>/",
 ## Config
 
 Independent per service. Local `configs/<svc>.yaml`; prod Consul prefix `config/<svc>/`.
-Priority: **env > Consul > local**. Common section (`service`/`registry`/`log`) is defined in
+Priority: **env > Consul > local**. Shared section (`registry`/`log`) is defined in
 `pkg/conf`; the private section (`server`/`data`/service-specific like `jwt_secret`) in
-`app/<svc>/internal/conf`. Env overrides are applied inline at the read site via
+`app/<svc>/internal/conf`. Service name/version are not config — name is the literal
+passed to `bootstrap.Run`, version is `-ldflags`-stamped into the binary. Env overrides are applied inline at the read site via
 `cmp.Or(os.Getenv("X"), cfg…)` — grep for the var names in `README.md`'s env table.

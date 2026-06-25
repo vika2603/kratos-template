@@ -6,7 +6,7 @@ import "google/protobuf/duration.proto";
 
 option go_package = "kratos-template/app/auth/internal/conf;conf";
 
-// Bootstrap holds this service's private config only. Common config
+// Bootstrap holds this service's private config only. Shared config
 // (service / registry / log) lives in pkg/conf and is scanned separately
 // by pkg/bootstrap.
 message Bootstrap {

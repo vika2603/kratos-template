@@ -2,6 +2,8 @@ package bootstrap
 
 import (
 	"cmp"
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
@@ -10,7 +12,6 @@ import (
 	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/hashicorp/consul/api"
 
-	"kratos-template/pkg/conf"
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 )
@@ -21,38 +22,58 @@ func init() {
 
 const consulAddrEnv = "CONSUL_ADDR"
 
-func NewConfig(localPath, consulPath, consulAddr string) (config.Config, error) {
-	consulAddr = cmp.Or(consulAddr, os.Getenv(consulAddrEnv))
-	consulPath = cmp.Or(os.Getenv("CONSUL_CONFIG_PATH"), consulPath)
-
-	var sources []config.Source
-
-	if localPath != "" {
-		if _, err := os.Stat(localPath); err == nil {
-			sources = append(sources, file.NewSource(localPath))
-			log.Infof("Config: using local file %s", localPath)
-		}
-	}
-
-	if consulAddr != "" && consulPath != "" {
-		consulClient, err := api.NewClient(&api.Config{
-			Address: consulAddr,
-		})
-		if err == nil {
-			cs, err := consul.New(consulClient, consul.WithPath(consulPath))
-			if err == nil {
-				sources = append(sources, cs)
-				log.Infof("Config: using Consul source %s%s", consulAddr, consulPath)
-			}
-		}
+// NewConfig assembles config from layered sources and loads it. Both the local
+// file and Consul may apply at once — see configSources for precedence.
+func NewConfig(localPath, consulPath string) (config.Config, error) {
+	sources, err := configSources(localPath, consulPath)
+	if err != nil {
+		return nil, err
 	}
 
 	c := config.New(config.WithSource(sources...))
 	if err := c.Load(); err != nil {
 		return nil, err
 	}
-
 	return c, nil
+}
+
+// configSources layers sources low→high precedence: local file (committed
+// defaults) < Consul (deployed overrides), with env vars overriding individual
+// values later at their read sites. Both are optional; at least one must resolve.
+// Consul is only added when CONSUL_ADDR is set, and a configured-but-unreachable
+// Consul is a hard error rather than a silent fallthrough.
+func configSources(localPath, consulPath string) ([]config.Source, error) {
+	var sources []config.Source
+
+	if localPath != "" {
+		if _, err := os.Stat(localPath); err == nil {
+			sources = append(sources, file.NewSource(localPath))
+			log.Infof("Config: file %s", localPath)
+		}
+	}
+
+	if addr := os.Getenv(consulAddrEnv); addr != "" {
+		path := cmp.Or(os.Getenv("CONSUL_CONFIG_PATH"), consulPath)
+		cs, err := consulSource(addr, path)
+		if err != nil {
+			return nil, fmt.Errorf("consul %s%s: %w", addr, path, err)
+		}
+		sources = append(sources, cs)
+		log.Infof("Config: Consul %s%s", addr, path)
+	}
+
+	if len(sources) == 0 {
+		return nil, errors.New("no config source: pass -conf <file> or set CONSUL_ADDR")
+	}
+	return sources, nil
+}
+
+func consulSource(addr, path string) (config.Source, error) {
+	client, err := api.NewClient(&api.Config{Address: addr})
+	if err != nil {
+		return nil, err
+	}
+	return consul.New(client, consul.WithPath(path))
 }
 
 func LoadConfig[T any](cfg config.Config) (*T, error) {
@@ -61,26 +82,6 @@ func LoadConfig[T any](cfg config.Config) (*T, error) {
 		return nil, err
 	}
 	return &bc, nil
-}
-
-func ScanCommonConfig(cfg config.Config) (*conf.CommonConfig, error) {
-	var cc conf.CommonConfig
-	if err := cfg.Scan(&cc); err != nil {
-		return nil, err
-	}
-	if name := os.Getenv("SERVICE_NAME"); name != "" {
-		if cc.Service == nil {
-			cc.Service = &conf.Service{}
-		}
-		cc.Service.Name = name
-	}
-	if version := os.Getenv("SERVICE_VERSION"); version != "" {
-		if cc.Service == nil {
-			cc.Service = &conf.Service{}
-		}
-		cc.Service.Version = version
-	}
-	return &cc, nil
 }
 
 func hostname() string {

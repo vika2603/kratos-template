@@ -2,17 +2,32 @@ package bootstrap
 
 import (
 	"context"
+	"flag"
+	"fmt"
 
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 
+	"kratos-template/pkg/conf"
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 )
 
-func Run[T any](configPath, consulPath string, opts ...fx.Option) {
-	cfg, err := NewConfig(configPath, consulPath, "")
+// Version is stamped at build time via -ldflags (see Makefile); "dev" locally.
+var Version = "dev"
+
+// Run owns flag parsing — add shared flags here, not per-service.
+func Run[T any](name string, opts ...fx.Option) {
+	configPath := flag.String("conf", "configs/"+name+".yaml", "config file path")
+	showVersion := flag.Bool("version", false, "print version and exit")
+	flag.Parse()
+	if *showVersion {
+		fmt.Println(name, Version)
+		return
+	}
+
+	cfg, err := NewConfig(*configPath, "config/"+name+"/")
 	if err != nil {
 		log.Fatalf("load config error: %v", err)
 	}
@@ -22,17 +37,17 @@ func Run[T any](configPath, consulPath string, opts ...fx.Option) {
 		log.Fatalf("load bootstrap config error: %v", err)
 	}
 
-	cc, err := ScanCommonConfig(cfg)
+	sc, err := LoadConfig[conf.Shared](cfg)
 	if err != nil {
-		log.Fatalf("scan common config error: %v", err)
+		log.Fatalf("load shared config error: %v", err)
 	}
 
-	logger, shutdown, err := log.Init(ProvideLogSettings(cc))
+	logger, shutdown, err := log.Init(ProvideLogSettings(sc))
 	if err != nil {
 		log.Fatalf("init log error: %v", err)
 	}
 
-	tracerShutdown, err := InitTracer(cc.GetService().GetName(), cc.GetService().GetVersion())
+	tracerShutdown, err := InitTracer(name, Version)
 	if err != nil {
 		log.Errorf("init tracer error: %v", err)
 		tracerShutdown = func(context.Context) error { return nil }
@@ -43,14 +58,14 @@ func Run[T any](configPath, consulPath string, opts ...fx.Option) {
 		fx.Supply(
 			fx.Annotate(cfg, fx.As(new(kratosconfig.Config))),
 			bc,
-			cc,
+			sc,
 			logger,
 		),
-		CommonLifecycleOptions(shutdown),
+		SharedLifecycleOptions(shutdown),
 		fx.Invoke(func(lc fx.Lifecycle) {
 			lc.Append(fx.Hook{OnStop: tracerShutdown})
 		}),
-		CommonProviders(),
+		SharedProviders(name, Version),
 	}
 	allOpts = append(allOpts, opts...)
 

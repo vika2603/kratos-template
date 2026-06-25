@@ -97,9 +97,6 @@ func (uc *UserUseCase) VerifyCredentials(ctx context.Context, username, password
 func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*User, error) {
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return nil, ErrUserNotFound
-		}
 		return nil, err
 	}
 	return user, nil
@@ -108,9 +105,6 @@ func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*User, error) {
 func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email string) (*User, error) {
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return nil, ErrUserNotFound
-		}
 		return nil, err
 	}
 
@@ -146,9 +140,6 @@ func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email strin
 func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return ErrUserNotFound
-		}
 		return err
 	}
 

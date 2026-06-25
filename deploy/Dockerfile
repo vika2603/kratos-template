@@ -10,8 +10,11 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/auth ./app/auth/cmd/auth && \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/user ./app/user/cmd/user
+ARG VERSION=dev
+ENV LDFLAGS="-s -w -X kratos-template/pkg/bootstrap.Version=$VERSION"
+
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="$LDFLAGS" -o /out/auth ./app/auth/cmd/auth && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="$LDFLAGS" -o /out/user ./app/user/cmd/user
 
 FROM alpine:3.19 AS base
 RUN apk --no-cache add ca-certificates tzdata

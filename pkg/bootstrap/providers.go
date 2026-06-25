@@ -27,7 +27,7 @@ type ServiceInfoResult struct {
 	ServiceMetadata map[string]string `name:"service_metadata"`
 }
 
-func ProvideLogSettings(cfg *conf.CommonConfig) log.Config {
+func ProvideLogSettings(cfg *conf.Shared) log.Config {
 	level := cfg.GetLog().GetLevel()
 	if level == "" {
 		level = "info"
@@ -49,7 +49,7 @@ func ProvideLogSettings(cfg *conf.CommonConfig) log.Config {
 	}
 }
 
-func ProvideRegistrySettings(cfg *conf.CommonConfig) RegistrySettingsResult {
+func ProvideRegistrySettings(cfg *conf.Shared) RegistrySettingsResult {
 	address := cmp.Or(os.Getenv(consulAddrEnv), cfg.GetRegistry().GetConsul().GetAddress())
 	scheme := cfg.GetRegistry().GetConsul().GetScheme()
 	if scheme == "" {
@@ -61,33 +61,26 @@ func ProvideRegistrySettings(cfg *conf.CommonConfig) RegistrySettingsResult {
 	}
 }
 
-func ProvideServiceInfo(cfg *conf.CommonConfig) ServiceInfoResult {
-	name := cfg.GetService().GetName()
-	if name == "" {
-		name = "unknown"
-	}
-	version := cfg.GetService().GetVersion()
-	if version == "" {
-		version = "v0.0.0"
-	}
-	hostname := hostname()
-	return ServiceInfoResult{
-		ServiceID:       name + "-" + hostname,
-		ServiceName:     name,
-		ServiceVersion:  version,
-		ServiceMetadata: nil,
+func ProvideServiceInfo(name, version string) func() ServiceInfoResult {
+	return func() ServiceInfoResult {
+		return ServiceInfoResult{
+			ServiceID:       name + "-" + hostname(),
+			ServiceName:     name,
+			ServiceVersion:  version,
+			ServiceMetadata: nil,
+		}
 	}
 }
 
-func CommonProviders() fx.Option {
+func SharedProviders(name, version string) fx.Option {
 	return fx.Options(
 		fx.Provide(ProvideRegistrySettings),
 		fx.Provide(registry.New),
-		fx.Provide(ProvideServiceInfo),
+		fx.Provide(ProvideServiceInfo(name, version)),
 	)
 }
 
-func CommonLifecycleOptions(shutdown func(context.Context) error) fx.Option {
+func SharedLifecycleOptions(shutdown func(context.Context) error) fx.Option {
 	return fx.Options(
 		fx.Invoke(func(lc fx.Lifecycle, c kratosconfig.Config) {
 			lc.Append(fx.Hook{
