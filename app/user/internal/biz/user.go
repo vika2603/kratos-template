@@ -2,12 +2,12 @@ package biz
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"golang.org/x/crypto/bcrypt"
 
-	kratosErrors "github.com/go-kratos/kratos/v2/errors"
+	userv1 "kratos-template/api/user/v1"
 )
 
 // User is the biz-layer domain type; the data layer maps it to/from pkg/model.User.
@@ -24,38 +24,18 @@ type UserRepo interface {
 	Create(ctx context.Context, user *User) error
 	GetByID(ctx context.Context, id string) (*User, error)
 	GetByUsername(ctx context.Context, username string) (*User, error)
-	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, offset, limit int) ([]*User, int64, error)
 }
-
-var (
-	ErrUserNotFound       = kratosErrors.NotFound("USER_NOT_FOUND", "user not found")
-	ErrUsernameExists     = kratosErrors.Conflict("USERNAME_EXISTS", "username already exists")
-	ErrEmailExists        = kratosErrors.Conflict("EMAIL_EXISTS", "email already exists")
-	ErrInvalidCredentials = kratosErrors.Unauthorized("INVALID_CREDENTIALS", "invalid credentials")
-)
 
 type UserUseCase struct {
 	repo UserRepo
 }
 
 func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password string) (*User, error) {
-	existingUser, err := uc.repo.GetByUsername(ctx, username)
-	if err != nil && !errors.Is(err, ErrUserNotFound) {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, ErrUsernameExists
-	}
-
-	existingUser, err = uc.repo.GetByEmail(ctx, email)
-	if err != nil && !errors.Is(err, ErrUserNotFound) {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, ErrEmailExists
+	if len(password) > 72 {
+		return nil, kratosErrors.BadRequest("VALIDATION_FAILED", "password must be at most 72 bytes")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -81,14 +61,14 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, username, email, password
 func (uc *UserUseCase) VerifyCredentials(ctx context.Context, username, password string) (*User, error) {
 	user, err := uc.repo.GetByUsername(ctx, username)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			return nil, ErrInvalidCredentials
+		if userv1.IsUserNotFound(err) {
+			return nil, userv1.ErrorInvalidCredentials("invalid credentials")
 		}
 		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return nil, ErrInvalidCredentials
+		return nil, userv1.ErrorInvalidCredentials("invalid credentials")
 	}
 
 	return user, nil
@@ -109,24 +89,10 @@ func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email strin
 	}
 
 	if username != "" && username != user.Username {
-		existingUser, err := uc.repo.GetByUsername(ctx, username)
-		if err != nil && !errors.Is(err, ErrUserNotFound) {
-			return nil, err
-		}
-		if existingUser != nil && existingUser.ID != id {
-			return nil, ErrUsernameExists
-		}
 		user.Username = username
 	}
 
 	if email != "" && email != user.Email {
-		existingUser, err := uc.repo.GetByEmail(ctx, email)
-		if err != nil && !errors.Is(err, ErrUserNotFound) {
-			return nil, err
-		}
-		if existingUser != nil && existingUser.ID != id {
-			return nil, ErrEmailExists
-		}
 		user.Email = email
 	}
 
@@ -138,12 +104,7 @@ func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email strin
 }
 
 func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
-	user, err := uc.repo.GetByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return uc.repo.Delete(ctx, user.ID)
+	return uc.repo.Delete(ctx, id)
 }
 
 func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*User, int32, error) {
@@ -153,14 +114,22 @@ func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*
 	if pageSize <= 0 {
 		pageSize = 10
 	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
 
-	offset := int((page - 1) * pageSize)
+	offset := int(int64(page-1) * int64(pageSize))
 	limit := int(pageSize)
 
 	users, total, err := uc.repo.List(ctx, offset, limit)
 	if err != nil {
 		return nil, 0, err
 	}
+	if total > maxListTotal {
+		total = maxListTotal
+	}
 
 	return users, int32(total), nil
 }
+
+const maxListTotal = int64(1<<31 - 1)

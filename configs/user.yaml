@@ -7,6 +7,9 @@ data:
   database:
     source: postgres://postgres:postgres@localhost:5432/user_db?sslmode=disable
 
+auth:
+  jwt_secret: CHANGE_ME
+
 # (no registry → standalone local run; set CONSUL_ADDR to register)
 log:
   level: info

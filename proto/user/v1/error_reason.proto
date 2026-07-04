@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "errors/errors.proto";
+
+option go_package = "kratos-template/api/user/v1;v1";
+
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0;
+  USER_NOT_FOUND = 1 [(errors.code) = 404];
+  USERNAME_EXISTS = 2 [(errors.code) = 409];
+  EMAIL_EXISTS = 3 [(errors.code) = 409];
+  INVALID_CREDENTIALS = 4 [(errors.code) = 401];
+  INTERNAL = 5 [(errors.code) = 500];
+}

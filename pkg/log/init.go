@@ -2,19 +2,24 @@ package log
 
 import (
 	"context"
+	"errors"
 	"os"
+	"sync/atomic"
+	"syscall"
 	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	_logger *zap.Logger
-	_level  zap.AtomicLevel
-	_global *zap.Logger        // with CallerSkip(1) for package-level functions
-	_sugar  *zap.SugaredLogger // from _global
-)
+type state struct {
+	logger *zap.Logger
+	level  zap.AtomicLevel
+	global *zap.Logger
+	sugar  *zap.SugaredLogger
+}
+
+var current atomic.Pointer[state]
 
 func init() {
 	l, level, _ := New(defaultConfig())
@@ -23,10 +28,17 @@ func init() {
 }
 
 func set(l *zap.Logger, level zap.AtomicLevel) {
-	_logger = l
-	_level = level
-	_global = l.WithOptions(zap.AddCallerSkip(1))
-	_sugar = _global.Sugar()
+	global := l.WithOptions(zap.AddCallerSkip(1))
+	current.Store(&state{
+		logger: l,
+		level:  level,
+		global: global,
+		sugar:  global.Sugar(),
+	})
+}
+
+func load() *state {
+	return current.Load()
 }
 
 func Init(cfg Config) (*zap.Logger, func(context.Context) error, error) {
@@ -38,43 +50,50 @@ func Init(cfg Config) (*zap.Logger, func(context.Context) error, error) {
 	set(l, level)
 	zap.ReplaceGlobals(l)
 
-	shutdown := func(ctx context.Context) error {
-		return l.Sync()
+	shutdown := func(context.Context) error {
+		err := l.Sync()
+		if isIgnorableSyncError(err) {
+			return nil
+		}
+		return err
 	}
 
 	return l, shutdown, nil
 }
 
 // L returns the global logger for DI or direct use.
-func L() *zap.Logger { return _logger }
+func L() *zap.Logger { return load().logger }
 
 // SetLevel dynamically changes the global log level.
-func SetLevel(l zapcore.Level) { _level.SetLevel(l) }
+func SetLevel(l zapcore.Level) { load().level.SetLevel(l) }
 
 // GetLevel returns the current log level.
-func GetLevel() zapcore.Level { return _level.Level() }
+func GetLevel() zapcore.Level { return load().level.Level() }
 
-// AtomicLevel returns the underlying AtomicLevel, which also implements
-// http.Handler for GET/PUT log level changes at runtime.
-func AtomicLevel() zap.AtomicLevel { return _level }
+// AtomicLevel returns the underlying zap AtomicLevel for runtime level changes.
+func AtomicLevel() zap.AtomicLevel { return load().level }
 
 // With creates a child logger with additional fields.
-func With(fields ...zap.Field) *zap.Logger { return _logger.With(fields...) }
+func With(fields ...zap.Field) *zap.Logger { return load().logger.With(fields...) }
 
 // Named creates a named child logger.
-func Named(name string) *zap.Logger { return _logger.Named(name) }
+func Named(name string) *zap.Logger { return load().logger.Named(name) }
 
-func Debug(msg string, fields ...zap.Field) { _global.Debug(msg, fields...) }
-func Info(msg string, fields ...zap.Field)  { _global.Info(msg, fields...) }
-func Warn(msg string, fields ...zap.Field)  { _global.Warn(msg, fields...) }
-func Error(msg string, fields ...zap.Field) { _global.Error(msg, fields...) }
-func Fatal(msg string, fields ...zap.Field) { _global.Fatal(msg, fields...) }
+func Debug(msg string, fields ...zap.Field) { load().global.Debug(msg, fields...) }
+func Info(msg string, fields ...zap.Field)  { load().global.Info(msg, fields...) }
+func Warn(msg string, fields ...zap.Field)  { load().global.Warn(msg, fields...) }
+func Error(msg string, fields ...zap.Field) { load().global.Error(msg, fields...) }
+func Fatal(msg string, fields ...zap.Field) { load().global.Fatal(msg, fields...) }
 
-func Debugf(template string, args ...any) { _sugar.Debugf(template, args...) }
-func Infof(template string, args ...any)  { _sugar.Infof(template, args...) }
-func Warnf(template string, args ...any)  { _sugar.Warnf(template, args...) }
-func Errorf(template string, args ...any) { _sugar.Errorf(template, args...) }
-func Fatalf(template string, args ...any) { _sugar.Fatalf(template, args...) }
+func Debugf(template string, args ...any) { load().sugar.Debugf(template, args...) }
+func Infof(template string, args ...any)  { load().sugar.Infof(template, args...) }
+func Warnf(template string, args ...any)  { load().sugar.Warnf(template, args...) }
+func Errorf(template string, args ...any) { load().sugar.Errorf(template, args...) }
+func Fatalf(template string, args ...any) { load().sugar.Fatalf(template, args...) }
+
+func isIgnorableSyncError(err error) bool {
+	return errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.ENOTTY)
+}
 
 func New(cfg Config) (*zap.Logger, zap.AtomicLevel, error) {
 	cfg.applyDefaults()

@@ -1,16 +1,15 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/v2/middleware/logging"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"kratos-template/app/auth/internal/conf"
+	"kratos-template/pkg/bootstrap"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
 	v1 "kratos-template/api/auth/v1"
-	"kratos-template/app/auth/internal/conf"
-	"kratos-template/pkg/log/adapter"
 )
 
 type GRPCServerParams struct {
@@ -20,25 +19,20 @@ type GRPCServerParams struct {
 	AuthService v1.AuthServiceServer
 }
 
-func NewGRPCServer(params GRPCServerParams) (*grpc.Server, error) {
-	var opts = []grpc.ServerOption{
-		grpc.Middleware(
-			recovery.Recovery(),
-			tracing.Server(),
-			logging.Server(adapter.NewKratosAdapter(params.Logger)),
-		),
+func NewGRPCServer(params GRPCServerParams) *grpc.Server {
+	grpcCfg := params.Config.GetServer().GetGrpc()
+	var timeout time.Duration
+	if t := grpcCfg.GetTimeout(); t != nil {
+		timeout = t.AsDuration()
 	}
-
-	if addr := params.Config.GetServer().GetGrpc().GetAddr(); addr != "" {
-		opts = append(opts, grpc.Address(addr))
-	}
-
-	if t := params.Config.GetServer().GetGrpc().GetTimeout(); t != nil {
-		opts = append(opts, grpc.Timeout(t.AsDuration()))
-	}
-
-	srv := grpc.NewServer(opts...)
-	v1.RegisterAuthServiceServer(srv, params.AuthService)
-
-	return srv, nil
+	return bootstrap.BuildGRPCServer(
+		bootstrap.GRPCServerConfig{
+			Addr:    grpcCfg.GetAddr(),
+			Timeout: timeout,
+		},
+		params.Logger,
+		func(srv *grpc.Server) {
+			v1.RegisterAuthServiceServer(srv, params.AuthService)
+		},
+	)
 }

@@ -1,10 +1,10 @@
 package adapter
 
 import (
+	"kratos-template/pkg/log"
+
 	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
-
-	"kratos-template/pkg/log"
 )
 
 type KratosAdapter struct {

@@ -29,6 +29,7 @@ type Bootstrap struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Server        *Server                `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	Data          *Data                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Auth          *Auth                  `protobuf:"bytes,3,opt,name=auth,proto3" json:"auth,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,6 +74,13 @@ func (x *Bootstrap) GetServer() *Server {
 func (x *Bootstrap) GetData() *Data {
 	if x != nil {
 		return x.Data
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetAuth() *Auth {
+	if x != nil {
+		return x.Auth
 	}
 	return nil
 }
@@ -165,6 +173,50 @@ func (x *Data) GetDatabase() *Data_Database {
 	return nil
 }
 
+type Auth struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JwtSecret     string                 `protobuf:"bytes,1,opt,name=jwt_secret,json=jwtSecret,proto3" json:"jwt_secret,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Auth) Reset() {
+	*x = Auth{}
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Auth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Auth) ProtoMessage() {}
+
+func (x *Auth) ProtoReflect() protoreflect.Message {
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Auth.ProtoReflect.Descriptor instead.
+func (*Auth) Descriptor() ([]byte, []int) {
+	return file_app_user_internal_conf_conf_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Auth) GetJwtSecret() string {
+	if x != nil {
+		return x.JwtSecret
+	}
+	return ""
+}
+
 type Server_GRPC struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
@@ -175,7 +227,7 @@ type Server_GRPC struct {
 
 func (x *Server_GRPC) Reset() {
 	*x = Server_GRPC{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -187,7 +239,7 @@ func (x *Server_GRPC) String() string {
 func (*Server_GRPC) ProtoMessage() {}
 
 func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[3]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -226,7 +278,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -238,7 +290,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_app_user_internal_conf_conf_proto_msgTypes[4]
+	mi := &file_app_user_internal_conf_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -265,10 +317,11 @@ var File_app_user_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\x1a\x1egoogle/protobuf/duration.proto\"q\n" +
+	"!app/user/internal/conf/conf.proto\x12\x14kratos.api.user.conf\x1a\x1egoogle/protobuf/duration.proto\"\xa1\x01\n" +
 	"\tBootstrap\x124\n" +
 	"\x06server\x18\x01 \x01(\v2\x1c.kratos.api.user.conf.ServerR\x06server\x12.\n" +
-	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\"\x90\x01\n" +
+	"\x04data\x18\x02 \x01(\v2\x1a.kratos.api.user.conf.DataR\x04data\x12.\n" +
+	"\x04auth\x18\x03 \x01(\v2\x1a.kratos.api.user.conf.AuthR\x04auth\"\x90\x01\n" +
 	"\x06Server\x125\n" +
 	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.user.conf.Server.GRPCR\x04grpc\x1aO\n" +
 	"\x04GRPC\x12\x12\n" +
@@ -277,7 +330,10 @@ const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\x04Data\x12?\n" +
 	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.user.conf.Data.DatabaseR\bdatabase\x1a\"\n" +
 	"\bDatabase\x12\x16\n" +
-	"\x06source\x18\x01 \x01(\tR\x06sourceB-Z+kratos-template/app/user/internal/conf;confb\x06proto3"
+	"\x06source\x18\x01 \x01(\tR\x06source\"%\n" +
+	"\x04Auth\x12\x1d\n" +
+	"\n" +
+	"jwt_secret\x18\x01 \x01(\tR\tjwtSecretB-Z+kratos-template/app/user/internal/conf;confb\x06proto3"
 
 var (
 	file_app_user_internal_conf_conf_proto_rawDescOnce sync.Once
@@ -291,26 +347,28 @@ func file_app_user_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_app_user_internal_conf_conf_proto_rawDescData
 }
 
-var file_app_user_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_app_user_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_app_user_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: kratos.api.user.conf.Bootstrap
 	(*Server)(nil),              // 1: kratos.api.user.conf.Server
 	(*Data)(nil),                // 2: kratos.api.user.conf.Data
-	(*Server_GRPC)(nil),         // 3: kratos.api.user.conf.Server.GRPC
-	(*Data_Database)(nil),       // 4: kratos.api.user.conf.Data.Database
-	(*durationpb.Duration)(nil), // 5: google.protobuf.Duration
+	(*Auth)(nil),                // 3: kratos.api.user.conf.Auth
+	(*Server_GRPC)(nil),         // 4: kratos.api.user.conf.Server.GRPC
+	(*Data_Database)(nil),       // 5: kratos.api.user.conf.Data.Database
+	(*durationpb.Duration)(nil), // 6: google.protobuf.Duration
 }
 var file_app_user_internal_conf_conf_proto_depIdxs = []int32{
 	1, // 0: kratos.api.user.conf.Bootstrap.server:type_name -> kratos.api.user.conf.Server
 	2, // 1: kratos.api.user.conf.Bootstrap.data:type_name -> kratos.api.user.conf.Data
-	3, // 2: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
-	4, // 3: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
-	5, // 4: kratos.api.user.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3, // 2: kratos.api.user.conf.Bootstrap.auth:type_name -> kratos.api.user.conf.Auth
+	4, // 3: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
+	5, // 4: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
+	6, // 5: kratos.api.user.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_app_user_internal_conf_conf_proto_init() }
@@ -324,7 +382,7 @@ func file_app_user_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_user_internal_conf_conf_proto_rawDesc), len(file_app_user_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

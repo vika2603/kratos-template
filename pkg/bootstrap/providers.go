@@ -3,14 +3,13 @@ package bootstrap
 import (
 	"cmp"
 	"context"
+	"kratos-template/pkg/conf"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/registry"
 	"os"
 
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"go.uber.org/fx"
-
-	"kratos-template/pkg/conf"
-	"kratos-template/pkg/log"
-	"kratos-template/pkg/registry"
 )
 
 type RegistrySettingsResult struct {
@@ -21,10 +20,9 @@ type RegistrySettingsResult struct {
 
 type ServiceInfoResult struct {
 	fx.Out
-	ServiceID       string            `name:"service_id"`
-	ServiceName     string            `name:"service_name"`
-	ServiceVersion  string            `name:"service_version"`
-	ServiceMetadata map[string]string `name:"service_metadata"`
+	ServiceID      string `name:"service_id"`
+	ServiceName    string `name:"service_name"`
+	ServiceVersion string `name:"service_version"`
 }
 
 func ProvideLogSettings(cfg *conf.Shared) log.Config {
@@ -64,10 +62,9 @@ func ProvideRegistrySettings(cfg *conf.Shared) RegistrySettingsResult {
 func ProvideServiceInfo(name, version string) func() ServiceInfoResult {
 	return func() ServiceInfoResult {
 		return ServiceInfoResult{
-			ServiceID:       name + "-" + hostname(),
-			ServiceName:     name,
-			ServiceVersion:  version,
-			ServiceMetadata: nil,
+			ServiceID:      name + "-" + hostname(),
+			ServiceName:    name,
+			ServiceVersion: version,
 		}
 	}
 }

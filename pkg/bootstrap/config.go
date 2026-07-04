@@ -4,6 +4,8 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 	"os"
 
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
@@ -11,9 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/config/file"
 	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/hashicorp/consul/api"
-
-	"kratos-template/pkg/log"
-	"kratos-template/pkg/log/adapter"
 )
 
 func init() {

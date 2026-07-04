@@ -3,16 +3,15 @@ package data
 import (
 	"cmp"
 	"fmt"
+	"kratos-template/app/user/internal/conf"
+	"kratos-template/app/user/internal/data/query"
+	"kratos-template/pkg/log"
+	"kratos-template/pkg/log/adapter"
 	"os"
 
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"kratos-template/app/user/internal/conf"
-	"kratos-template/app/user/internal/data/query"
-	"kratos-template/pkg/log"
-	"kratos-template/pkg/log/adapter"
 )
 
 type Data struct {

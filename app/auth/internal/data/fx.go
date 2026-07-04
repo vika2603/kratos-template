@@ -8,8 +8,10 @@ import (
 
 var Module = fx.Module("auth.data",
 	fx.Provide(NewUserClientConn),
+	fx.Provide(NewRedisClient),
 	fx.Provide(NewData),
 	fx.Provide(NewAuthUserRepo),
+	fx.Provide(NewTokenRepo),
 	fx.Invoke(registerLifecycle),
 )
 

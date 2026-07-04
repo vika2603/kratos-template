@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/transport"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
-func WithContextLogger(logger *zap.Logger, ctx context.Context) *zap.Logger {
+func WithContextLogger(ctx context.Context, logger *zap.Logger) *zap.Logger {
 	if logger == nil {
 		return logger
 	}
@@ -25,6 +26,12 @@ func extractContextFields(ctx context.Context) []zap.Field {
 			fields = append(fields, zap.String("request_id", requestID))
 		}
 		fields = append(fields, zap.String("operation", tr.Operation()))
+	}
+	if spanCtx := trace.SpanContextFromContext(ctx); spanCtx.IsValid() {
+		fields = append(fields,
+			zap.String("trace_id", spanCtx.TraceID().String()),
+			zap.String("span_id", spanCtx.SpanID().String()),
+		)
 	}
 
 	return fields

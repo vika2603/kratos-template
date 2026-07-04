@@ -4,13 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kratos-template/pkg/log"
 	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
-
-	"kratos-template/pkg/log"
 )
 
 const (
@@ -57,19 +56,19 @@ func (a *GormAdapter) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
 
 func (a *GormAdapter) Info(ctx context.Context, msg string, data ...interface{}) {
 	if a.level >= gormlogger.Info {
-		log.WithContextLogger(a.logger, ctx).Sugar().Infof(msg, data...)
+		log.WithContextLogger(ctx, a.logger).Sugar().Infof(msg, data...)
 	}
 }
 
 func (a *GormAdapter) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if a.level >= gormlogger.Warn {
-		log.WithContextLogger(a.logger, ctx).Sugar().Warnf(msg, data...)
+		log.WithContextLogger(ctx, a.logger).Sugar().Warnf(msg, data...)
 	}
 }
 
 func (a *GormAdapter) Error(ctx context.Context, msg string, data ...interface{}) {
 	if a.level >= gormlogger.Error {
-		log.WithContextLogger(a.logger, ctx).Sugar().Errorf(msg, data...)
+		log.WithContextLogger(ctx, a.logger).Sugar().Errorf(msg, data...)
 	}
 }
 
@@ -81,7 +80,7 @@ func (a *GormAdapter) Trace(ctx context.Context, begin time.Time, fc func() (sql
 	elapsed := time.Since(begin)
 	sql, rows := fc()
 
-	l := log.WithContextLogger(a.logger, ctx).With(
+	l := log.WithContextLogger(ctx, a.logger).With(
 		zap.Duration("elapsed", elapsed),
 		zap.String("sql", sql),
 		zap.Int64("rows", rows),

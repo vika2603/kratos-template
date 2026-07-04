@@ -4,14 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-
-	kratosconfig "github.com/go-kratos/kratos/v2/config"
-	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
-
 	"kratos-template/pkg/conf"
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
+
+	kratosconfig "github.com/go-kratos/kratos/v2/config"
+	"go.uber.org/fx"
 )
 
 // Version is stamped at build time via -ldflags (see Makefile); "dev" locally.
@@ -54,7 +52,7 @@ func Run[T any](name string, opts ...fx.Option) {
 	}
 
 	allOpts := []fx.Option{
-		fx.WithLogger(func() fxevent.Logger { return adapter.NewFxAdapter() }),
+		fx.WithLogger(adapter.NewFxAdapter),
 		fx.Supply(
 			fx.Annotate(cfg, fx.As(new(kratosconfig.Config))),
 			bc,

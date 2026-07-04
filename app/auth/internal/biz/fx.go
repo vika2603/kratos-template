@@ -2,25 +2,36 @@ package biz
 
 import (
 	"cmp"
+	"kratos-template/app/auth/internal/conf"
 	"os"
 	"time"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
-	"kratos-template/app/auth/internal/conf"
 	pkgauth "kratos-template/pkg/auth"
 )
 
-func NewAuthUseCase(repo AuthUserRepo, cfg *conf.Bootstrap) *AuthUseCase {
-	expiry := time.Duration(cfg.Auth.TokenExpiry) * time.Second
-	if expiry <= 0 {
-		expiry = 24 * time.Hour
+func NewAuthUseCase(userRepo AuthUserRepo, tokenRepo TokenRepo, cfg *conf.Bootstrap, logger *zap.Logger) (*AuthUseCase, error) {
+	accessTTL := time.Duration(cfg.Auth.AccessTokenExpiry) * time.Second
+	if accessTTL <= 0 {
+		accessTTL = 15 * time.Minute
+	}
+	refreshTTL := time.Duration(cfg.Auth.RefreshTokenExpiry) * time.Second
+	if refreshTTL <= 0 {
+		refreshTTL = 168 * time.Hour
 	}
 	secret := cmp.Or(os.Getenv("JWT_SECRET"), cfg.Auth.JwtSecret)
-	return &AuthUseCase{
-		repo:       repo,
-		jwtManager: pkgauth.NewJWTManager(secret, expiry),
+	manager, err := pkgauth.NewJWTManager(secret, accessTTL, refreshTTL)
+	if err != nil {
+		return nil, err
 	}
+	return &AuthUseCase{
+		userRepo:   userRepo,
+		tokenRepo:  tokenRepo,
+		jwtManager: manager,
+		logger:     logger,
+	}, nil
 }
 
 var Module = fx.Module("auth.biz",

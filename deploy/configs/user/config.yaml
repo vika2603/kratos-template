@@ -7,6 +7,9 @@ data:
   database:
     source: postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
 
+auth:
+  jwt_secret: CHANGE_ME
+
 registry:
   consul:
     address: consul:8500

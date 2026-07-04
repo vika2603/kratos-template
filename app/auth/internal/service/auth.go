@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
+	"kratos-template/app/auth/internal/biz"
 
 	v1 "kratos-template/api/auth/v1"
-	"kratos-template/app/auth/internal/biz"
 )
 
 type AuthService struct {
@@ -17,28 +17,24 @@ func NewAuthService(uc *biz.AuthUseCase) v1.AuthServiceServer {
 }
 
 func (s *AuthService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginResponse, error) {
-	token, expiresIn, err := s.authUC.Login(ctx, req.Username, req.Password)
+	pair, err := s.authUC.Login(ctx, req.Username, req.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	return &v1.LoginResponse{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   expiresIn,
+		TokenPair: toProtoTokenPair(pair),
 	}, nil
 }
 
 func (s *AuthService) Refresh(ctx context.Context, req *v1.RefreshRequest) (*v1.RefreshResponse, error) {
-	token, expiresIn, err := s.authUC.Refresh(ctx, req.AccessToken)
+	pair, err := s.authUC.Refresh(ctx, req.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 
 	return &v1.RefreshResponse{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   expiresIn,
+		TokenPair: toProtoTokenPair(pair),
 	}, nil
 }
 
@@ -56,11 +52,21 @@ func (s *AuthService) Validate(ctx context.Context, req *v1.ValidateRequest) (*v
 }
 
 func (s *AuthService) Logout(ctx context.Context, req *v1.LogoutRequest) (*v1.LogoutResponse, error) {
-	if err := s.authUC.Logout(ctx, req.AccessToken); err != nil {
+	if err := s.authUC.Logout(ctx, req.AccessToken, req.RefreshToken); err != nil {
 		return nil, err
 	}
 
 	return &v1.LogoutResponse{
 		Success: true,
 	}, nil
+}
+
+func toProtoTokenPair(pair *biz.TokenPair) *v1.TokenPair {
+	return &v1.TokenPair{
+		AccessToken:      pair.AccessToken,
+		RefreshToken:     pair.RefreshToken,
+		TokenType:        pair.TokenType,
+		ExpiresIn:        pair.ExpiresIn,
+		RefreshExpiresIn: pair.RefreshExpiresIn,
+	}
 }

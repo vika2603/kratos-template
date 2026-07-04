@@ -13,9 +13,11 @@ make run-<svc>          # run one service locally vs configs/<svc>.yaml (e.g. ma
 make build              # all services → bin/ ; make build-<svc> for one
 make test               # go test -race -cover ./...
 make lint               # golangci-lint (v2; gofumpt+goimports formatters; api/ excluded)
-make fmt                # gofmt -s -w .
+make fmt                # golangci-lint fmt
 make generate           # regenerate codegen: proto + gorm (see below)
-make up / logs / down   # full docker stack (Postgres + Consul + Jaeger + services)
+make migrate-up/down    # golang-migrate SQL migrations via Docker image
+make check              # fmt + lint + buf-lint + test
+make up / logs / down   # full docker stack (Postgres + Redis + Consul + Jaeger + services)
 ```
 
 Run a single test: `go test -race -run '^TestName$' ./app/<svc>/internal/<layer>/`.
@@ -25,10 +27,12 @@ Run a single test: `go test -race -run '^TestName$' ./app/<svc>/internal/<layer>
 - `api/<svc>/v1/*.pb.go` + `*_grpc.pb.go` and each service's `internal/conf/conf.pb.go`
   come from `make proto` (`buf generate`). Edit the `.proto` source, not the output:
   service contracts in `proto/<svc>/v1/`, private config in `app/<svc>/internal/conf/conf.proto`.
+- `api/<svc>/v1/*_errors.pb.go` comes from `protoc-gen-go-errors`. Add error reasons
+  in `proto/<svc>/v1/error_reason.proto`, not by hand-writing reason strings.
 - `app/<svc>/internal/data/query/*.gen.go` is GORM Gen output from `make gorm`
   (`go run tools/gen/main.go`), driven by structs in `pkg/model`. To generate a new table:
-  add the model to `pkg/model`, then add `g.ApplyBasic(model.X{})` and the query path to
-  `targets` in `tools/gen/main.go`.
+  add the model to `pkg/model`, then add it to the owning service's entry in `targets`
+  in `tools/gen/main.go`.
 - Run `make generate` after touching any proto or model.
 
 ## FX wiring conventions
@@ -50,6 +54,8 @@ bootstrap.Run[conf.Bootstrap]("<svc>",
   Version is baked in via `-ldflags` (see Makefile), not config.
 - The **server** Module annotates its gRPC server into `group:"servers"` as a
   `transport.Server`; `NewKratosApp` collects that group. A new transport must join the group.
+- gRPC servers are built through `pkg/bootstrap.BuildGRPCServer`; put baseline middleware there
+  and add service-specific selector middleware from each service's `internal/server/grpc.go`.
 - Resource constructors return `(*T, func(), error)`; the `func()` cleanup is registered onto
   the FX lifecycle via a small `fx.Invoke(registerLifecycle)` in that layer's `fx.go`.
 - Cross-cutting params travel in `fx.In`/`fx.Out` structs (see `GRPCServerParams`, `AppParams`).
@@ -65,6 +71,13 @@ bootstrap.Run[conf.Bootstrap]("<svc>",
   to another service. One owning service per table — others reach it through that owner's API,
   never by sharing the table. `auth` owns no DB: its repo is a gRPC client to `user`, and
   bcrypt verification stays behind user's `VerifyCredentials` RPC so hashes never cross the wire.
+- `auth` owns Redis token state through `TokenRepo`: access-token denylist, refresh-token
+  rotation, and all-session refresh revocation on reuse detection.
+- `user` service RPCs are protected by `pkg/middleware/authn`: `VerifyCredentials` accepts
+  service tokens only, `GetUser` accepts service/access tokens, and mutating/listing RPCs
+  require access tokens.
+- Data-layer PostgreSQL errors must be translated before leaving data. Do not leak raw GORM/pgx
+  errors to clients; use generated error helpers and log unknown storage errors internally.
 
 ## Config
 
@@ -74,3 +87,15 @@ Priority: **env > Consul > local**. Shared section (`registry`/`log`) is defined
 `app/<svc>/internal/conf`. Service name/version are not config — name is the literal
 passed to `bootstrap.Run`, version is `-ldflags`-stamped into the binary. Env overrides are applied inline at the read site via
 `cmp.Or(os.Getenv("X"), cfg…)` — grep for the var names in `README.md`'s env table.
+
+`JWT_SECRET` is shared by auth and user and must be at least 32 bytes. Auth config uses
+`access_token_expiry` and `refresh_token_expiry`; user reads the same secret to validate
+access/service tokens. Local auth also needs Redis (`REDIS_ADDR`, default config points at
+`127.0.0.1:6379`).
+
+## Schema migrations
+
+The `users` table is defined in `migrations/`, not `deploy/init-db.sql` and not GORM tags.
+`deploy/init-db.sql` only creates `user_db`. Keep migration constraint names stable
+(`users_username_key`, `users_email_key`) because data-layer error translation depends on them.
+The demo admin seed is migration `0002` and is demo-only.

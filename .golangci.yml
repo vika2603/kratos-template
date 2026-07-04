@@ -5,12 +5,39 @@ run:
 
 linters:
   enable:
+    - bodyclose
+    - copyloopvar
+    - depguard
     - errcheck
+    - errorlint
+    - gocritic
+    - gosec
     - govet
+    - noctx
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
     - staticcheck
     - ineffassign
+    - unconvert
+    - unparam
     - unused
     - misspell
+  settings:
+    depguard:
+      rules:
+        biz-layer:
+          files:
+            - "**/internal/biz/**"
+          deny:
+            - pkg: "kratos-template/app/*/internal/data"
+              desc: "biz layer must depend on interfaces, not data implementations"
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
   exclusions:
     generated: lax
     paths:

@@ -28,10 +28,17 @@ message Data {
     // host:port (local) or discovery:///user (via registry)
     string endpoint = 1;
   }
+  message Redis {
+    string addr = 1;
+    string password = 2;
+    int32 db = 3;
+  }
   UserService user_service = 1;
+  Redis redis = 2;
 }
 
 message Auth {
   string jwt_secret = 1;
-  int64 token_expiry = 2;
+  int64 access_token_expiry = 2;
+  int64 refresh_token_expiry = 3;
 }

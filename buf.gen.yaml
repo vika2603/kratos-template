@@ -1,6 +1,13 @@
 version: v2
 managed:
   enabled: false
+# errors/ is a vendored copy of kratos's errors.proto for import only — its Go
+# code ships inside kratos itself; regenerating it here would register
+# errors/errors.proto twice in the protobuf registry and panic at startup.
+inputs:
+  - directory: .
+    exclude_paths:
+      - errors
 # Output path follows each file's go_package (module prefix stripped); plugins
 # run via `go tool`, pinned in go.mod.
 plugins:
@@ -16,3 +23,9 @@ plugins:
       - paths=import
       - module=kratos-template
       - require_unimplemented_servers=false
+
+  - local: ["go", "tool", "protoc-gen-go-errors"]
+    out: .
+    opt:
+      - paths=import
+      - module=kratos-template

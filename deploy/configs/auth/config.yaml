@@ -7,10 +7,15 @@ data:
   # auth owns no DB; it resolves the user service through the registry (Consul).
   user_service:
     endpoint: discovery:///user
+  redis:
+    addr: redis:6379
+    password: ""
+    db: 0
 
 auth:
-  jwt_secret: your-secret-key-change-in-production
-  token_expiry: 86400
+  jwt_secret: CHANGE_ME
+  access_token_expiry: 900
+  refresh_token_expiry: 604800
 
 registry:
   consul:

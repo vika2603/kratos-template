@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package api.auth.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "kratos-template/api/auth/v1;v1";
 
 service AuthService {
@@ -12,28 +14,32 @@ service AuthService {
 }
 
 message LoginRequest {
-  string username = 1;
-  string password = 2;
+  string username = 1 [(buf.validate.field).string = {min_len: 1, max_len: 64}];
+  string password = 2 [(buf.validate.field).string = {min_bytes: 8, max_bytes: 72}];
 }
 
 message LoginResponse {
+  TokenPair token_pair = 1;
+}
+
+message TokenPair {
   string access_token = 1;
-  string token_type = 2;
-  int64 expires_in = 3;
+  string refresh_token = 2;
+  string token_type = 3;
+  int64 expires_in = 4;
+  int64 refresh_expires_in = 5;
 }
 
 message RefreshRequest {
-  string access_token = 1;
+  string refresh_token = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message RefreshResponse {
-  string access_token = 1;
-  string token_type = 2;
-  int64 expires_in = 3;
+  TokenPair token_pair = 1;
 }
 
 message ValidateRequest {
-  string access_token = 1;
+  string access_token = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message ValidateResponse {
@@ -43,7 +49,8 @@ message ValidateResponse {
 }
 
 message LogoutRequest {
-  string access_token = 1;
+  string access_token = 1 [(buf.validate.field).string.min_len = 1];
+  string refresh_token = 2;
 }
 
 message LogoutResponse {

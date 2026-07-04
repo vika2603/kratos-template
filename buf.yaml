@@ -3,13 +3,15 @@ modules:
   - path: .
     excludes:
       - .claude # worktree copies would double every proto
+deps:
+  - buf.build/bufbuild/protovalidate
 lint:
   use:
     - STANDARD
   except:
+    - ENUM_VALUE_PREFIX
     - PACKAGE_DIRECTORY_MATCH
     - PACKAGE_VERSION_SUFFIX
-    - FIELD_LOWER_SNAKE_CASE
 breaking:
   use:
     - FILE

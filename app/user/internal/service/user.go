@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
+	"kratos-template/app/user/internal/biz"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	v1 "kratos-template/api/user/v1"
-	"kratos-template/app/user/internal/biz"
 )
 
 type UserService struct {

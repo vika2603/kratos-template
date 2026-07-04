@@ -2,12 +2,13 @@
 
 BUILD_DIR := bin
 COMPOSE   := docker compose -f deploy/docker-compose.yml
+MIGRATE_IMAGE ?= migrate/migrate:v4.18.3
 
 VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS   := -ldflags "-s -w -X kratos-template/pkg/bootstrap.Version=$(VERSION)"
 export VERSION   # so docker-compose build args pick it up via `make up`
 
-.PHONY: help generate proto gorm build clean test lint fmt tidy up down logs
+.PHONY: help generate proto gorm build clean test lint fmt tidy buf-lint buf-breaking check migrate-up migrate-down up down logs
 
 ## help: list available targets
 help:
@@ -42,7 +43,18 @@ lint:
 
 ## fmt: format all Go code
 fmt:
-	gofmt -s -w .
+	golangci-lint fmt
+
+## buf-lint: lint protobuf sources
+buf-lint:
+	buf lint
+
+## buf-breaking: check protobuf breaking changes against main
+buf-breaking:
+	buf breaking --against '.git#branch=main'
+
+## check: run local quality checks
+check: fmt lint buf-lint test
 
 ## tidy: tidy go modules
 tidy:
@@ -62,7 +74,15 @@ build-%:
 clean:
 	rm -rf $(BUILD_DIR)
 
-# deploy stack (Postgres + Consul + Jaeger + services)
+## migrate-up: apply database migrations
+migrate-up:
+	docker run --rm -v $(PWD)/migrations:/migrations:ro $(MIGRATE_IMAGE) -path=/migrations -database "$${DB_DSN:-postgres://postgres:postgres@host.docker.internal:5432/user_db?sslmode=disable}" up
+
+## migrate-down: roll back one database migration
+migrate-down:
+	docker run --rm -v $(PWD)/migrations:/migrations:ro $(MIGRATE_IMAGE) -path=/migrations -database "$${DB_DSN:-postgres://postgres:postgres@host.docker.internal:5432/user_db?sslmode=disable}" down 1
+
+# deploy stack (Postgres + Redis + Consul + Jaeger + services)
 
 ## up: build and start the full stack
 up:

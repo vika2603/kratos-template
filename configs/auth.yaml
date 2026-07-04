@@ -8,10 +8,15 @@ data:
   # for local runs; use "discovery:///user" when running with the registry.
   user_service:
     endpoint: 127.0.0.1:9082
+  redis:
+    addr: 127.0.0.1:6379
+    password: ""
+    db: 0
 
 auth:
-  jwt_secret: your-secret-key-change-in-production
-  token_expiry: 86400
+  jwt_secret: CHANGE_ME
+  access_token_expiry: 900
+  refresh_token_expiry: 604800
 
 # (no registry → standalone local run; set CONSUL_ADDR to register)
 log:

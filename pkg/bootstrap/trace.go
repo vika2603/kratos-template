@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"os"
+	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/otel"
@@ -27,8 +28,7 @@ func InitTracer(serviceName, version string) (func(context.Context) error, error
 	endpoint = strings.TrimPrefix(endpoint, "https://")
 
 	exp, err := otlptracegrpc.New(context.Background(),
-		otlptracegrpc.WithEndpoint(endpoint),
-		otlptracegrpc.WithInsecure(),
+		tracerExporterOptions(endpoint)...,
 	)
 	if err != nil {
 		return nil, err
@@ -36,6 +36,7 @@ func InitTracer(serviceName, version string) (func(context.Context) error, error
 
 	tp := tracesdk.NewTracerProvider(
 		tracesdk.WithBatcher(exp),
+		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(traceSampleRatio()))),
 		tracesdk.WithResource(resource.NewSchemaless(
 			attribute.String("service.name", serviceName),
 			attribute.String("service.version", version),
@@ -48,4 +49,34 @@ func InitTracer(serviceName, version string) (func(context.Context) error, error
 	))
 
 	return tp.Shutdown, nil
+}
+
+func tracerExporterOptions(endpoint string) []otlptracegrpc.Option {
+	opts := []otlptracegrpc.Option{otlptracegrpc.WithEndpoint(endpoint)}
+	insecure := true
+	if raw := os.Getenv("OTEL_EXPORTER_OTLP_INSECURE"); raw != "" {
+		if parsed, err := strconv.ParseBool(raw); err == nil {
+			insecure = parsed
+		}
+	}
+	if insecure {
+		opts = append(opts, otlptracegrpc.WithInsecure())
+	}
+	return opts
+}
+
+func traceSampleRatio() float64 {
+	ratio := 1.0
+	if raw := os.Getenv("OTEL_TRACES_SAMPLER_ARG"); raw != "" {
+		if parsed, err := strconv.ParseFloat(raw, 64); err == nil {
+			ratio = parsed
+		}
+	}
+	if ratio < 0 {
+		return 0
+	}
+	if ratio > 1 {
+		return 1
+	}
+	return ratio
 }

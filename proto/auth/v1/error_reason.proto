@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+import "errors/errors.proto";
+
+option go_package = "kratos-template/api/auth/v1;v1";
+
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0;
+  INVALID_CREDENTIALS = 1 [(errors.code) = 401];
+  TOKEN_EXPIRED = 2 [(errors.code) = 401];
+  TOKEN_INVALID = 3 [(errors.code) = 401];
+  TOKEN_REVOKED = 4 [(errors.code) = 401];
+  INTERNAL = 5 [(errors.code) = 500];
+}

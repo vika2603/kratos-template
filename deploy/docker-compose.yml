@@ -24,16 +24,24 @@ services:
       - "8500:8500"
       - "8600:8600/udp"
     command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
-    volumes:
-      - ./configs:/configs:ro
-      - ./init-consul-config.sh:/init-consul-config.sh:ro
-    post_start:
-      - command: /bin/sh -c "/init-consul-config.sh"
     healthcheck:
       test: ["CMD", "consul", "members"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  consul-init:
+    image: hashicorp/consul:1.15
+    container_name: kratos-consul-init
+    depends_on:
+      consul:
+        condition: service_healthy
+    environment:
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - ./configs:/configs:ro
+      - ./init-consul-config.sh:/init-consul-config.sh:ro
+    entrypoint: ["/bin/sh", "/init-consul-config.sh"]
 
   jaeger:
     image: jaegertracing/all-in-one:1.51
@@ -50,6 +58,32 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: kratos-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate:v4.18.3
+    container_name: kratos-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../migrations:/migrations:ro
+    command:
+      [
+        "-path=/migrations",
+        "-database=postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable",
+        "up"
+      ]
+
   auth:
     build:
       context: ..
@@ -59,14 +93,18 @@ services:
         VERSION: ${VERSION:-dev}
     container_name: kratos-auth
     depends_on:
-      consul:
+      consul-init:
+        condition: service_completed_successfully
+      redis:
         condition: service_healthy
       user:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "9081:9081"
     environment:
-      - JWT_SECRET=dev-secret-change-in-prod
+      - CONSUL_ADDR=consul:8500
+      - JWT_SECRET=dev-secret-change-in-prod-32-bytes!!
+      - REDIS_ADDR=redis:6379
       - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
     volumes:
       - ./configs:/configs:ro
@@ -81,14 +119,16 @@ services:
         VERSION: ${VERSION:-dev}
     container_name: kratos-user
     depends_on:
-      postgres:
-        condition: service_healthy
-      consul:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      consul-init:
+        condition: service_completed_successfully
     ports:
       - "9082:9082"
     environment:
+      - CONSUL_ADDR=consul:8500
       - DB_DSN=postgres://postgres:postgres@postgres:5432/user_db?sslmode=disable
+      - JWT_SECRET=dev-secret-change-in-prod-32-bytes!!
       - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4317
     volumes:
       - ./configs:/configs:ro

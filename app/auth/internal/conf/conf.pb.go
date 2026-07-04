@@ -132,6 +132,7 @@ func (x *Server) GetGrpc() *Server_GRPC {
 type Data struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserService   *Data_UserService      `protobuf:"bytes,1,opt,name=user_service,json=userService,proto3" json:"user_service,omitempty"`
+	Redis         *Data_Redis            `protobuf:"bytes,2,opt,name=redis,proto3" json:"redis,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -173,12 +174,20 @@ func (x *Data) GetUserService() *Data_UserService {
 	return nil
 }
 
+func (x *Data) GetRedis() *Data_Redis {
+	if x != nil {
+		return x.Redis
+	}
+	return nil
+}
+
 type Auth struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	JwtSecret     string                 `protobuf:"bytes,1,opt,name=jwt_secret,json=jwtSecret,proto3" json:"jwt_secret,omitempty"`
-	TokenExpiry   int64                  `protobuf:"varint,2,opt,name=token_expiry,json=tokenExpiry,proto3" json:"token_expiry,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	JwtSecret          string                 `protobuf:"bytes,1,opt,name=jwt_secret,json=jwtSecret,proto3" json:"jwt_secret,omitempty"`
+	AccessTokenExpiry  int64                  `protobuf:"varint,2,opt,name=access_token_expiry,json=accessTokenExpiry,proto3" json:"access_token_expiry,omitempty"`
+	RefreshTokenExpiry int64                  `protobuf:"varint,3,opt,name=refresh_token_expiry,json=refreshTokenExpiry,proto3" json:"refresh_token_expiry,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Auth) Reset() {
@@ -218,9 +227,16 @@ func (x *Auth) GetJwtSecret() string {
 	return ""
 }
 
-func (x *Auth) GetTokenExpiry() int64 {
+func (x *Auth) GetAccessTokenExpiry() int64 {
 	if x != nil {
-		return x.TokenExpiry
+		return x.AccessTokenExpiry
+	}
+	return 0
+}
+
+func (x *Auth) GetRefreshTokenExpiry() int64 {
+	if x != nil {
+		return x.RefreshTokenExpiry
 	}
 	return 0
 }
@@ -322,6 +338,66 @@ func (x *Data_UserService) GetEndpoint() string {
 	return ""
 }
 
+type Data_Redis struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Db            int32                  `protobuf:"varint,3,opt,name=db,proto3" json:"db,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Data_Redis) Reset() {
+	*x = Data_Redis{}
+	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Data_Redis) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Data_Redis) ProtoMessage() {}
+
+func (x *Data_Redis) ProtoReflect() protoreflect.Message {
+	mi := &file_app_auth_internal_conf_conf_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Data_Redis.ProtoReflect.Descriptor instead.
+func (*Data_Redis) Descriptor() ([]byte, []int) {
+	return file_app_auth_internal_conf_conf_proto_rawDescGZIP(), []int{2, 1}
+}
+
+func (x *Data_Redis) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
+}
+
+func (x *Data_Redis) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Data_Redis) GetDb() int32 {
+	if x != nil {
+		return x.Db
+	}
+	return 0
+}
+
 var File_app_auth_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_auth_internal_conf_conf_proto_rawDesc = "" +
@@ -335,15 +411,21 @@ const file_app_auth_internal_conf_conf_proto_rawDesc = "" +
 	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.auth.conf.Server.GRPCR\x04grpc\x1aO\n" +
 	"\x04GRPC\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"|\n" +
+	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xfd\x01\n" +
 	"\x04Data\x12I\n" +
-	"\fuser_service\x18\x01 \x01(\v2&.kratos.api.auth.conf.Data.UserServiceR\vuserService\x1a)\n" +
+	"\fuser_service\x18\x01 \x01(\v2&.kratos.api.auth.conf.Data.UserServiceR\vuserService\x126\n" +
+	"\x05redis\x18\x02 \x01(\v2 .kratos.api.auth.conf.Data.RedisR\x05redis\x1a)\n" +
 	"\vUserService\x12\x1a\n" +
-	"\bendpoint\x18\x01 \x01(\tR\bendpoint\"H\n" +
+	"\bendpoint\x18\x01 \x01(\tR\bendpoint\x1aG\n" +
+	"\x05Redis\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x0e\n" +
+	"\x02db\x18\x03 \x01(\x05R\x02db\"\x87\x01\n" +
 	"\x04Auth\x12\x1d\n" +
 	"\n" +
-	"jwt_secret\x18\x01 \x01(\tR\tjwtSecret\x12!\n" +
-	"\ftoken_expiry\x18\x02 \x01(\x03R\vtokenExpiryB-Z+kratos-template/app/auth/internal/conf;confb\x06proto3"
+	"jwt_secret\x18\x01 \x01(\tR\tjwtSecret\x12.\n" +
+	"\x13access_token_expiry\x18\x02 \x01(\x03R\x11accessTokenExpiry\x120\n" +
+	"\x14refresh_token_expiry\x18\x03 \x01(\x03R\x12refreshTokenExpiryB-Z+kratos-template/app/auth/internal/conf;confb\x06proto3"
 
 var (
 	file_app_auth_internal_conf_conf_proto_rawDescOnce sync.Once
@@ -357,7 +439,7 @@ func file_app_auth_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_app_auth_internal_conf_conf_proto_rawDescData
 }
 
-var file_app_auth_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_app_auth_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_app_auth_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: kratos.api.auth.conf.Bootstrap
 	(*Server)(nil),              // 1: kratos.api.auth.conf.Server
@@ -365,7 +447,8 @@ var file_app_auth_internal_conf_conf_proto_goTypes = []any{
 	(*Auth)(nil),                // 3: kratos.api.auth.conf.Auth
 	(*Server_GRPC)(nil),         // 4: kratos.api.auth.conf.Server.GRPC
 	(*Data_UserService)(nil),    // 5: kratos.api.auth.conf.Data.UserService
-	(*durationpb.Duration)(nil), // 6: google.protobuf.Duration
+	(*Data_Redis)(nil),          // 6: kratos.api.auth.conf.Data.Redis
+	(*durationpb.Duration)(nil), // 7: google.protobuf.Duration
 }
 var file_app_auth_internal_conf_conf_proto_depIdxs = []int32{
 	1, // 0: kratos.api.auth.conf.Bootstrap.server:type_name -> kratos.api.auth.conf.Server
@@ -373,12 +456,13 @@ var file_app_auth_internal_conf_conf_proto_depIdxs = []int32{
 	3, // 2: kratos.api.auth.conf.Bootstrap.auth:type_name -> kratos.api.auth.conf.Auth
 	4, // 3: kratos.api.auth.conf.Server.grpc:type_name -> kratos.api.auth.conf.Server.GRPC
 	5, // 4: kratos.api.auth.conf.Data.user_service:type_name -> kratos.api.auth.conf.Data.UserService
-	6, // 5: kratos.api.auth.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	6, // 5: kratos.api.auth.conf.Data.redis:type_name -> kratos.api.auth.conf.Data.Redis
+	7, // 6: kratos.api.auth.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_app_auth_internal_conf_conf_proto_init() }
@@ -392,7 +476,7 @@ func file_app_auth_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_auth_internal_conf_conf_proto_rawDesc), len(file_app_auth_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -29,4 +29,7 @@ func (c *Config) applyDefaults() {
 	if c.Format == "" {
 		c.Format = "json"
 	}
+	if !c.Caller {
+		c.Caller = defaultConfig().Caller
+	}
 }

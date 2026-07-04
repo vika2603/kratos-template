@@ -1,12 +1,11 @@
 package adapter
 
 import (
+	"kratos-template/pkg/log"
 	"strings"
 
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-
-	"kratos-template/pkg/log"
 )
 
 var _ fxevent.Logger = (*FxAdapter)(nil)

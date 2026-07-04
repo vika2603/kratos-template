@@ -12,6 +12,7 @@ option go_package = "kratos-template/app/user/internal/conf;conf";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Auth auth = 3;
 }
 
 message Server {
@@ -27,4 +28,8 @@ message Data {
     string source = 1;
   }
   Database database = 1;
+}
+
+message Auth {
+  string jwt_secret = 1;
 }

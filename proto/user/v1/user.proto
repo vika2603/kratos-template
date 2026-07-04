@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package api.user.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "kratos-template/api/user/v1;v1";
@@ -13,7 +14,7 @@ service UserService {
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
 
-  // auth calls this to verify a login; password hash never leaves this service.
+  // Internal-only: auth calls this with a service token to verify a login; password hash never leaves this service.
   rpc VerifyCredentials(VerifyCredentialsRequest) returns (VerifyCredentialsResponse);
 }
 
@@ -26,9 +27,9 @@ message User {
 }
 
 message CreateUserRequest {
-  string username = 1;
-  string email = 2;
-  string password = 3;
+  string username = 1 [(buf.validate.field).string = {min_len: 3, max_len: 64}];
+  string email = 2 [(buf.validate.field).string.email = true];
+  string password = 3 [(buf.validate.field).string = {min_bytes: 8, max_bytes: 72}];
 }
 
 message CreateUserResponse {
@@ -36,7 +37,7 @@ message CreateUserResponse {
 }
 
 message GetUserRequest {
-  string id = 1;
+  string id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message GetUserResponse {
@@ -44,9 +45,15 @@ message GetUserResponse {
 }
 
 message UpdateUserRequest {
-  string id = 1;
-  string username = 2;
-  string email = 3;
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string username = 2 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string = {min_len: 3, max_len: 64}
+  ];
+  string email = 3 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string.email = true
+  ];
 }
 
 message UpdateUserResponse {
@@ -54,7 +61,7 @@ message UpdateUserResponse {
 }
 
 message DeleteUserRequest {
-  string id = 1;
+  string id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message DeleteUserResponse {
@@ -62,8 +69,11 @@ message DeleteUserResponse {
 }
 
 message ListUsersRequest {
-  int32 page = 1;
-  int32 page_size = 2;
+  int32 page = 1 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).int32.gte = 1
+  ];
+  int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
 }
 
 message ListUsersResponse {
@@ -72,8 +82,8 @@ message ListUsersResponse {
 }
 
 message VerifyCredentialsRequest {
-  string username = 1;
-  string password = 2;
+  string username = 1 [(buf.validate.field).string = {min_len: 1, max_len: 64}];
+  string password = 2 [(buf.validate.field).string = {min_bytes: 8, max_bytes: 72}];
 }
 
 message VerifyCredentialsResponse {

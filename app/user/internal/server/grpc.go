@@ -1,16 +1,21 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/v2/middleware/logging"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"cmp"
+	"kratos-template/app/user/internal/conf"
+	"kratos-template/pkg/bootstrap"
+	"kratos-template/pkg/middleware/authn"
+	"os"
+	"time"
+
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
 	v1 "kratos-template/api/user/v1"
-	"kratos-template/app/user/internal/conf"
-	"kratos-template/pkg/log/adapter"
+
+	pkgauth "kratos-template/pkg/auth"
 )
 
 type GRPCServerParams struct {
@@ -21,24 +26,46 @@ type GRPCServerParams struct {
 }
 
 func NewGRPCServer(params GRPCServerParams) (*grpc.Server, error) {
-	var opts = []grpc.ServerOption{
-		grpc.Middleware(
-			recovery.Recovery(),
-			tracing.Server(),
-			logging.Server(adapter.NewKratosAdapter(params.Logger)),
-		),
+	manager, err := pkgauth.NewJWTManager(
+		cmp.Or(os.Getenv("JWT_SECRET"), params.Config.GetAuth().GetJwtSecret()),
+		0,
+		0,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	if addr := params.Config.GetServer().GetGrpc().GetAddr(); addr != "" {
-		opts = append(opts, grpc.Address(addr))
+	serviceOnly := selector.Server(authn.Server(manager, pkgauth.TokenTypeService)).
+		Path(v1.UserService_VerifyCredentials_FullMethodName).
+		Build()
+	accessOrService := selector.Server(authn.Server(manager, pkgauth.TokenTypeAccess, pkgauth.TokenTypeService)).
+		Path(v1.UserService_GetUser_FullMethodName).
+		Build()
+	accessOnly := selector.Server(authn.Server(manager, pkgauth.TokenTypeAccess)).
+		Path(
+			v1.UserService_CreateUser_FullMethodName,
+			v1.UserService_UpdateUser_FullMethodName,
+			v1.UserService_DeleteUser_FullMethodName,
+			v1.UserService_ListUsers_FullMethodName,
+		).
+		Build()
+
+	grpcCfg := params.Config.GetServer().GetGrpc()
+	var timeout time.Duration
+	if t := grpcCfg.GetTimeout(); t != nil {
+		timeout = t.AsDuration()
 	}
-
-	if t := params.Config.GetServer().GetGrpc().GetTimeout(); t != nil {
-		opts = append(opts, grpc.Timeout(t.AsDuration()))
-	}
-
-	srv := grpc.NewServer(opts...)
-	v1.RegisterUserServiceServer(srv, params.UserService)
-
-	return srv, nil
+	return bootstrap.BuildGRPCServer(
+		bootstrap.GRPCServerConfig{
+			Addr:    grpcCfg.GetAddr(),
+			Timeout: timeout,
+		},
+		params.Logger,
+		func(srv *grpc.Server) {
+			v1.RegisterUserServiceServer(srv, params.UserService)
+		},
+		serviceOnly,
+		accessOrService,
+		accessOnly,
+	), nil
 }
