@@ -2,8 +2,10 @@ package biz
 
 import (
 	"context"
+	"encoding/base64"
 	"kratos-template/pkg/middleware/authn"
 	"testing"
+	"time"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -20,8 +22,10 @@ type fakeUserRepo struct {
 	createErr error
 	getByName func(username string) (*User, error)
 
-	listOffset int
-	listLimit  int
+	listAfterCreatedAt time.Time
+	listAfterID        string
+	listLimit          int
+	listResult         []*User
 }
 
 func (f *fakeUserRepo) Create(_ context.Context, user *User) error {
@@ -50,10 +54,14 @@ func (f *fakeUserRepo) Delete(_ context.Context, id string) error {
 	return nil
 }
 
-func (f *fakeUserRepo) List(_ context.Context, offset, limit int) ([]*User, int64, error) {
-	f.listOffset = offset
+func (f *fakeUserRepo) List(_ context.Context, afterCreatedAt time.Time, afterID string, limit int) ([]*User, error) {
+	f.listAfterCreatedAt = afterCreatedAt
+	f.listAfterID = afterID
 	f.listLimit = limit
-	return nil, 0, nil
+	if len(f.listResult) > limit {
+		return f.listResult[:limit], nil
+	}
+	return f.listResult, nil
 }
 
 func ownerCtx(userID string) context.Context {
@@ -216,29 +224,96 @@ func TestDeleteUserOwnership(t *testing.T) {
 	}
 }
 
-func TestListUsersClamping(t *testing.T) {
+func TestListUsersPageSizeClamping(t *testing.T) {
+	// The repo always sees pageSize+1: the extra row detects a next page.
 	tests := []struct {
-		name       string
-		page, size int32
-		wantOffset int
-		wantLimit  int
+		name      string
+		size      int32
+		wantLimit int
 	}{
-		{"defaults", 0, 0, 0, 10},
-		{"negative page", -1, 20, 0, 20},
-		{"size over cap", 1, 500, 0, 100},
-		{"second page", 3, 25, 50, 25},
+		{"default", 0, 11},
+		{"negative", -3, 11},
+		{"explicit", 20, 21},
+		{"over cap", 500, 101},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &fakeUserRepo{}
 			uc := &UserUseCase{repo: repo}
-			if _, _, err := uc.ListUsers(context.Background(), tt.page, tt.size); err != nil {
+			if _, _, err := uc.ListUsers(context.Background(), tt.size, ""); err != nil {
 				t.Fatalf("ListUsers: %v", err)
 			}
-			if repo.listOffset != tt.wantOffset || repo.listLimit != tt.wantLimit {
-				t.Errorf("offset/limit = %d/%d, want %d/%d",
-					repo.listOffset, repo.listLimit, tt.wantOffset, tt.wantLimit)
+			if repo.listLimit != tt.wantLimit {
+				t.Errorf("limit = %d, want %d", repo.listLimit, tt.wantLimit)
 			}
 		})
+	}
+}
+
+func TestListUsersPagination(t *testing.T) {
+	base := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	all := []*User{
+		{ID: "a", CreatedAt: base},
+		{ID: "b", CreatedAt: base.Add(time.Second)},
+		{ID: "c", CreatedAt: base.Add(2 * time.Second)},
+	}
+	repo := &fakeUserRepo{listResult: all}
+	uc := &UserUseCase{repo: repo}
+
+	users, token, err := uc.ListUsers(context.Background(), 2, "")
+	if err != nil {
+		t.Fatalf("first page: %v", err)
+	}
+	if len(users) != 2 || users[0].ID != "a" || users[1].ID != "b" {
+		t.Fatalf("first page = %+v, want [a b]", users)
+	}
+	if token == "" {
+		t.Fatal("expected non-empty next_page_token")
+	}
+
+	repo.listResult = all[2:]
+	users, token, err = uc.ListUsers(context.Background(), 2, token)
+	if err != nil {
+		t.Fatalf("second page: %v", err)
+	}
+	if !repo.listAfterCreatedAt.Equal(all[1].CreatedAt) || repo.listAfterID != "b" {
+		t.Errorf("cursor = (%v, %q), want position of user b", repo.listAfterCreatedAt, repo.listAfterID)
+	}
+	if len(users) != 1 || users[0].ID != "c" {
+		t.Fatalf("second page = %+v, want [c]", users)
+	}
+	if token != "" {
+		t.Errorf("last page token = %q, want empty", token)
+	}
+}
+
+func TestListUsersInvalidPageToken(t *testing.T) {
+	tokens := map[string]string{
+		"not base64":   "%%%",
+		"no separator": base64.RawURLEncoding.EncodeToString([]byte("12345")),
+		"empty id":     base64.RawURLEncoding.EncodeToString([]byte("12345|")),
+		"bad micros":   base64.RawURLEncoding.EncodeToString([]byte("abc|id")),
+	}
+	for name, token := range tokens {
+		t.Run(name, func(t *testing.T) {
+			uc := &UserUseCase{repo: &fakeUserRepo{}}
+			_, _, err := uc.ListUsers(context.Background(), 10, token)
+			if !userv1.IsInvalidPageToken(err) {
+				t.Errorf("err = %v, want INVALID_PAGE_TOKEN", err)
+			}
+		})
+	}
+}
+
+func TestPageTokenRoundtrip(t *testing.T) {
+	at := time.Date(2026, 7, 7, 12, 34, 56, 789123000, time.UTC) // whole µs: matches pg precision
+	token := encodePageToken(at, "e7b8a1c2-0000-0000-0000-000000000000")
+
+	gotAt, gotID, err := decodePageToken(token)
+	if err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if !gotAt.Equal(at) || gotID != "e7b8a1c2-0000-0000-0000-000000000000" {
+		t.Errorf("roundtrip = (%v, %q), want (%v, e7b8...)", gotAt, gotID, at)
 	}
 }

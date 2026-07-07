@@ -7,6 +7,7 @@ import (
 	"kratos-template/app/user/internal/data/query"
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/model"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"go.uber.org/zap"
@@ -89,18 +90,23 @@ func (r *userRepo) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *userRepo) List(ctx context.Context, offset, limit int) ([]*biz.User, int64, error) {
-	users, count, err := r.data.q.User.WithContext(ctx).
-		Order(r.data.q.User.CreatedAt, r.data.q.User.ID).
-		FindByPage(offset, limit)
+func (r *userRepo) List(ctx context.Context, afterCreatedAt time.Time, afterID string, limit int) ([]*biz.User, error) {
+	u := r.data.q.User
+	do := u.WithContext(ctx)
+	if !afterCreatedAt.IsZero() {
+		// Keyset over (created_at, id); backed by users_created_at_id_idx.
+		do = do.Where(u.CreatedAt.Gt(afterCreatedAt)).
+			Or(u.CreatedAt.Eq(afterCreatedAt), u.ID.Gt(afterID))
+	}
+	users, err := do.Order(u.CreatedAt, u.ID).Limit(limit).Find()
 	if err != nil {
-		return nil, 0, translateDBError(ctx, err)
+		return nil, translateDBError(ctx, err)
 	}
 	result := make([]*biz.User, 0, len(users))
-	for _, u := range users {
-		result = append(result, toBiz(u))
+	for _, m := range users {
+		result = append(result, toBiz(m))
 	}
-	return result, count, nil
+	return result, nil
 }
 
 func translateDBError(ctx context.Context, err error) error {

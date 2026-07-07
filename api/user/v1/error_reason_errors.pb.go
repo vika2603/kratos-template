@@ -82,3 +82,15 @@ func IsPermissionDenied(err error) bool {
 func ErrorPermissionDenied(format string, args ...interface{}) *errors.Error {
 	return errors.New(403, ErrorReason_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
 }
+
+func IsInvalidPageToken(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_INVALID_PAGE_TOKEN.String() && e.Code == 400
+}
+
+func ErrorInvalidPageToken(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_INVALID_PAGE_TOKEN.String(), fmt.Sprintf(format, args...))
+}

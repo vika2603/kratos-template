@@ -92,7 +92,7 @@ func (s *UserService) VerifyCredentials(ctx context.Context, req *v1.VerifyCrede
 }
 
 func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponse, error) {
-	users, total, err := s.userUC.ListUsers(ctx, req.Page, req.PageSize)
+	users, nextPageToken, err := s.userUC.ListUsers(ctx, req.PageSize, req.PageToken)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (s *UserService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (
 	}
 
 	return &v1.ListUsersResponse{
-		Users: userList,
-		Total: total,
+		Users:         userList,
+		NextPageToken: nextPageToken,
 	}, nil
 }

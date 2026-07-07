@@ -32,6 +32,7 @@ const (
 	ErrorReason_INVALID_CREDENTIALS      ErrorReason = 4
 	ErrorReason_INTERNAL                 ErrorReason = 5
 	ErrorReason_PERMISSION_DENIED        ErrorReason = 6
+	ErrorReason_INVALID_PAGE_TOKEN       ErrorReason = 7
 )
 
 // Enum value maps for ErrorReason.
@@ -44,6 +45,7 @@ var (
 		4: "INVALID_CREDENTIALS",
 		5: "INTERNAL",
 		6: "PERMISSION_DENIED",
+		7: "INVALID_PAGE_TOKEN",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED": 0,
@@ -53,6 +55,7 @@ var (
 		"INVALID_CREDENTIALS":      4,
 		"INTERNAL":                 5,
 		"PERMISSION_DENIED":        6,
+		"INVALID_PAGE_TOKEN":       7,
 	}
 )
 
@@ -87,7 +90,7 @@ var File_proto_user_v1_error_reason_proto protoreflect.FileDescriptor
 
 const file_proto_user_v1_error_reason_proto_rawDesc = "" +
 	"\n" +
-	" proto/user/v1/error_reason.proto\x12\vapi.user.v1\x1a\x13errors/errors.proto*\xc8\x01\n" +
+	" proto/user/v1/error_reason.proto\x12\vapi.user.v1\x1a\x13errors/errors.proto*\xe6\x01\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x0eUSER_NOT_FOUND\x10\x01\x1a\x04\xa8E\x94\x03\x12\x19\n" +
@@ -95,7 +98,8 @@ const file_proto_user_v1_error_reason_proto_rawDesc = "" +
 	"\fEMAIL_EXISTS\x10\x03\x1a\x04\xa8E\x99\x03\x12\x1d\n" +
 	"\x13INVALID_CREDENTIALS\x10\x04\x1a\x04\xa8E\x91\x03\x12\x12\n" +
 	"\bINTERNAL\x10\x05\x1a\x04\xa8E\xf4\x03\x12\x1b\n" +
-	"\x11PERMISSION_DENIED\x10\x06\x1a\x04\xa8E\x93\x03B Z\x1ekratos-template/api/user/v1;v1b\x06proto3"
+	"\x11PERMISSION_DENIED\x10\x06\x1a\x04\xa8E\x93\x03\x12\x1c\n" +
+	"\x12INVALID_PAGE_TOKEN\x10\a\x1a\x04\xa8E\x90\x03B Z\x1ekratos-template/api/user/v1;v1b\x06proto3"
 
 var (
 	file_proto_user_v1_error_reason_proto_rawDescOnce sync.Once

@@ -2,7 +2,11 @@ package biz
 
 import (
 	"context"
+	"encoding/base64"
+	"errors"
 	"kratos-template/pkg/middleware/authn"
+	"strconv"
+	"strings"
 	"time"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
@@ -27,7 +31,9 @@ type UserRepo interface {
 	GetByUsername(ctx context.Context, username string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, offset, limit int) ([]*User, int64, error)
+	// List returns users ordered by (created_at, id), keyset-paginated:
+	// only rows strictly after the cursor position when afterCreatedAt is set.
+	List(ctx context.Context, afterCreatedAt time.Time, afterID string, limit int) ([]*User, error)
 }
 
 type UserUseCase struct {
@@ -124,10 +130,7 @@ func requireOwner(ctx context.Context, id string) error {
 	return nil
 }
 
-func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*User, int32, error) {
-	if page <= 0 {
-		page = 1
-	}
+func (uc *UserUseCase) ListUsers(ctx context.Context, pageSize int32, pageToken string) ([]*User, string, error) {
 	if pageSize <= 0 {
 		pageSize = 10
 	}
@@ -135,18 +138,51 @@ func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*
 		pageSize = 100
 	}
 
-	offset := int(int64(page-1) * int64(pageSize))
+	var afterCreatedAt time.Time
+	var afterID string
+	if pageToken != "" {
+		var err error
+		afterCreatedAt, afterID, err = decodePageToken(pageToken)
+		if err != nil {
+			return nil, "", userv1.ErrorInvalidPageToken("invalid page token")
+		}
+	}
+
+	// Fetch one extra row to learn whether another page exists.
 	limit := int(pageSize)
-
-	users, total, err := uc.repo.List(ctx, offset, limit)
+	users, err := uc.repo.List(ctx, afterCreatedAt, afterID, limit+1)
 	if err != nil {
-		return nil, 0, err
-	}
-	if total > maxListTotal {
-		total = maxListTotal
+		return nil, "", err
 	}
 
-	return users, int32(total), nil
+	nextToken := ""
+	if len(users) > limit {
+		users = users[:limit]
+		last := users[limit-1]
+		nextToken = encodePageToken(last.CreatedAt, last.ID)
+	}
+	return users, nextToken, nil
 }
 
-const maxListTotal = int64(1<<31 - 1)
+// Page tokens encode the last row's (created_at, id); UnixMicro matches
+// PostgreSQL timestamptz precision so the cursor round-trips losslessly.
+func encodePageToken(createdAt time.Time, id string) string {
+	raw := strconv.FormatInt(createdAt.UnixMicro(), 10) + "|" + id
+	return base64.RawURLEncoding.EncodeToString([]byte(raw))
+}
+
+func decodePageToken(token string) (time.Time, string, error) {
+	raw, err := base64.RawURLEncoding.DecodeString(token)
+	if err != nil {
+		return time.Time{}, "", err
+	}
+	micros, id, ok := strings.Cut(string(raw), "|")
+	if !ok || id == "" {
+		return time.Time{}, "", errors.New("malformed page token")
+	}
+	n, err := strconv.ParseInt(micros, 10, 64)
+	if err != nil {
+		return time.Time{}, "", err
+	}
+	return time.UnixMicro(n), id, nil
+}
