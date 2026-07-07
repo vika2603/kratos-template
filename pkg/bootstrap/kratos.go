@@ -75,6 +75,8 @@ func NewKratosApp(lc fx.Lifecycle, params AppParams) *kratos.App {
 func WithKratosApp() fx.Option {
 	return fx.Options(
 		fx.Provide(NewKratosApp),
+		fx.Provide(NewHealthServer),
+		fx.Invoke(runHealthMonitor),
 		fx.Invoke(func(*kratos.App) {}),
 	)
 }

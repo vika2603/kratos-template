@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/health"
 
 	v1 "kratos-template/api/auth/v1"
 )
@@ -16,6 +17,7 @@ type GRPCServerParams struct {
 	fx.In
 	Config      *conf.Bootstrap
 	Logger      *zap.Logger
+	Health      *health.Server
 	AuthService v1.AuthServiceServer
 }
 
@@ -29,6 +31,7 @@ func NewGRPCServer(params GRPCServerParams) *grpc.Server {
 		bootstrap.GRPCServerConfig{
 			Addr:    grpcCfg.GetAddr(),
 			Timeout: timeout,
+			Health:  params.Health,
 		},
 		params.Logger,
 		func(srv *grpc.Server) {

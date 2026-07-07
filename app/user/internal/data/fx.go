@@ -10,6 +10,9 @@ var Module = fx.Module("user.data",
 	fx.Provide(NewDB),
 	fx.Provide(NewData),
 	fx.Provide(NewUserRepo),
+	fx.Provide(
+		fx.Annotate(NewDBHealthChecker, fx.ResultTags(`group:"health_checkers"`)),
+	),
 	fx.Invoke(registerLifecycle),
 )
 

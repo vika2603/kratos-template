@@ -14,11 +14,16 @@ import (
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type GRPCServerConfig struct {
 	Addr    string
 	Timeout time.Duration
+	// Health replaces the built-in always-SERVING health service with the
+	// dependency-aware one driven by the bootstrap health monitor.
+	Health *health.Server
 }
 
 func BuildGRPCServer(
@@ -45,9 +50,16 @@ func BuildGRPCServer(
 	if cfg.Timeout > 0 {
 		opts = append(opts, kgrpc.Timeout(cfg.Timeout))
 	}
+	if cfg.Health != nil {
+		opts = append(opts, kgrpc.CustomHealth())
+	}
 
-	// kgrpc.NewServer registers the standard grpc.health.v1 service by default.
+	// Without cfg.Health, kgrpc.NewServer registers the standard
+	// grpc.health.v1 service (always SERVING once started).
 	srv := kgrpc.NewServer(opts...)
+	if cfg.Health != nil {
+		grpc_health_v1.RegisterHealthServer(srv.Server, cfg.Health)
+	}
 	register(srv)
 	return srv
 }

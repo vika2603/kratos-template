@@ -13,6 +13,10 @@ var Module = fx.Module("auth.data",
 	fx.Provide(NewAuthUserRepo),
 	fx.Provide(NewTokenRepo),
 	fx.Provide(NewLoginGuardRepo),
+	fx.Provide(
+		fx.Annotate(NewRedisHealthChecker, fx.ResultTags(`group:"health_checkers"`)),
+		fx.Annotate(NewUserServiceHealthChecker, fx.ResultTags(`group:"health_checkers"`)),
+	),
 	fx.Invoke(registerLifecycle),
 )
 
