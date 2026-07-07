@@ -13,4 +13,5 @@ enum ErrorReason {
   EMAIL_EXISTS = 3 [(errors.code) = 409];
   INVALID_CREDENTIALS = 4 [(errors.code) = 401];
   INTERNAL = 5 [(errors.code) = 500];
+  PERMISSION_DENIED = 6 [(errors.code) = 403];
 }

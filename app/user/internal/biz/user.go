@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"kratos-template/pkg/middleware/authn"
 	"time"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
@@ -83,6 +84,10 @@ func (uc *UserUseCase) GetUser(ctx context.Context, id string) (*User, error) {
 }
 
 func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email string) (*User, error) {
+	if err := requireOwner(ctx, id); err != nil {
+		return nil, err
+	}
+
 	user, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -104,7 +109,19 @@ func (uc *UserUseCase) UpdateUser(ctx context.Context, id, username, email strin
 }
 
 func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
+	if err := requireOwner(ctx, id); err != nil {
+		return err
+	}
 	return uc.repo.Delete(ctx, id)
+}
+
+// requireOwner fails closed when claims are absent (e.g. middleware removed).
+func requireOwner(ctx context.Context, id string) error {
+	claims, ok := authn.FromContext(ctx)
+	if !ok || claims.UserID != id {
+		return userv1.ErrorPermissionDenied("cannot modify another user")
+	}
+	return nil
 }
 
 func (uc *UserUseCase) ListUsers(ctx context.Context, page, pageSize int32) ([]*User, int32, error) {

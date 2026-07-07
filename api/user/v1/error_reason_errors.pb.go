@@ -70,3 +70,15 @@ func IsInternal(err error) bool {
 func ErrorInternal(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, ErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
 }
+
+func IsPermissionDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PERMISSION_DENIED.String() && e.Code == 403
+}
+
+func ErrorPermissionDenied(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
+}
