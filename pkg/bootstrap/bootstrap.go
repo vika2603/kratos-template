@@ -9,6 +9,7 @@ import (
 	"kratos-template/pkg/log/adapter"
 
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
 )
 
@@ -51,6 +52,13 @@ func Run[T any](name string, opts ...fx.Option) {
 		tracerShutdown = func(context.Context) error { return nil }
 	}
 
+	registry, metricsShutdown, err := InitMetrics(name, Version)
+	if err != nil {
+		log.Errorf("init metrics error: %v", err)
+		registry = prometheus.NewRegistry()
+		metricsShutdown = func(context.Context) error { return nil }
+	}
+
 	allOpts := []fx.Option{
 		fx.WithLogger(adapter.NewFxAdapter),
 		fx.Supply(
@@ -58,10 +66,12 @@ func Run[T any](name string, opts ...fx.Option) {
 			bc,
 			sc,
 			logger,
+			registry,
 		),
 		SharedLifecycleOptions(shutdown),
 		fx.Invoke(func(lc fx.Lifecycle) {
 			lc.Append(fx.Hook{OnStop: tracerShutdown})
+			lc.Append(fx.Hook{OnStop: metricsShutdown})
 		}),
 		SharedProviders(name, Version),
 	}

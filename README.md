@@ -21,14 +21,14 @@ All services are **gRPC-only**.
 
 ## Services & Ports
 
-| Service | gRPC | Notes |
-|---------|------|-------|
-| auth | 9081 | JWT login / refresh / validate (calls user over gRPC; owns no DB) |
-| user | 9082 | User CRUD; owner of the `users` table |
-| PostgreSQL | 5432 | Database |
-| Redis | 6379 | JWT denylist + refresh token rotation state |
-| Consul | 8500 | Service discovery + config (UI at :8500) |
-| Jaeger | 16686 | Tracing UI (OTLP collector on 4317) |
+| Service | gRPC | Metrics | Notes |
+|---------|------|---------|-------|
+| auth | 9081 | 9181 | JWT login / refresh / validate (calls user over gRPC; owns no DB) |
+| user | 9082 | 9182 | User CRUD; owner of the `users` table |
+| PostgreSQL | 5432 | — | Database |
+| Redis | 6379 | — | JWT denylist + refresh token rotation state |
+| Consul | 8500 | — | Service discovery + config (UI at :8500) |
+| Jaeger | 16686 | — | Tracing UI (OTLP collector on 4317) |
 
 ## Quick Start
 

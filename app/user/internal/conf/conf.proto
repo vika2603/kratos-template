@@ -20,7 +20,12 @@ message Server {
     string addr = 1;
     google.protobuf.Duration timeout = 2;
   }
+  message Metrics {
+    // Prometheus /metrics listen address; empty disables the endpoint.
+    string addr = 1;
+  }
   GRPC grpc = 1;
+  Metrics metrics = 2;
 }
 
 message Data {

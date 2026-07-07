@@ -2,6 +2,8 @@ server:
   grpc:
     addr: 0.0.0.0:9081
     timeout: 30s
+  metrics:
+    addr: 0.0.0.0:9181
 
 data:
   # auth owns no DB; it resolves the user service through the registry (Consul).

@@ -12,5 +12,10 @@ var Module = fx.Module("auth.server",
 			fx.As(new(transport.Server)),
 			fx.ResultTags(`group:"servers"`),
 		),
+		fx.Annotate(
+			NewMetricsServer,
+			fx.As(new(transport.Server)),
+			fx.ResultTags(`group:"servers"`),
+		),
 	),
 )

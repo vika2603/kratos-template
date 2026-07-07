@@ -2,6 +2,8 @@ server:
   grpc:
     addr: 0.0.0.0:9082
     timeout: 30s
+  metrics:
+    addr: 0.0.0.0:9182
 
 data:
   database:
