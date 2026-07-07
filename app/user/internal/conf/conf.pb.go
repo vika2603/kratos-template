@@ -270,10 +270,14 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 }
 
 type Data_Database struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Source string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	// Pool limits; zero values fall back to template defaults (25/5/30m).
+	MaxOpenConns    int32                `protobuf:"varint,2,opt,name=max_open_conns,json=maxOpenConns,proto3" json:"max_open_conns,omitempty"`
+	MaxIdleConns    int32                `protobuf:"varint,3,opt,name=max_idle_conns,json=maxIdleConns,proto3" json:"max_idle_conns,omitempty"`
+	ConnMaxLifetime *durationpb.Duration `protobuf:"bytes,4,opt,name=conn_max_lifetime,json=connMaxLifetime,proto3" json:"conn_max_lifetime,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Data_Database) Reset() {
@@ -313,6 +317,27 @@ func (x *Data_Database) GetSource() string {
 	return ""
 }
 
+func (x *Data_Database) GetMaxOpenConns() int32 {
+	if x != nil {
+		return x.MaxOpenConns
+	}
+	return 0
+}
+
+func (x *Data_Database) GetMaxIdleConns() int32 {
+	if x != nil {
+		return x.MaxIdleConns
+	}
+	return 0
+}
+
+func (x *Data_Database) GetConnMaxLifetime() *durationpb.Duration {
+	if x != nil {
+		return x.ConnMaxLifetime
+	}
+	return nil
+}
+
 var File_app_user_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_app_user_internal_conf_conf_proto_rawDesc = "" +
@@ -326,11 +351,14 @@ const file_app_user_internal_conf_conf_proto_rawDesc = "" +
 	"\x04grpc\x18\x01 \x01(\v2!.kratos.api.user.conf.Server.GRPCR\x04grpc\x1aO\n" +
 	"\x04GRPC\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"k\n" +
+	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xff\x01\n" +
 	"\x04Data\x12?\n" +
-	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.user.conf.Data.DatabaseR\bdatabase\x1a\"\n" +
+	"\bdatabase\x18\x01 \x01(\v2#.kratos.api.user.conf.Data.DatabaseR\bdatabase\x1a\xb5\x01\n" +
 	"\bDatabase\x12\x16\n" +
-	"\x06source\x18\x01 \x01(\tR\x06source\"%\n" +
+	"\x06source\x18\x01 \x01(\tR\x06source\x12$\n" +
+	"\x0emax_open_conns\x18\x02 \x01(\x05R\fmaxOpenConns\x12$\n" +
+	"\x0emax_idle_conns\x18\x03 \x01(\x05R\fmaxIdleConns\x12E\n" +
+	"\x11conn_max_lifetime\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x0fconnMaxLifetime\"%\n" +
 	"\x04Auth\x12\x1d\n" +
 	"\n" +
 	"jwt_secret\x18\x01 \x01(\tR\tjwtSecretB-Z+kratos-template/app/user/internal/conf;confb\x06proto3"
@@ -364,11 +392,12 @@ var file_app_user_internal_conf_conf_proto_depIdxs = []int32{
 	4, // 3: kratos.api.user.conf.Server.grpc:type_name -> kratos.api.user.conf.Server.GRPC
 	5, // 4: kratos.api.user.conf.Data.database:type_name -> kratos.api.user.conf.Data.Database
 	6, // 5: kratos.api.user.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	6, // 6: kratos.api.user.conf.Data.Database.conn_max_lifetime:type_name -> google.protobuf.Duration
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_app_user_internal_conf_conf_proto_init() }

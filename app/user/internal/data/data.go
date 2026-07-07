@@ -8,6 +8,7 @@ import (
 	"kratos-template/pkg/log"
 	"kratos-template/pkg/log/adapter"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -29,9 +30,41 @@ func NewDB(cfg *conf.Bootstrap, logger *zap.Logger) (*gorm.DB, *query.Query, err
 		return nil, nil, fmt.Errorf("failed opening connection to postgres: %w", err)
 	}
 
+	if err := configurePool(db, cfg.GetData().GetDatabase()); err != nil {
+		return nil, nil, err
+	}
+
 	q := query.Use(db)
 
 	return db, q, nil
+}
+
+// configurePool applies pool limits; zero config falls back to template
+// defaults rather than Go's unlimited open connections.
+func configurePool(db *gorm.DB, cfg *conf.Data_Database) error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return fmt.Errorf("failed getting sql.DB for pool config: %w", err)
+	}
+
+	maxOpen := int(cfg.GetMaxOpenConns())
+	if maxOpen <= 0 {
+		maxOpen = 25
+	}
+	maxIdle := int(cfg.GetMaxIdleConns())
+	if maxIdle <= 0 {
+		maxIdle = 5
+	}
+	maxLifetime := cfg.GetConnMaxLifetime().AsDuration()
+	if maxLifetime <= 0 {
+		// Below common LB/pgbouncer idle timeouts so we recycle first.
+		maxLifetime = 30 * time.Minute
+	}
+
+	sqlDB.SetMaxOpenConns(maxOpen)
+	sqlDB.SetMaxIdleConns(maxIdle)
+	sqlDB.SetConnMaxLifetime(maxLifetime)
+	return nil
 }
 
 func NewData(db *gorm.DB, q *query.Query) (*Data, func(), error) {

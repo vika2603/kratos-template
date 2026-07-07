@@ -26,6 +26,10 @@ message Server {
 message Data {
   message Database {
     string source = 1;
+    // Pool limits; zero values fall back to template defaults (25/5/30m).
+    int32 max_open_conns = 2;
+    int32 max_idle_conns = 3;
+    google.protobuf.Duration conn_max_lifetime = 4;
   }
   Database database = 1;
 }
