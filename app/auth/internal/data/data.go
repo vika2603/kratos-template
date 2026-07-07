@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/middleware/circuitbreaker"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/registry"
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -44,6 +45,9 @@ func NewUserClientConn(cfg *conf.Bootstrap, disc registry.Discovery) (*ggrpc.Cli
 		kgrpc.WithTimeout(5 * time.Second),
 		kgrpc.WithMiddleware(
 			tracing.Client(),
+			// Breaker inside tracing so rejections show up in traces,
+			// outside token injection to skip wasted token generation.
+			circuitbreaker.Client(),
 			authn.ClientServiceToken(manager, "auth"),
 		),
 	}
