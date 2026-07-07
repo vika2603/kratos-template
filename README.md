@@ -144,6 +144,18 @@ openssl rand -base64 32
 For production, prefer an asymmetric key flow such as RS256/EdDSA public-key
 distribution.
 
+## Production notes
+
+- **Redis is a single point for token state.** Refresh rotation, the access-token
+  denylist, and login brute-force counters all live in one Redis. Refresh and logout
+  fail closed when Redis is down; the login guard fails open (an outage must not lock
+  everyone out). For production use Sentinel/Cluster, and note that losing Redis keys
+  on failover invalidates all refresh tokens — users just log in again, which fails
+  safe.
+- **Secret rotation.** The JWT manager holds a single HS256 secret with no `kid`
+  header. For rotation, sign new tokens with a `kid`, verify by key id, and keep the
+  old key valid for one refresh-token TTL — or move to the asymmetric setup above.
+
 ## Configuration
 
 Config is **independent per service** — each service loads only its own:
