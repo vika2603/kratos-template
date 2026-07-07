@@ -49,9 +49,14 @@ func runHealthMonitor(lc fx.Lifecycle, hs *health.Server, params healthMonitorPa
 			go monitorHealth(hs, params, stop, done)
 			return nil
 		},
-		OnStop: func(context.Context) error {
+		OnStop: func(ctx context.Context) error {
 			close(stop)
-			<-done
+			// Don't let a checker that ignores its context hang shutdown.
+			select {
+			case <-done:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 			hs.Shutdown()
 			return nil
 		},

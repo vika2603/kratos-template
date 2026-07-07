@@ -89,6 +89,11 @@ func (f *fakeTokenRepo) ConsumeRefresh(_ context.Context, jti string) (string, b
 
 func (f *fakeTokenRepo) RevokeAllRefresh(_ context.Context, userID string) error {
 	f.revokeAllUsers = append(f.revokeAllUsers, userID)
+	for jti, uid := range f.refresh {
+		if uid == userID {
+			delete(f.refresh, jti)
+		}
+	}
 	return nil
 }
 
@@ -226,6 +231,9 @@ func TestLoginSuccessResetsFailures(t *testing.T) {
 	}
 }
 
+// Guard-only fail-open: an unavailable guard must not 429 legitimate logins.
+// Token issuance keeps its own Redis dependency and still fails closed
+// (see TestLoginSaveRefreshFails).
 func TestLoginGuardFailsOpen(t *testing.T) {
 	uc := newTestUseCase(t, happyUserRepo(), newFakeTokenRepo())
 	uc.loginGuard.(*fakeLoginGuard).err = errors.New("redis down")
@@ -289,15 +297,55 @@ func TestRefreshReuseRevokesAll(t *testing.T) {
 	uc := newTestUseCase(t, happyUserRepo(), tokens)
 	pair, _ := login(t, uc)
 
-	if _, err := uc.Refresh(context.Background(), pair.RefreshToken); err != nil {
+	rotated, err := uc.Refresh(context.Background(), pair.RefreshToken)
+	if err != nil {
 		t.Fatalf("first Refresh: %v", err)
 	}
-	_, err := uc.Refresh(context.Background(), pair.RefreshToken)
+	_, err = uc.Refresh(context.Background(), pair.RefreshToken)
 	if !authv1.IsTokenRevoked(err) {
 		t.Errorf("err = %v, want TOKEN_REVOKED", err)
 	}
 	if len(tokens.revokeAllUsers) != 1 || tokens.revokeAllUsers[0] != "u1" {
 		t.Errorf("revokeAllUsers = %v, want [u1]", tokens.revokeAllUsers)
+	}
+	// The whole family is revoked: the rotated token must be dead too.
+	if _, err := uc.Refresh(context.Background(), rotated.RefreshToken); !authv1.IsTokenRevoked(err) {
+		t.Errorf("rotated token after reuse: err = %v, want TOKEN_REVOKED", err)
+	}
+}
+
+// Half-rotation: the old token is consumed but no new one gets saved; the
+// caller is forced to log in again, which fails safe.
+func TestRefreshSaveFailsAfterConsume(t *testing.T) {
+	tokens := newFakeTokenRepo()
+	uc := newTestUseCase(t, happyUserRepo(), tokens)
+	pair, jti := login(t, uc)
+
+	tokens.saveErr = errors.New("redis down")
+	_, err := uc.Refresh(context.Background(), pair.RefreshToken)
+	if !authv1.IsInternal(err) {
+		t.Errorf("err = %v, want INTERNAL", err)
+	}
+	if _, ok := tokens.refresh[jti]; ok {
+		t.Error("old refresh token should have been consumed")
+	}
+}
+
+func TestRefreshUserLookupFails(t *testing.T) {
+	tokens := newFakeTokenRepo()
+	repo := happyUserRepo()
+	uc := newTestUseCase(t, repo, tokens)
+	pair, jti := login(t, uc)
+
+	repo.getByID = func(context.Context, string) (*AuthUser, error) {
+		return nil, userv1.ErrorUserNotFound("user not found")
+	}
+	_, err := uc.Refresh(context.Background(), pair.RefreshToken)
+	if !userv1.IsUserNotFound(err) {
+		t.Errorf("err = %v, want USER_NOT_FOUND passthrough", err)
+	}
+	if _, ok := tokens.refresh[jti]; ok {
+		t.Error("old refresh token should have been consumed")
 	}
 }
 
