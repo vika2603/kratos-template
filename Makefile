@@ -54,7 +54,7 @@ buf-breaking:
 	buf breaking --against '.git#branch=main'
 
 ## check: run local quality checks
-check: fmt lint buf-lint test
+check: fmt lint buf-lint buf-breaking test
 
 ## tidy: tidy go modules
 tidy:
