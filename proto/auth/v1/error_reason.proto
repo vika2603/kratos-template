@@ -13,4 +13,5 @@ enum ErrorReason {
   TOKEN_INVALID = 3 [(errors.code) = 401];
   TOKEN_REVOKED = 4 [(errors.code) = 401];
   INTERNAL = 5 [(errors.code) = 500];
+  RATE_LIMITED = 6 [(errors.code) = 429];
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/metrics"
+	"github.com/go-kratos/kratos/v2/middleware/ratelimit"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -29,6 +30,8 @@ func BuildGRPCServer(
 	stack := []middleware.Middleware{
 		recovery.Recovery(),
 		metrics.Server(metricsOptions(logger)...),
+		// BBR before tracing: shed load without paying span overhead.
+		ratelimit.Server(),
 		tracing.Server(),
 		logging.Server(adapter.NewKratosAdapter(logger)),
 	}

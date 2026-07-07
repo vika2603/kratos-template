@@ -31,6 +31,7 @@ const (
 	ErrorReason_TOKEN_INVALID            ErrorReason = 3
 	ErrorReason_TOKEN_REVOKED            ErrorReason = 4
 	ErrorReason_INTERNAL                 ErrorReason = 5
+	ErrorReason_RATE_LIMITED             ErrorReason = 6
 )
 
 // Enum value maps for ErrorReason.
@@ -42,6 +43,7 @@ var (
 		3: "TOKEN_INVALID",
 		4: "TOKEN_REVOKED",
 		5: "INTERNAL",
+		6: "RATE_LIMITED",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED": 0,
@@ -50,6 +52,7 @@ var (
 		"TOKEN_INVALID":            3,
 		"TOKEN_REVOKED":            4,
 		"INTERNAL":                 5,
+		"RATE_LIMITED":             6,
 	}
 )
 
@@ -84,14 +87,15 @@ var File_proto_auth_v1_error_reason_proto protoreflect.FileDescriptor
 
 const file_proto_auth_v1_error_reason_proto_rawDesc = "" +
 	"\n" +
-	" proto/auth/v1/error_reason.proto\x12\vapi.auth.v1\x1a\x13errors/errors.proto*\xa9\x01\n" +
+	" proto/auth/v1/error_reason.proto\x12\vapi.auth.v1\x1a\x13errors/errors.proto*\xc1\x01\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x13INVALID_CREDENTIALS\x10\x01\x1a\x04\xa8E\x91\x03\x12\x17\n" +
 	"\rTOKEN_EXPIRED\x10\x02\x1a\x04\xa8E\x91\x03\x12\x17\n" +
 	"\rTOKEN_INVALID\x10\x03\x1a\x04\xa8E\x91\x03\x12\x17\n" +
 	"\rTOKEN_REVOKED\x10\x04\x1a\x04\xa8E\x91\x03\x12\x12\n" +
-	"\bINTERNAL\x10\x05\x1a\x04\xa8E\xf4\x03B Z\x1ekratos-template/api/auth/v1;v1b\x06proto3"
+	"\bINTERNAL\x10\x05\x1a\x04\xa8E\xf4\x03\x12\x16\n" +
+	"\fRATE_LIMITED\x10\x06\x1a\x04\xa8E\xad\x03B Z\x1ekratos-template/api/auth/v1;v1b\x06proto3"
 
 var (
 	file_proto_auth_v1_error_reason_proto_rawDescOnce sync.Once

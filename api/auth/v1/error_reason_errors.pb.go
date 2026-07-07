@@ -70,3 +70,15 @@ func IsInternal(err error) bool {
 func ErrorInternal(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, ErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
 }
+
+func IsRateLimited(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_RATE_LIMITED.String() && e.Code == 429
+}
+
+func ErrorRateLimited(format string, args ...interface{}) *errors.Error {
+	return errors.New(429, ErrorReason_RATE_LIMITED.String(), fmt.Sprintf(format, args...))
+}

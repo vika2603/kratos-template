@@ -12,7 +12,7 @@ import (
 	pkgauth "kratos-template/pkg/auth"
 )
 
-func NewAuthUseCase(userRepo AuthUserRepo, tokenRepo TokenRepo, cfg *conf.Bootstrap, logger *zap.Logger) (*AuthUseCase, error) {
+func NewAuthUseCase(userRepo AuthUserRepo, tokenRepo TokenRepo, loginGuard LoginGuardRepo, cfg *conf.Bootstrap, logger *zap.Logger) (*AuthUseCase, error) {
 	accessTTL := time.Duration(cfg.Auth.AccessTokenExpiry) * time.Second
 	if accessTTL <= 0 {
 		accessTTL = 15 * time.Minute
@@ -29,6 +29,7 @@ func NewAuthUseCase(userRepo AuthUserRepo, tokenRepo TokenRepo, cfg *conf.Bootst
 	return &AuthUseCase{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,
+		loginGuard: loginGuard,
 		jwtManager: manager,
 		logger:     logger,
 	}, nil

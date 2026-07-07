@@ -92,6 +92,32 @@ func (f *fakeTokenRepo) RevokeAllRefresh(_ context.Context, userID string) error
 	return nil
 }
 
+type fakeLoginGuard struct {
+	failures map[string]int64
+	err      error
+}
+
+func newFakeLoginGuard() *fakeLoginGuard {
+	return &fakeLoginGuard{failures: make(map[string]int64)}
+}
+
+func (f *fakeLoginGuard) FailureCount(_ context.Context, username string) (int64, error) {
+	if f.err != nil {
+		return 0, f.err
+	}
+	return f.failures[username], nil
+}
+
+func (f *fakeLoginGuard) RecordFailure(_ context.Context, username string, _ time.Duration) error {
+	f.failures[username]++
+	return nil
+}
+
+func (f *fakeLoginGuard) Reset(_ context.Context, username string) error {
+	delete(f.failures, username)
+	return nil
+}
+
 func newTestUseCase(t *testing.T, userRepo AuthUserRepo, tokenRepo TokenRepo) *AuthUseCase {
 	t.Helper()
 	manager, err := pkgauth.NewJWTManager(testSecret, 15*time.Minute, time.Hour)
@@ -101,6 +127,7 @@ func newTestUseCase(t *testing.T, userRepo AuthUserRepo, tokenRepo TokenRepo) *A
 	return &AuthUseCase{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,
+		loginGuard: newFakeLoginGuard(),
 		jwtManager: manager,
 		logger:     zap.NewNop(),
 	}
@@ -158,6 +185,53 @@ func TestLoginInvalidCredentialsPassthrough(t *testing.T) {
 	_, err := uc.Login(context.Background(), "alice", "wrong")
 	if !userv1.IsInvalidCredentials(err) {
 		t.Errorf("err = %v, want INVALID_CREDENTIALS passthrough", err)
+	}
+}
+
+func TestLoginBruteForceThrottled(t *testing.T) {
+	verifyCalls := 0
+	repo := &fakeUserRepo{
+		verify: func(context.Context, string, string) (*AuthUser, error) {
+			verifyCalls++
+			return nil, authv1.ErrorInvalidCredentials("invalid credentials")
+		},
+	}
+	uc := newTestUseCase(t, repo, newFakeTokenRepo())
+
+	for i := range maxLoginFailures {
+		if _, err := uc.Login(context.Background(), "alice", "wrong"); !authv1.IsInvalidCredentials(err) {
+			t.Fatalf("attempt %d: err = %v, want INVALID_CREDENTIALS", i+1, err)
+		}
+	}
+	_, err := uc.Login(context.Background(), "alice", "wrong")
+	if !authv1.IsRateLimited(err) {
+		t.Errorf("err = %v, want RATE_LIMITED", err)
+	}
+	if verifyCalls != maxLoginFailures {
+		t.Errorf("VerifyCredentials called %d times, want %d (throttled attempt must not hit user service)",
+			verifyCalls, maxLoginFailures)
+	}
+}
+
+func TestLoginSuccessResetsFailures(t *testing.T) {
+	uc := newTestUseCase(t, happyUserRepo(), newFakeTokenRepo())
+	guard := uc.loginGuard.(*fakeLoginGuard)
+	guard.failures["alice"] = maxLoginFailures - 1
+
+	if _, err := uc.Login(context.Background(), "alice", "password123"); err != nil {
+		t.Fatalf("Login: %v", err)
+	}
+	if guard.failures["alice"] != 0 {
+		t.Errorf("failures = %d, want reset to 0", guard.failures["alice"])
+	}
+}
+
+func TestLoginGuardFailsOpen(t *testing.T) {
+	uc := newTestUseCase(t, happyUserRepo(), newFakeTokenRepo())
+	uc.loginGuard.(*fakeLoginGuard).err = errors.New("redis down")
+
+	if _, err := uc.Login(context.Background(), "alice", "password123"); err != nil {
+		t.Errorf("Login with unavailable guard: %v, want success (fail-open)", err)
 	}
 }
 

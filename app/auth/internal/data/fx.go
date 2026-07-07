@@ -12,6 +12,7 @@ var Module = fx.Module("auth.data",
 	fx.Provide(NewData),
 	fx.Provide(NewAuthUserRepo),
 	fx.Provide(NewTokenRepo),
+	fx.Provide(NewLoginGuardRepo),
 	fx.Invoke(registerLifecycle),
 )
 

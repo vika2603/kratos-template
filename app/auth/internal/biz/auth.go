@@ -25,6 +25,18 @@ type TokenRepo interface {
 	RevokeAllRefresh(ctx context.Context, userID string) error
 }
 
+// LoginGuardRepo counts failed logins per username inside a fixed window.
+type LoginGuardRepo interface {
+	FailureCount(ctx context.Context, username string) (int64, error)
+	RecordFailure(ctx context.Context, username string, window time.Duration) error
+	Reset(ctx context.Context, username string) error
+}
+
+const (
+	maxLoginFailures   = 5
+	loginFailureWindow = 15 * time.Minute
+)
+
 type AuthUser struct {
 	ID       string
 	Username string
@@ -41,21 +53,52 @@ type TokenPair struct {
 type AuthUseCase struct {
 	userRepo   AuthUserRepo
 	tokenRepo  TokenRepo
+	loginGuard LoginGuardRepo
 	jwtManager *pkgauth.JWTManager
 	logger     *zap.Logger
 }
 
 func (uc *AuthUseCase) Login(ctx context.Context, username, password string) (*TokenPair, error) {
+	if uc.loginBlocked(ctx, username) {
+		return nil, authv1.ErrorRateLimited("too many failed login attempts")
+	}
+
 	user, err := uc.userRepo.VerifyCredentials(ctx, username, password)
 	if err != nil {
+		if authv1.IsInvalidCredentials(err) {
+			uc.recordLoginFailure(ctx, username)
+		}
 		return nil, err
 	}
+	uc.resetLoginFailures(ctx, username)
 
 	pair, err := uc.issueTokenPair(ctx, user)
 	if err != nil {
 		return nil, uc.internalError(ctx, "failed to issue token", err)
 	}
 	return pair, nil
+}
+
+// The guard fails open: Redis trouble must not lock everyone out.
+func (uc *AuthUseCase) loginBlocked(ctx context.Context, username string) bool {
+	count, err := uc.loginGuard.FailureCount(ctx, username)
+	if err != nil {
+		log.WithContextLogger(ctx, uc.logger).Warn("login guard unavailable", zap.Error(err))
+		return false
+	}
+	return count >= maxLoginFailures
+}
+
+func (uc *AuthUseCase) recordLoginFailure(ctx context.Context, username string) {
+	if err := uc.loginGuard.RecordFailure(ctx, username, loginFailureWindow); err != nil {
+		log.WithContextLogger(ctx, uc.logger).Warn("failed to record login failure", zap.Error(err))
+	}
+}
+
+func (uc *AuthUseCase) resetLoginFailures(ctx context.Context, username string) {
+	if err := uc.loginGuard.Reset(ctx, username); err != nil {
+		log.WithContextLogger(ctx, uc.logger).Warn("failed to reset login failures", zap.Error(err))
+	}
 }
 
 func (uc *AuthUseCase) Refresh(ctx context.Context, refreshToken string) (*TokenPair, error) {
