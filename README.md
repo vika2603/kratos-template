@@ -116,7 +116,23 @@ The user service protects RPCs with JWT middleware:
 |-----|---------------------|
 | `VerifyCredentials` | `service` only |
 | `GetUser` | `access` or `service` |
-| `CreateUser` / `UpdateUser` / `DeleteUser` / `ListUsers` | `access` |
+| `CreateUser` / `ListUsers` | `access` |
+| `UpdateUser` / `DeleteUser` | `access`, owner only (`claims.UserID` must match the target id) |
+
+### Revocation trust boundary
+
+The user service validates access tokens **locally** (signature check only) and does
+not consult the Redis denylist — a deliberate trade-off: stateless verification, no
+per-RPC Redis round-trip, and token state stays owned by auth alone. A logged-out
+access token therefore keeps working against the user service until it expires; the
+revocation delay is bounded by the access-token TTL (default 15 min). Callers that
+need immediate revocation must go through auth's `Validate` (e.g. from an API gateway).
+
+### No public registration
+
+`CreateUser` itself requires an access token, so there is no unauthenticated sign-up
+path. The first user comes from the demo seed migration (`0002`, demo-only); replace
+it with your own provisioning flow in production.
 
 This template uses one shared HS256 platform secret read by both auth and user
 services. Generate one with:
