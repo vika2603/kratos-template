@@ -11,6 +11,7 @@ import (
 	kratosconfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
+	"go.uber.org/zap/zapcore"
 )
 
 // Version is stamped at build time via -ldflags (see Makefile); "dev" locally.
@@ -45,6 +46,7 @@ func Run[T any](name string, opts ...fx.Option) {
 	if err != nil {
 		log.Fatalf("init log error: %v", err)
 	}
+	watchLogLevel(cfg)
 
 	tracerShutdown, err := InitTracer(name, Version)
 	if err != nil {
@@ -78,4 +80,28 @@ func Run[T any](name string, opts ...fx.Option) {
 	allOpts = append(allOpts, opts...)
 
 	fx.New(allOpts...).Run()
+}
+
+// watchLogLevel applies config changes (file edit or Consul KV update) to the
+// global log level at runtime.
+func watchLogLevel(cfg kratosconfig.Config) {
+	err := cfg.Watch("log.level", func(_ string, v kratosconfig.Value) {
+		raw, err := v.String()
+		if err != nil {
+			return
+		}
+		var lvl zapcore.Level
+		if err := lvl.UnmarshalText([]byte(raw)); err != nil {
+			log.Warnf("ignoring invalid log.level %q: %v", raw, err)
+			return
+		}
+		if lvl != log.GetLevel() {
+			log.Infof("log level changed to %s", lvl)
+			log.SetLevel(lvl)
+		}
+	})
+	if err != nil {
+		// Config without a log.level key is fine — watching is best-effort.
+		log.Infof("log.level watch disabled: %v", err)
+	}
 }
